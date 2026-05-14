@@ -40,6 +40,19 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .ctrl-eq    { font-family: var(--font-serif); font-size: 18px; font-style: italic; color: var(--text); margin-bottom: 14px; }
 .ctrl-divider { height: 1px; background: var(--border); margin: 12px 0; }
 .ctrl-note  { margin-top: auto; padding-top: 12px; font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); border-top: 1px solid var(--border); }
+.gravity-group { margin-bottom: 13px; }
+.gravity-label { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.03em; margin-bottom: 7px; text-transform: uppercase; font-size: 11px; }
+.radio-row { display: flex; flex-direction: column; gap: 6px; }
+.radio-option { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 5px 8px; border-radius: 5px; border: 1px solid transparent; transition: border-color 0.15s, background 0.15s; }
+.radio-option:hover { background: var(--surface2); border-color: var(--border); }
+.radio-option input[type=radio] { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border2); background: transparent; cursor: pointer; flex-shrink: 0; transition: border-color 0.15s; }
+.radio-option input[type=radio]:checked { border-color: var(--blue); background: var(--blue); box-shadow: inset 0 0 0 3px var(--surface); }
+.radio-option input[type=radio]:disabled { opacity: 0.38; }
+.radio-planet { font-size: 13px; color: var(--text); font-family: var(--font-body); flex: 1; }
+.radio-g { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); margin-left: auto; }
+.radio-option:has(input:checked) { background: var(--blue-dim); border-color: var(--blue); }
+.radio-option:has(input:checked) .radio-planet { color: var(--blue); }
+.radio-option:has(input:checked) .radio-g { color: var(--blue); opacity: 0.7; }
 .slider-group  { margin-bottom: 13px; }
 .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
 .slider-label  { font-size: 13px; color: var(--text-muted); font-style: italic; font-family: var(--font-serif); }
@@ -89,6 +102,7 @@ canvas { display: block; }
       <div class="status-badge" id="status-badge"><span class="status-dot"></span><span id="status-text">ready to drop</span></div>
       <div class="btn-row">
         <button class="btn primary" id="btn-drop" onclick="dropBall()">▶ Drop</button>
+        <button class="btn" id="btn-pause" onclick="togglePause()" disabled>⏸ Pause</button>
         <button class="btn" id="btn-reset" onclick="resetSim()">↺ Reset</button>
       </div>
       <div class="slider-group">
@@ -97,12 +111,36 @@ canvas { display: block; }
       </div>
       <div class="slider-group">
         <div class="slider-header"><span class="slider-label">h₁ · drop height</span><span class="slider-value" id="lbl-h1">20.0 m</span></div>
-        <input type="range" id="sl-h1" min="2" max="30" step="0.5" value="20" oninput="onSliderChange()">
+        <input type="range" id="sl-h1" min="1" max="30" step="0.5" value="20" oninput="onSliderChange()">
       </div>
       <div class="slider-group">
         <div class="slider-header"><span class="slider-label">h₂ · escape height</span><span class="slider-value" id="lbl-h2">10.0 m</span></div>
-        <input type="range" id="sl-h2" min="0" max="30" step="0.5" value="10" oninput="onSliderChange()">
+        <input type="range" id="sl-h2" min="1" max="30" step="0.5" value="10" oninput="onSliderChange()">
       </div>
+      <div class="ctrl-divider"></div>
+
+      <!-- Gravity selector -->
+      <div class="gravity-group">
+        <div class="gravity-label">Gravity</div>
+        <div class="radio-row">
+          <label class="radio-option">
+            <input type="radio" name="gravity" value="9.807" checked onchange="onGravityChange()">
+            <span class="radio-planet">🌍 Earth</span>
+            <span class="radio-g">9.81 m/s²</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="gravity" value="1.620" onchange="onGravityChange()">
+            <span class="radio-planet">🌕 Moon</span>
+            <span class="radio-g">1.62 m/s²</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="gravity" value="3.721" onchange="onGravityChange()">
+            <span class="radio-planet">🔴 Mars</span>
+            <span class="radio-g">3.72 m/s²</span>
+          </label>
+        </div>
+      </div>
+
       <div class="ctrl-divider"></div>
       <div class="result-row"><span class="result-label">h (current)</span><span class="result-val" id="val-h">20.0 m</span></div>
       <div class="result-row"><span class="result-label">PE = mgh</span><span class="result-val blue" id="val-pe">1960.0 J</span></div>
@@ -113,7 +151,7 @@ canvas { display: block; }
       <div class="ctrl-divider"></div>
       <div class="result-row"><span class="result-label">E<sub>total</sub></span><span class="result-val" id="val-total">1960.0 J</span></div>
       <div class="result-row"><span class="result-label">escape condition</span><span class="result-val red" id="val-escape">h₂ &lt; h₁ — escapes</span></div>
-      <div class="ctrl-note">g = 9.8 m/s² · frictionless</div>
+      <div class="ctrl-note" id="ctrl-note">g = 9.81 m/s² (Earth) · frictionless</div>
     </div>
 
     <!-- Canvas -->
@@ -134,7 +172,11 @@ canvas { display: block; }
 //  This avoids all canvas-pixel coordinate confusion.
 // ═══════════════════════════════════════════════════════
 
-const G = 9.8;
+// Gravity — driven by radio selection
+function getG() {
+  const sel = document.querySelector('input[name="gravity"]:checked');
+  return sel ? parseFloat(sel.value) : 9.807;
+}
 
 // ── Canvas setup ──────────────────────────────
 const wrap   = document.getElementById('canvas-wrap');
@@ -200,6 +242,7 @@ function pToCanvas(p, h1, h2, g) {
 
 // ── Simulation state ──────────────────────────
 let simState = 'idle';   // idle | rolling | escaped | returned
+let paused   = false;
 let p        = 0;        // normalized ball position [0..1]
 let dir      = 1;        // 1=right, -1=left
 let animId   = null;
@@ -215,6 +258,19 @@ function getH2() { return parseFloat(document.getElementById('sl-h2').value); }
 function onH1Change() {
   onSliderChange();
 }
+function onGravityChange() {
+  // Update the note at bottom showing active g
+  const g = getG();
+  const names = { '9.807': 'Earth', '1.620': 'Moon', '3.721': 'Mars' };
+  const display = { '9.807': '9.81', '1.620': '1.62', '3.721': '3.72' };
+  const sel = document.querySelector('input[name="gravity"]:checked');
+  const planet = sel ? (names[sel.value] || '') : 'Earth';
+  const dg = display[sel ? sel.value : '9.807'] || g.toFixed(2);
+  document.getElementById('ctrl-note').textContent = 'g = ' + dg + ' m/s² (' + planet + ') · frictionless';
+  if (simState !== 'idle') resetSim();
+  else { refreshReadouts(); draw(); }
+}
+
 function onSliderChange() {
   if (simState !== 'idle') resetSim();
   else { refreshReadouts(); draw(); }
@@ -226,7 +282,7 @@ function refreshReadouts() {
   document.getElementById('lbl-m').textContent  = m.toFixed(1)  + ' kg';
   document.getElementById('lbl-h1').textContent = h1.toFixed(1) + ' m';
   document.getElementById('lbl-h2').textContent = h2.toFixed(1) + ' m';
-  document.getElementById('val-total').textContent = (m * G * h1).toFixed(1) + ' J';
+  document.getElementById('val-total').textContent = (m * getG() * h1).toFixed(1) + ' J';
   setEnergyBars(h1, m, h1);
   const el = document.getElementById('val-escape');
   if (h2 >= h1) { el.textContent = 'h₂ ≥ h₁ — returns'; el.className = 'result-val blue'; }
@@ -234,8 +290,8 @@ function refreshReadouts() {
 }
 
 function setEnergyBars(curH, m, h1) {
-  const totalE = m * G * h1;
-  const pe     = Math.max(0, m * G * curH);
+  const totalE = m * getG() * h1;
+  const pe     = Math.max(0, m * getG() * curH);
   const ke     = Math.max(0, totalE - pe);
   const v      = ke > 0 ? Math.sqrt(2 * ke / m) : 0;
   const pf     = totalE > 0 ? Math.min(1, pe / totalE) : 1;
@@ -259,6 +315,7 @@ function setStatus(s) {
 
 function lockSliders(on) {
   ['sl-m','sl-h1','sl-h2'].forEach(id => document.getElementById(id).disabled = on);
+  document.querySelectorAll('input[name="gravity"]').forEach(r => r.disabled = on);
   document.getElementById('btn-drop').disabled = on;
 }
 
@@ -271,6 +328,7 @@ function dropBall() {
   simState    = 'rolling';
   setStatus('rolling');
   lockSliders(true);
+  document.getElementById('btn-pause').disabled = false;
   animId = requestAnimationFrame(tick);
 }
 
@@ -280,19 +338,38 @@ function resetSim() {
   proj.active = false;
   p           = 0;
   setStatus('idle');
+  paused = false;
+  document.getElementById('btn-pause').disabled = true;
+  document.getElementById('btn-pause').textContent = '⏸ Pause';
+  document.getElementById('btn-pause').classList.remove('primary');
   lockSliders(false);
   refreshReadouts();
   draw();
 }
 
+function togglePause() {
+  if (simState !== 'rolling') return;
+  paused = !paused;
+  const btn = document.getElementById('btn-pause');
+  if (paused) {
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    btn.textContent = '▶ Resume';
+    btn.classList.add('primary');
+  } else {
+    btn.textContent = '⏸ Pause';
+    btn.classList.remove('primary');
+    animId = requestAnimationFrame(tick);
+  }
+}
+
 // ── Animation ─────────────────────────────────
 // Instead of timestamp-based dt, use a fixed step per frame.
 // Simple and bulletproof — 60fps gives smooth motion.
-const STEP = 0.001125;   // normalized path units per frame at v=1 m/s
+const STEP = 0.0002;   // normalized path units per frame at v=1 m/s
 
 function tick() {
   const m = getM(), h1 = getH1(), h2 = getH2();
-  const totalE = m * G * h1;
+  const totalE = m * getG() * h1;
 
   // ── Projectile phase ──
   if (proj.active) {
@@ -314,7 +391,7 @@ function tick() {
 
   // ── Path phase ──
   const curH = heightOfP(p, h1, h2);
-  const ke   = Math.max(0, totalE - m * G * curH);
+  const ke   = Math.max(0, totalE - m * getG() * curH);
   const spd  = Math.sqrt(2 * ke / m);
 
   // Move p proportional to speed. Use a small minimum only when reversing
@@ -333,7 +410,7 @@ function tick() {
   // ── Right rim reached (only matters when h2 < h1) ──
   if (dir === 1 && p >= 1.0) {
     p = 1.0;
-    const keRim = Math.max(0, totalE - m * G * h2);
+    const keRim = Math.max(0, totalE - m * getG() * h2);
     if (h2 < h1 && keRim > 0.1) {
       // ESCAPE — launch projectile
       const g      = geom();
@@ -352,6 +429,9 @@ function tick() {
     p        = 0;
     simState = 'returned';
     setStatus('returned');
+    document.getElementById('btn-pause').disabled = true;
+    document.getElementById('btn-pause').textContent = '⏸ Pause';
+    document.getElementById('btn-pause').classList.remove('primary');
     setEnergyBars(h1, m, h1);
     draw();
     return;
@@ -363,6 +443,7 @@ function tick() {
 
 // ── Drawing ───────────────────────────────────
 function draw() {
+  if (!ctx || W() === 0 || H() === 0) return;
   const g  = geom();
   const m  = getM(), h1 = getH1(), h2 = getH2();
   const { padL, padR, padT, w, h, gy, ppm, x0, xB, xF, x1 } = g;
@@ -431,7 +512,7 @@ function draw() {
 
   // E_total
   ctx.textAlign = 'right'; ctx.fillStyle = '#4a4d5e'; ctx.font = '11px "DM Mono", monospace';
-  ctx.fillText('E_total = ' + (m * G * h1).toFixed(1) + ' J', padL + w, padT - 12);
+  ctx.fillText('E_total = ' + (m * getG() * h1).toFixed(1) + ' J', padL + w, padT - 12);
 
   // Ball
   const BALL_R = 12;
@@ -447,8 +528,8 @@ function draw() {
     by = cy - BALL_R;
 
     // Velocity arrow
-    const totalE = m * G * h1;
-    const ke     = Math.max(0, totalE - m * G * heightOfP(bp, h1, h2));
+    const totalE = m * getG() * h1;
+    const ke     = Math.max(0, totalE - m * getG() * heightOfP(bp, h1, h2));
     if (ke > 0.5 && simState === 'rolling') {
       const v   = Math.sqrt(2 * ke / m);
       const len = Math.min(v * 4, 80) * dir;
@@ -474,9 +555,12 @@ function draw() {
 
 // ── Init ──────────────────────────────────────
 window.addEventListener('resize', () => { setupCanvas(); draw(); });
-setupCanvas();
-refreshReadouts();
-draw();
+// Double rAF ensures browser has completed layout before we measure canvas size
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  setupCanvas();
+  refreshReadouts();
+  draw();
+}));
 </script>
 </body>
 </html>
