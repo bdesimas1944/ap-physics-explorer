@@ -5,829 +5,254 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AP Physics 1 Explorer</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg:         #0f1014;
-    --surface:    #17181d;
-    --surface2:   #1e2028;
-    --border:     #2a2b33;
-    --border2:    #3a3b45;
-    --text:       #e8e9ef;
-    --text-muted: #7a7d8e;
-    --text-dim:   #4a4d5e;
-    --blue:       #4a9eff;
-    --blue-dim:   #1a3a6a;
-    --teal:       #2dd4a0;
-    --teal-dim:   #0a3a2a;
-    --amber:      #f5a623;
-    --amber-dim:  #3a2a0a;
-    --red:        #ff5f6d;
-    --font-body:  'DM Sans', sans-serif;
-    --font-mono:  'DM Mono', monospace;
-    --font-serif: 'DM Serif Display', serif;
-  }
-
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 15px;
-    line-height: 1.5;
-  }
-
-  /* ── Shell ── */
-  .shell {
+  .landing {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
   }
 
-  /* ── Header ── */
-  header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 0 24px;
-    height: 52px;
+  /* ── Hero ── */
+  .hero {
+    padding: 56px 48px 40px;
     border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    background: var(--surface);
   }
-  .logo {
+  .hero-title {
     font-family: var(--font-serif);
-    font-size: 18px;
+    font-size: 42px;
     color: var(--text);
-    letter-spacing: 0.01em;
+    line-height: 1.15;
+    margin-bottom: 10px;
   }
-  .logo span { color: var(--blue); }
-  .header-sub {
+  .hero-title span { color: var(--blue); }
+  .hero-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 520px;
+    line-height: 1.6;
+  }
+  .hero-meta {
+    margin-top: 16px;
+    display: flex;
+    gap: 20px;
     font-size: 12px;
-    color: var(--text-dim);
     font-family: var(--font-mono);
-    letter-spacing: 0.05em;
-  }
-
-  /* ── Tab bar ── */
-  .tabbar {
-    display: flex;
-    align-items: stretch;
-    gap: 0;
-    padding: 0 24px;
-    height: 44px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    flex-shrink: 0;
-    overflow-x: auto;
-  }
-  .tabbar::-webkit-scrollbar { display: none; }
-
-  .tab-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 0 18px;
-    height: 100%;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--text-muted);
-    font-family: var(--font-body);
-    font-size: 13px;
-    font-weight: 400;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: color 0.15s, border-color 0.15s;
-    position: relative;
-  }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active {
-    color: var(--text);
-    border-bottom-color: var(--blue);
-    font-weight: 500;
-  }
-  .tab-badge {
-    font-size: 10px;
-    font-family: var(--font-mono);
-    padding: 1px 5px;
-    border-radius: 3px;
-    background: var(--surface2);
     color: var(--text-dim);
   }
-  .tab-btn.active .tab-badge {
-    background: var(--blue-dim);
-    color: var(--blue);
-  }
-  .tab-soon {
-    font-size: 10px;
-    color: var(--text-dim);
-    font-family: var(--font-mono);
-    padding: 1px 5px;
-    border-radius: 3px;
-    background: var(--surface2);
+  .hero-meta span { display: flex; align-items: center; gap: 5px; }
+  .hero-meta .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    display: inline-block;
   }
 
-  /* ── Content area ── */
-  .content {
+  /* ── Sim grid ── */
+  .sim-grid-section {
+    padding: 40px 48px;
     flex: 1;
-    overflow: hidden;
-    position: relative;
   }
-  .tab-panel {
-    display: none;
-    width: 100%;
-    height: 100%;
-  }
-  .tab-panel.active { display: flex; }
-
-  /* ── Coming soon panel ── */
-  .coming-soon {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    color: var(--text-dim);
-  }
-  .coming-soon .cs-title {
-    font-family: var(--font-serif);
-    font-size: 22px;
-    color: var(--text-muted);
-  }
-  .coming-soon .cs-eq {
+  .section-label {
+    font-size: 11px;
     font-family: var(--font-mono);
-    font-size: 15px;
     color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .sim-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
   }
 
-  /* ══════════════════════════════════════════════
-     ENERGY TOOL LAYOUT
-  ══════════════════════════════════════════════ */
-  .energy-layout {
-    display: flex;
-    width: 100%;
-    height: 100%;
-  }
-
-  /* ── Left control panel ── */
-  .ctrl-panel {
-    width: 300px;
-    flex-shrink: 0;
+  /* ── Sim card ── */
+  .sim-card {
     background: var(--surface);
-    border-right: 1px solid var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
     padding: 20px 20px 16px;
     display: flex;
     flex-direction: column;
     gap: 0;
-    overflow-y: auto;
-  }
-
-  .ctrl-eq {
-    font-family: var(--font-serif);
-    font-size: 20px;
-    font-style: italic;
-    color: var(--text);
-    margin-bottom: 16px;
-    min-height: 28px;
-  }
-
-  /* Mode toggle */
-  .mode-toggle {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 20px;
-  }
-  .mode-btn {
-    flex: 1;
-    padding: 7px 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text-muted);
-    font-family: var(--font-body);
-    font-size: 12px;
-    font-weight: 400;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: center;
-  }
-  .mode-btn:hover { border-color: var(--border2); color: var(--text); }
-  .mode-btn.active {
-    background: var(--blue-dim);
-    border-color: var(--blue);
-    color: var(--blue);
-    font-weight: 500;
-  }
-
-  /* Sliders */
-  .slider-group { margin-bottom: 14px; }
-  .slider-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 5px;
-  }
-  .slider-label {
-    font-size: 13px;
-    color: var(--text-muted);
-    font-style: italic;
-    font-family: var(--font-serif);
-  }
-  .slider-value {
-    font-size: 13px;
-    font-family: var(--font-mono);
-    color: var(--text);
-    font-weight: 500;
-  }
-  input[type=range] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 5px;
-    border-radius: 3px;
-    background: var(--border2);
-    outline: none;
-    cursor: pointer;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: var(--text);
-    border: 2px solid var(--border2);
-    cursor: grab;
-    transition: transform 0.1s;
-  }
-  input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.2); }
-  input[type=range]::-moz-range-thumb {
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: var(--text);
-    border: 2px solid var(--border2);
-    cursor: grab;
-  }
-  #sl-pos-group { display: none; }
-
-  /* Divider */
-  .ctrl-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 14px 0;
-  }
-
-  /* Results */
-  .result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .result-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-  }
-  .result-val {
-    font-size: 13px;
-    font-family: var(--font-mono);
-    font-weight: 500;
-    color: var(--text);
-  }
-  .result-val.blue  { color: var(--blue); }
-  .result-val.teal  { color: var(--teal); }
-  .result-val.amber { color: var(--amber); }
-
-  /* Energy bars */
-  .ebar-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-  .ebar-track {
-    flex: 1;
-    height: 8px;
-    border-radius: 4px;
-    background: var(--border);
-    overflow: hidden;
-  }
-  .ebar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.05s;
-  }
-  .ebar-fill.blue { background: var(--blue); }
-  .ebar-fill.teal { background: var(--teal); }
-  .ebar-pct {
-    font-size: 11px;
-    font-family: var(--font-mono);
-    color: var(--text-dim);
-    min-width: 34px;
-    text-align: right;
-  }
-
-  .ctrl-note {
-    margin-top: auto;
-    padding-top: 12px;
-    font-size: 11px;
-    color: var(--text-dim);
-    font-family: var(--font-mono);
-    border-top: 1px solid var(--border);
-  }
-
-  /* ── Canvas area ── */
-  .canvas-wrap {
-    flex: 1;
+    transition: border-color 0.15s, transform 0.15s;
+    text-decoration: none;
+    color: inherit;
     position: relative;
     overflow: hidden;
   }
-  #energy-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
+  .sim-card.ready:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+  .sim-card.soon {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* Accent bar top */
+  .sim-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--blue);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .sim-card.ready:hover::before { opacity: 1; }
+
+  .card-equation {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-style: italic;
+    color: var(--blue);
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+  .sim-card.soon .card-equation { color: var(--text-muted); }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    flex: 1;
+    margin-bottom: 16px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-tag {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .tag-ready {
+    background: var(--teal-dim);
+    color: var(--teal);
+  }
+  .tag-soon {
+    background: var(--surface2);
+    color: var(--text-dim);
+  }
+  .card-launch {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--blue);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .sim-card.ready:hover .card-launch { opacity: 1; }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 48px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    display: flex;
+    gap: 24px;
   }
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="landing">
 
-  <!-- Header -->
-  <header>
-    <div class="logo">AP Physics <span>1</span> Explorer</div>
-    <div class="header-sub">interactive simulations</div>
+  <header class="site-header">
+    <span class="site-logo">AP Physics <span>1</span> Explorer</span>
+    <span class="site-tagline">interactive simulations</span>
   </header>
 
-  <!-- Tab bar -->
-  <nav class="tabbar">
-    <button class="tab-btn active" onclick="showTab('energy', this)">
-      Energy Conservation <span class="tab-badge">U = mgh</span>
-    </button>
-    <button class="tab-btn" onclick="showTab('spring', this)">
-      Spring PE <span class="tab-soon">soon</span>
-    </button>
-    <button class="tab-btn" onclick="showTab('projectile', this)">
-      Projectile Motion <span class="tab-soon">soon</span>
-    </button>
-    <button class="tab-btn" onclick="showTab('friction', this)">
-      Friction &amp; Dissipation <span class="tab-soon">soon</span>
-    </button>
-    <button class="tab-btn" onclick="showTab('coaster', this)">
-      Roller Coaster <span class="tab-soon">soon</span>
-    </button>
-  </nav>
+  <div class="hero">
+    <h1 class="hero-title">Learn physics by<br><span>doing physics.</span></h1>
+    <p class="hero-sub">Interactive simulations for AP Physics 1. Adjust parameters in real time and watch the equations come alive — no textbook can do this.</p>
+    <div class="hero-meta">
+      <span><span class="dot"></span>HTML · CSS · JavaScript only</span>
+      <span>g = 9.8 m/s²</span>
+      <span>no login required</span>
+    </div>
+  </div>
 
-  <!-- Content -->
-  <div class="content">
+  <div class="sim-grid-section">
+    <div class="section-label">simulations</div>
+    <div class="sim-grid">
 
-    <!-- ══ ENERGY TAB ══ -->
-    <div id="tab-energy" class="tab-panel active">
-      <div class="energy-layout">
-
-        <!-- Controls -->
-        <div class="ctrl-panel">
-          <div class="ctrl-eq" id="ctrl-eq">U<sub>g</sub> = mgh</div>
-
-          <div class="mode-toggle">
-            <button class="mode-btn active" id="btn-pe" onclick="setMode('pe')">PE Only</button>
-            <button class="mode-btn" id="btn-conv" onclick="setMode('conversion')">PE → KE</button>
-          </div>
-
-          <div class="slider-group">
-            <div class="slider-header">
-              <span class="slider-label">m &nbsp;·&nbsp; mass</span>
-              <span class="slider-value" id="lbl-m">20.0 kg</span>
-            </div>
-            <input type="range" id="sl-m" min="1" max="50" step="0.5" value="20" oninput="update()">
-          </div>
-
-          <div class="slider-group">
-            <div class="slider-header">
-              <span class="slider-label">h &nbsp;·&nbsp; height</span>
-              <span class="slider-value" id="lbl-h">18.0 m</span>
-            </div>
-            <input type="range" id="sl-h" min="0" max="30" step="0.5" value="18" oninput="update()">
-          </div>
-
-          <div class="slider-group" id="sl-pos-group">
-            <div class="slider-header">
-              <span class="slider-label">x &nbsp;·&nbsp; position</span>
-              <span class="slider-value" id="lbl-pos">0%</span>
-            </div>
-            <input type="range" id="sl-pos" min="0" max="100" step="1" value="0" oninput="update()">
-          </div>
-
-          <div class="ctrl-divider"></div>
-
-          <!-- PE result -->
-          <div class="result-row">
-            <span class="result-label">PE = mgh</span>
-            <span class="result-val blue" id="val-pe">3528.0 J</span>
-          </div>
-          <div class="ebar-wrap">
-            <div class="ebar-track"><div class="ebar-fill blue" id="bar-pe" style="width:100%"></div></div>
-            <span class="ebar-pct" id="pct-pe">100%</span>
-          </div>
-
-          <!-- KE result (hidden in PE-only mode) -->
-          <div id="ke-results" style="display:none">
-            <div class="result-row" style="margin-top:6px">
-              <span class="result-label">KE = ½mv²</span>
-              <span class="result-val teal" id="val-ke">0.0 J</span>
-            </div>
-            <div class="ebar-wrap">
-              <div class="ebar-track"><div class="ebar-fill teal" id="bar-ke" style="width:0%"></div></div>
-              <span class="ebar-pct" id="pct-ke">0%</span>
-            </div>
-            <div class="result-row" style="margin-top:6px">
-              <span class="result-label">v = √(2KE/m)</span>
-              <span class="result-val amber" id="val-v">0.00 m/s</span>
-            </div>
-          </div>
-
-          <div class="ctrl-divider"></div>
-
-          <div class="result-row">
-            <span class="result-label">E<sub>total</sub></span>
-            <span class="result-val" id="val-total">3528.0 J</span>
-          </div>
-
-          <div class="ctrl-note">g = 9.8 m/s² · frictionless</div>
+      <!-- Energy Conservation — READY -->
+      <a class="sim-card ready" href="simulations/energy-conservation.html">
+        <div class="card-equation">U<sub>g</sub> = mgh</div>
+        <div class="card-title">Energy Conservation</div>
+        <div class="card-desc">Explore gravitational potential energy and its conversion to kinetic energy as a ball descends a frictionless ramp.</div>
+        <div class="card-footer">
+          <span class="card-tag tag-ready">● live</span>
+          <span class="card-launch">launch →</span>
         </div>
+      </a>
 
-        <!-- Canvas -->
-        <div class="canvas-wrap">
-          <canvas id="energy-canvas"></canvas>
+      <!-- Spring PE — SOON -->
+      <div class="sim-card soon">
+        <div class="card-equation">U = ½kx²</div>
+        <div class="card-title">Spring Potential Energy</div>
+        <div class="card-desc">Compress or stretch a spring and watch elastic PE convert to KE. Explore Hooke's Law and simple harmonic motion.</div>
+        <div class="card-footer">
+          <span class="card-tag tag-soon">coming soon</span>
         </div>
       </div>
-    </div>
 
-    <!-- ══ PLACEHOLDER TABS ══ -->
-    <div id="tab-spring" class="tab-panel">
-      <div class="coming-soon">
-        <div class="cs-title">Spring Potential Energy</div>
-        <div class="cs-eq">U = ½kx²</div>
-        <div style="font-size:13px;color:var(--text-dim);margin-top:4px">Coming next session</div>
+      <!-- Projectile Motion — SOON -->
+      <div class="sim-card soon">
+        <div class="card-equation">y(t) = v₀t − ½gt²</div>
+        <div class="card-title">Projectile Motion</div>
+        <div class="card-desc">Launch a projectile at any angle and speed. See the independence of horizontal and vertical motion in real time.</div>
+        <div class="card-footer">
+          <span class="card-tag tag-soon">coming soon</span>
+        </div>
       </div>
-    </div>
-    <div id="tab-projectile" class="tab-panel">
-      <div class="coming-soon">
-        <div class="cs-title">Projectile Motion</div>
-        <div class="cs-eq">x(t) = v₀cosθ·t &nbsp;&nbsp; y(t) = v₀sinθ·t − ½gt²</div>
-        <div style="font-size:13px;color:var(--text-dim);margin-top:4px">Coming soon</div>
+
+      <!-- Friction — SOON -->
+      <div class="sim-card soon">
+        <div class="card-equation">W<sub>f</sub> = μmgd</div>
+        <div class="card-title">Friction &amp; Dissipation</div>
+        <div class="card-desc">Add a friction coefficient and watch mechanical energy dissipate into heat. Compare frictionless vs. real surfaces.</div>
+        <div class="card-footer">
+          <span class="card-tag tag-soon">coming soon</span>
+        </div>
       </div>
-    </div>
-    <div id="tab-friction" class="tab-panel">
-      <div class="coming-soon">
-        <div class="cs-title">Friction &amp; Energy Dissipation</div>
-        <div class="cs-eq">W<sub>friction</sub> = μmgd</div>
-        <div style="font-size:13px;color:var(--text-dim);margin-top:4px">Coming soon</div>
+
+      <!-- Roller Coaster — SOON -->
+      <div class="sim-card soon">
+        <div class="card-equation">E<sub>total</sub> = const</div>
+        <div class="card-title">Roller Coaster</div>
+        <div class="card-desc">Send a cart over multiple hills and loops. Watch PE and KE trade off continuously while total energy is conserved.</div>
+        <div class="card-footer">
+          <span class="card-tag tag-soon">coming soon</span>
+        </div>
       </div>
+
     </div>
-    <div id="tab-coaster" class="tab-panel">
-      <div class="coming-soon">
-        <div class="cs-title">Roller Coaster</div>
-        <div class="cs-eq">E<sub>total</sub> = PE + KE = const</div>
-        <div style="font-size:13px;color:var(--text-dim);margin-top:4px">Coming soon</div>
-      </div>
-    </div>
+  </div>
 
-  </div><!-- .content -->
-</div><!-- .shell -->
+  <footer>
+    <span>AP Physics 1 Explorer</span>
+    <span>plain HTML · CSS · JS</span>
+    <span>no frameworks · no build step</span>
+  </footer>
 
-<script>
-// ══════════════════════════════════════════════
-//  TAB ROUTING
-// ══════════════════════════════════════════════
-function showTab(id, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  btn.classList.add('active');
-  if (id === 'energy') { resizeCanvas(); drawScene(); }
-}
-
-// ══════════════════════════════════════════════
-//  ENERGY SIMULATION
-// ══════════════════════════════════════════════
-const canvas = document.getElementById('energy-canvas');
-const ctx    = canvas.getContext('2d');
-const G      = 9.8;
-let   mode   = 'pe';
-
-function setMode(m) {
-  mode = m;
-  document.getElementById('btn-pe').classList.toggle('active', m === 'pe');
-  document.getElementById('btn-conv').classList.toggle('active', m === 'conversion');
-  document.getElementById('sl-pos-group').style.display = m === 'conversion' ? 'block' : 'none';
-  document.getElementById('ke-results').style.display   = m === 'conversion' ? 'block' : 'none';
-  document.getElementById('ctrl-eq').innerHTML = m === 'pe'
-    ? 'U<sub>g</sub> = mgh'
-    : 'E<sub>total</sub> = PE + KE';
-  if (m === 'pe') document.getElementById('sl-pos').value = 0;
-  update();
-}
-
-function update() {
-  const m      = parseFloat(document.getElementById('sl-m').value);
-  const h      = parseFloat(document.getElementById('sl-h').value);
-  const posPct = parseInt(document.getElementById('sl-pos').value) / 100;
-
-  document.getElementById('lbl-m').textContent   = m.toFixed(1) + ' kg';
-  document.getElementById('lbl-h').textContent   = h.toFixed(1) + ' m';
-  document.getElementById('lbl-pos').textContent = Math.round(posPct * 100) + '%';
-
-  const totalE  = m * G * h;
-  const curH    = mode === 'pe' ? h : h * (1 - posPct);
-  const pe      = m * G * curH;
-  const ke      = totalE - pe;
-  const v       = ke > 0 ? Math.sqrt(2 * ke / m) : 0;
-  const peFrac  = totalE > 0 ? pe / totalE : 1;
-  const keFrac  = 1 - peFrac;
-
-  document.getElementById('val-pe').textContent    = pe.toFixed(1) + ' J';
-  document.getElementById('val-ke').textContent    = ke.toFixed(1) + ' J';
-  document.getElementById('val-v').textContent     = v.toFixed(2) + ' m/s';
-  document.getElementById('val-total').textContent = totalE.toFixed(1) + ' J';
-
-  document.getElementById('bar-pe').style.width = (peFrac * 100).toFixed(1) + '%';
-  document.getElementById('bar-ke').style.width = (keFrac * 100).toFixed(1) + '%';
-  document.getElementById('pct-pe').textContent = Math.round(peFrac * 100) + '%';
-  document.getElementById('pct-ke').textContent = Math.round(keFrac * 100) + '%';
-
-  drawScene();
-}
-
-// ── Canvas helpers ──────────────────────────────
-function resizeCanvas() {
-  const wrap = canvas.parentElement;
-  canvas.width  = wrap.clientWidth  * devicePixelRatio;
-  canvas.height = wrap.clientHeight * devicePixelRatio;
-  canvas.style.width  = wrap.clientWidth  + 'px';
-  canvas.style.height = wrap.clientHeight + 'px';
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-}
-
-function W() { return canvas.width  / devicePixelRatio; }
-function H() { return canvas.height / devicePixelRatio; }
-
-function dashedLine(x1, y1, x2, y2, dash=5, gap=4) {
-  const dx = x2-x1, dy = y2-y1, dist = Math.hypot(dx, dy);
-  if (!dist) return;
-  const steps = Math.floor(dist / (dash+gap));
-  for (let i = 0; i <= steps; i++) {
-    const t0 = i*(dash+gap)/dist, t1 = Math.min((i*(dash+gap)+dash)/dist,1);
-    ctx.beginPath();
-    ctx.moveTo(x1+dx*t0, y1+dy*t0);
-    ctx.lineTo(x1+dx*t1, y1+dy*t1);
-    ctx.stroke();
-  }
-}
-
-function arrowHead(x, y, angle, size=8) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(angle);
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(-size*0.6,  size*0.35);
-  ctx.lineTo(-size*0.6, -size*0.35);
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
-}
-
-function rampY(t, groundY, hPx, exp=1.5) {
-  return groundY - hPx * Math.pow(1-t, exp);
-}
-
-// ── Main draw ───────────────────────────────────
-function drawScene() {
-  const cw = W(), ch = H();
-  ctx.clearRect(0, 0, cw, ch);
-
-  const m      = parseFloat(document.getElementById('sl-m').value);
-  const h      = parseFloat(document.getElementById('sl-h').value);
-  const posPct = parseInt(document.getElementById('sl-pos').value) / 100;
-  const totalE = m * G * h;
-  const curH   = mode === 'pe' ? h : h*(1-posPct);
-  const pe     = m * G * curH;
-  const ke     = totalE - pe;
-  const v      = ke > 0 ? Math.sqrt(2*ke/m) : 0;
-  const peFrac = totalE > 0 ? pe/totalE : 1;
-
-  const padL = 56, padR = 32, padT = 32, padB = 48;
-  const drawW = cw - padL - padR;
-  const drawH = ch - padT - padB;
-  const groundY = padT + drawH;
-  const maxHm   = 30;
-  const pxPerM  = drawH / maxHm;
-
-  // ── Grid lines & y-axis ──────────────────────
-  ctx.lineWidth = 0.5;
-  [0, 5, 10, 15, 20, 25, 30].forEach(hv => {
-    const ty = groundY - hv * pxPerM;
-    ctx.strokeStyle = '#1e2028';
-    ctx.beginPath(); ctx.moveTo(padL, ty); ctx.lineTo(padL + drawW, ty); ctx.stroke();
-    ctx.fillStyle = '#4a4d5e';
-    ctx.font = '11px "DM Mono", monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText(hv + 'm', padL - 8, ty + 4);
-  });
-
-  // Y axis line
-  ctx.strokeStyle = '#2a2b33';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, groundY); ctx.stroke();
-
-  // Ground
-  ctx.strokeStyle = '#3a3b45';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(padL, groundY); ctx.lineTo(padL+drawW, groundY); ctx.stroke();
-
-  // Ground hatch
-  ctx.strokeStyle = '#2a2b33';
-  ctx.lineWidth = 1;
-  for (let x = padL; x < padL+drawW; x += 16) {
-    ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x-10, groundY+10); ctx.stroke();
-  }
-
-  if (mode === 'pe') {
-    // ── PE SCENE ────────────────────────────────
-    const hPx  = h * pxPerM;
-    const ballX = padL + drawW * 0.38;
-    const ballY = groundY - hPx;
-    const ballR = 18;
-
-    // Height bracket (left side)
-    const brX = padL + drawW * 0.14;
-    if (hPx > 6) {
-      ctx.strokeStyle = '#4a9eff';
-      ctx.lineWidth = 1.5;
-      // vertical line
-      ctx.beginPath(); ctx.moveTo(brX, groundY - 2); ctx.lineTo(brX, ballY + ballR + 2); ctx.stroke();
-      // serifs
-      ctx.beginPath(); ctx.moveTo(brX-5, groundY-2); ctx.lineTo(brX+5, groundY-2); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(brX-5, ballY+ballR+2); ctx.lineTo(brX+5, ballY+ballR+2); ctx.stroke();
-      // h label
-      ctx.fillStyle = '#4a9eff';
-      ctx.font = 'italic 14px "DM Serif Display", serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('h = ' + h.toFixed(1) + ' m', brX + 10, (groundY + ballY) / 2 + 5);
-    }
-
-    // Ball shadow
-    ctx.beginPath();
-    ctx.ellipse(ballX, groundY - 2, ballR * 0.9, 5, 0, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fill();
-
-    // Ball
-    ctx.beginPath(); ctx.arc(ballX, ballY, ballR, 0, Math.PI*2);
-    ctx.fillStyle = '#c8cad8';
-    ctx.fill();
-    ctx.strokeStyle = '#7a7d8e';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Ball highlight
-    ctx.beginPath(); ctx.arc(ballX - ballR*0.3, ballY - ballR*0.3, ballR*0.25, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
-    ctx.fill();
-
-    // Energy annotation
-    ctx.fillStyle = '#4a9eff';
-    ctx.font = '500 13px "DM Mono", monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText('PE = ' + pe.toFixed(1) + ' J', ballX + ballR + 10, ballY - 6);
-    ctx.fillStyle = '#4a4d5e';
-    ctx.font = '12px "DM Mono", monospace';
-    ctx.fillText('= ' + m.toFixed(1) + ' × 9.8 × ' + h.toFixed(1), ballX + ballR + 10, ballY + 12);
-
-  } else {
-    // ── PE→KE SCENE ─────────────────────────────
-    const hPx = h * pxPerM;
-
-    // Ramp curve
-    const rampPts = [];
-    for (let i = 0; i <= 200; i++) {
-      const t = i/200;
-      rampPts.push([padL + drawW*t, rampY(t, groundY, hPx)]);
-    }
-    ctx.beginPath();
-    ctx.moveTo(rampPts[0][0], rampPts[0][1]);
-    for (let i = 1; i < rampPts.length; i++) ctx.lineTo(rampPts[i][0], rampPts[i][1]);
-    ctx.strokeStyle = '#3a3b45';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Ball position
-    const t    = posPct;
-    const bx   = padL + drawW * t;
-    const by   = rampY(t, groundY, hPx);
-    const ballR = 14;
-
-    // Dashed height line
-    if (curH > 0.3) {
-      ctx.strokeStyle = 'rgba(74,158,255,0.5)';
-      ctx.lineWidth = 1;
-      dashedLine(bx, by + ballR, bx, groundY);
-      ctx.fillStyle = '#4a9eff';
-      ctx.font = '11px "DM Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.fillText('h = ' + curH.toFixed(1) + 'm', bx + 5, (by + groundY)/2 + 4);
-    }
-
-    // Ball shadow
-    ctx.beginPath();
-    ctx.ellipse(bx, groundY - 2, ballR * 0.8, 4, 0, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.fill();
-
-    // Ball
-    ctx.beginPath(); ctx.arc(bx, by, ballR, 0, Math.PI*2);
-    ctx.fillStyle = '#c8cad8';
-    ctx.fill();
-    ctx.strokeStyle = '#7a7d8e';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Velocity arrow
-    if (v > 0.2) {
-      const vScale = Math.min(v * 7, 110);
-      ctx.strokeStyle = '#2dd4a0';
-      ctx.fillStyle   = '#2dd4a0';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(bx + ballR, by);
-      ctx.lineTo(bx + ballR + vScale, by);
-      ctx.stroke();
-      arrowHead(bx + ballR + vScale, by, 0, 9);
-      ctx.fillStyle = '#2dd4a0';
-      ctx.font = '500 11px "DM Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.fillText('v = ' + v.toFixed(1) + ' m/s', bx + ballR + 4, by - 10);
-    }
-
-    // Stacked energy bar (right side)
-    const barW      = 18;
-    const barHTotal = Math.round(drawH * 0.78);
-    const barX      = padL + drawW + 10;
-    const barY      = padT + Math.round((drawH - barHTotal) / 2);
-    const peBarH    = Math.round(peFrac * barHTotal);
-    const keBarH    = barHTotal - peBarH;
-
-    // PE segment
-    if (peBarH > 0) {
-      ctx.fillStyle = '#4a9eff';
-      roundRect(ctx, barX, barY, barW, peBarH, peBarH === barHTotal ? [3,3,3,3] : [3,3,0,0]);
-      ctx.fill();
-    }
-    // KE segment
-    if (keBarH > 0) {
-      ctx.fillStyle = '#2dd4a0';
-      roundRect(ctx, barX, barY+peBarH, barW, keBarH, keBarH === barHTotal ? [3,3,3,3] : [0,0,3,3]);
-      ctx.fill();
-    }
-    // Bar outline
-    ctx.strokeStyle = '#3a3b45';
-    ctx.lineWidth = 0.5;
-    ctx.strokeRect(barX, barY, barW, barHTotal);
-
-    // Bar labels
-    ctx.textAlign = 'left';
-    ctx.font = '11px "DM Mono", monospace';
-    ctx.fillStyle = '#4a9eff';
-    ctx.fillText('PE', barX + barW + 5, barY + 10);
-    ctx.fillStyle = '#2dd4a0';
-    ctx.fillText('KE', barX + barW + 5, barY + barHTotal);
-  }
-
-  // Energy label top-right
-  ctx.textAlign = 'right';
-  ctx.fillStyle = '#4a4d5e';
-  ctx.font = '11px "DM Mono", monospace';
-  ctx.fillText('E_total = ' + totalE.toFixed(1) + ' J', padL + drawW, padT - 8);
-}
-
-// Rounded rect helper (radii = [tl, tr, br, bl])
-function roundRect(ctx, x, y, w, h, r=[3,3,3,3]) {
-  ctx.beginPath();
-  ctx.moveTo(x + r[0], y);
-  ctx.lineTo(x + w - r[1], y);  ctx.arcTo(x+w, y, x+w, y+r[1], r[1]);
-  ctx.lineTo(x + w, y + h - r[2]); ctx.arcTo(x+w, y+h, x+w-r[2], y+h, r[2]);
-  ctx.lineTo(x + r[3], y + h);  ctx.arcTo(x, y+h, x, y+h-r[3], r[3]);
-  ctx.lineTo(x, y + r[0]);       ctx.arcTo(x, y, x+r[0], y, r[0]);
-  ctx.closePath();
-}
-
-// ── Resize & init ────────────────────────────────
-window.addEventListener('resize', () => { resizeCanvas(); update(); });
-resizeCanvas();
-update();
-</script>
+</div>
 </body>
 </html>
