@@ -1,352 +1,599 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Energy Conservation — AP Physics 1 Explorer</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Conservation — AP Physics 1 Explorer</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-:root {
-  --bg:         #0f1014;
-  --surface:    #17181d;
-  --surface2:   #1e2028;
-  --border:     #2a2b33;
-  --border2:    #3a3b45;
-  --text:       #e8e9ef;
-  --text-muted: #7a7d8e;
-  --text-dim:   #4a4d5e;
-  --blue:       #4a9eff;
-  --blue-dim:   #1a3a6a;
-  --teal:       #2dd4a0;
-  --amber:      #f5a623;
-  --font-body:  'DM Sans', sans-serif;
-  --font-mono:  'DM Mono', monospace;
-  --font-serif: 'DM Serif Display', serif;
-}
+    :root {
+      --bg: #0f1014;
+      --surface: #17181d;
+      --surface2: #1e2028;
+      --border: #2a2b33;
+      --border2: #3a3b45;
+      --text: #e8e9ef;
+      --text-muted: #7a7d8e;
+      --text-dim: #4a4d5e;
+      --blue: #4a9eff;
+      --blue-dim: #1a3a6a;
+      --teal: #2dd4a0;
+      --amber: #f5a623;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --font-serif: 'DM Serif Display', serif;
+    }
+   
+    html,
+    body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+    }
 
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; }
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      height: 52px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
 
-.site-header { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
-.site-logo { font-family: var(--font-serif); font-size: 18px; color: var(--text); text-decoration: none; }
-.site-logo span { color: var(--blue); }
-.site-tagline { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); letter-spacing: 0.05em; }
-.header-back { margin-left: auto; font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
-.header-back:hover { color: var(--text); }
+    .site-logo {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      color: var(--text);
+      text-decoration: none;
+    }
 
-.sim-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-.sim-layout { display: flex; flex: 1; overflow: hidden; }
+    .site-logo span {
+      color: var(--blue);
+    }
 
-.ctrl-panel { width: 300px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 20px 16px; display: flex; flex-direction: column; overflow-y: auto; }
-.ctrl-eq { font-family: var(--font-serif); font-size: 20px; font-style: italic; color: var(--text); margin-bottom: 16px; min-height: 28px; }
-.ctrl-divider { height: 1px; background: var(--border); margin: 14px 0; }
-.ctrl-note { margin-top: auto; padding-top: 12px; font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); border-top: 1px solid var(--border); }
+    .site-tagline {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
 
-.mode-toggle { display: flex; gap: 6px; margin-bottom: 20px; }
-.mode-btn { flex: 1; padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); font-family: var(--font-body); font-size: 12px; cursor: pointer; transition: all 0.15s; text-align: center; }
-.mode-btn:hover { border-color: var(--border2); color: var(--text); }
-.mode-btn.active { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); font-weight: 500; }
+    .header-back {
+      margin-left: auto;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
 
-.slider-group { margin-bottom: 14px; }
-.slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
-.slider-label { font-size: 13px; color: var(--text-muted); font-style: italic; font-family: var(--font-serif); }
-.slider-value { font-size: 13px; font-family: var(--font-mono); color: var(--text); font-weight: 500; }
-input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 3px; background: var(--border2); outline: none; cursor: pointer; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 2px solid var(--border2); cursor: grab; transition: transform 0.1s; }
-input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.2); }
-input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 2px solid var(--border2); }
+    .header-back:hover {
+      color: var(--text);
+    }
 
-.result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.result-label { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
-.result-val { font-size: 13px; font-family: var(--font-mono); font-weight: 500; color: var(--text); }
-.result-val.blue  { color: var(--blue); }
-.result-val.teal  { color: var(--teal); }
-.result-val.amber { color: var(--amber); }
+    .sim-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-.ebar-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.ebar-track { flex: 1; height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; }
-.ebar-fill { height: 100%; border-radius: 4px; transition: width 0.05s; }
-.ebar-fill.blue { background: var(--blue); }
-.ebar-fill.teal { background: var(--teal); }
-.ebar-pct { font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); min-width: 34px; text-align: right; }
+    .sim-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
 
-.canvas-wrap { flex: 1; position: relative; overflow: hidden; }
-.canvas-wrap canvas { display: block; width: 100%; height: 100%; }
+    .ctrl-panel {
+      width: 300px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 20px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
 
-#sl-pos-group { display: none; }
-#ke-results   { display: none; }
-</style>
+    .ctrl-eq {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 16px;
+      min-height: 28px;
+    }
+
+    .ctrl-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+
+    .ctrl-note {
+      margin-top: auto;
+      padding-top: 12px;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      border-top: 1px solid var(--border);
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 7px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .mode-btn:hover {
+      border-color: var(--border2);
+      color: var(--text);
+    }
+
+    .mode-btn.active {
+      background: var(--blue-dim);
+      border-color: var(--blue);
+      color: var(--blue);
+      font-weight: 500;
+    }
+
+    .slider-group {
+      margin-bottom: 14px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+
+    .slider-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+      font-family: var(--font-serif);
+    }
+
+    .slider-value {
+      font-size: 13px;
+      font-family: var(--font-mono);
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 3px;
+      background: var(--border2);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--text);
+      border: 2px solid var(--border2);
+      cursor: grab;
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.2);
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--text);
+      border: 2px solid var(--border2);
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .result-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .result-val {
+      font-size: 13px;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .result-val.blue {
+      color: var(--blue);
+    }
+
+    .result-val.teal {
+      color: var(--teal);
+    }
+
+    .result-val.amber {
+      color: var(--amber);
+    }
+
+    .ebar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .ebar-track {
+      flex: 1;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      overflow: hidden;
+    }
+
+    .ebar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.05s;
+    }
+
+    .ebar-fill.blue {
+      background: var(--blue);
+    }
+
+    .ebar-fill.teal {
+      background: var(--teal);
+    }
+
+    .ebar-pct {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      min-width: 34px;
+      text-align: right;
+    }
+
+    .canvas-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .canvas-wrap canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #sl-pos-group {
+      display: none;
+    }
+
+    #ke-results {
+      display: none;
+    }
+  </style>
 </head>
+
 <body>
-<div class="sim-shell">
 
-  <header class="site-header">
-    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
-    <span class="site-tagline">energy conservation</span>
-    <a href="../index.html" class="header-back">← all simulations</a>
-  </header>
+  <!-- Simulator Code -->
 
-  <div class="sim-layout">
-    <div class="ctrl-panel">
-      <div class="ctrl-eq" id="ctrl-eq">U<sub>g</sub> = mgh</div>
+  <div class="sim-shell">
 
-      <div class="mode-toggle">
-        <button class="mode-btn active" id="btn-pe"   onclick="setMode('pe')">PE Only</button>
-        <button class="mode-btn"        id="btn-conv" onclick="setMode('conversion')">PE → KE</button>
-      </div>
+    <header class="site-header">
+      <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+      <span class="site-tagline">energy conservation</span>
+      <a href="../index.html" class="header-back">← all simulations</a>
+    </header>
 
-      <div class="slider-group">
-        <div class="slider-header">
-          <span class="slider-label">m &nbsp;·&nbsp; mass</span>
-          <span class="slider-value" id="lbl-m">20.0 kg</span>
+    <div class="sim-layout">
+      <div class="ctrl-panel">
+        <div class="ctrl-eq" id="ctrl-eq">U<sub>g</sub> = mgh</div>
+
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="btn-pe" onclick="setMode('pe')">PE Only</button>
+          <button class="mode-btn" id="btn-conv" onclick="setMode('conversion')">PE → KE</button>
         </div>
-        <input type="range" id="sl-m" min="1" max="50" step="0.5" value="20" oninput="update()">
-      </div>
 
-      <div class="slider-group">
-        <div class="slider-header">
-          <span class="slider-label">h &nbsp;·&nbsp; height</span>
-          <span class="slider-value" id="lbl-h">18.0 m</span>
+        <div class="slider-group">
+          <div class="slider-header">
+            <span class="slider-label">m &nbsp;·&nbsp; mass</span>
+            <span class="slider-value" id="lbl-m">20.0 kg</span>
+          </div>
+          <input type="range" id="sl-m" min="1" max="50" step="0.5" value="20" oninput="update()">
         </div>
-        <input type="range" id="sl-h" min="0" max="30" step="0.5" value="18" oninput="update()">
-      </div>
 
-      <div class="slider-group" id="sl-pos-group">
-        <div class="slider-header">
-          <span class="slider-label">x &nbsp;·&nbsp; position</span>
-          <span class="slider-value" id="lbl-pos">0%</span>
+        <div class="slider-group">
+          <div class="slider-header">
+            <span class="slider-label">h &nbsp;·&nbsp; height</span>
+            <span class="slider-value" id="lbl-h">18.0 m</span>
+          </div>
+          <input type="range" id="sl-h" min="0" max="30" step="0.5" value="18" oninput="update()">
         </div>
-        <input type="range" id="sl-pos" min="0" max="100" step="1" value="0" oninput="update()">
-      </div>
 
-      <div class="ctrl-divider"></div>
+        <div class="slider-group" id="sl-pos-group">
+          <div class="slider-header">
+            <span class="slider-label">x &nbsp;·&nbsp; position</span>
+            <span class="slider-value" id="lbl-pos">0%</span>
+          </div>
+          <input type="range" id="sl-pos" min="0" max="100" step="1" value="0" oninput="update()">
+        </div>
 
-      <div class="result-row">
-        <span class="result-label">PE = mgh</span>
-        <span class="result-val blue" id="val-pe">3528.0 J</span>
-      </div>
-      <div class="ebar-wrap">
-        <div class="ebar-track"><div class="ebar-fill blue" id="bar-pe" style="width:100%"></div></div>
-        <span class="ebar-pct" id="pct-pe">100%</span>
-      </div>
+        <div class="ctrl-divider"></div>
 
-      <div id="ke-results">
-        <div class="result-row" style="margin-top:6px">
-          <span class="result-label">KE = ½mv²</span>
-          <span class="result-val teal" id="val-ke">0.0 J</span>
+        <div class="result-row">
+          <span class="result-label">PE = mgh</span>
+          <span class="result-val blue" id="val-pe">3528.0 J</span>
         </div>
         <div class="ebar-wrap">
-          <div class="ebar-track"><div class="ebar-fill teal" id="bar-ke" style="width:0%"></div></div>
-          <span class="ebar-pct" id="pct-ke">0%</span>
+          <div class="ebar-track">
+            <div class="ebar-fill blue" id="bar-pe" style="width:100%"></div>
+          </div>
+          <span class="ebar-pct" id="pct-pe">100%</span>
         </div>
-        <div class="result-row" style="margin-top:6px">
-          <span class="result-label">v = √(2KE/m)</span>
-          <span class="result-val amber" id="val-v">0.00 m/s</span>
+
+        <div id="ke-results">
+          <div class="result-row" style="margin-top:6px">
+            <span class="result-label">KE = ½mv²</span>
+            <span class="result-val teal" id="val-ke">0.0 J</span>
+          </div>
+          <div class="ebar-wrap">
+            <div class="ebar-track">
+              <div class="ebar-fill teal" id="bar-ke" style="width:0%"></div>
+            </div>
+            <span class="ebar-pct" id="pct-ke">0%</span>
+          </div>
+          <div class="result-row" style="margin-top:6px">
+            <span class="result-label">v = √(2KE/m)</span>
+            <span class="result-val amber" id="val-v">0.00 m/s</span>
+          </div>
         </div>
+
+        <div class="ctrl-divider"></div>
+
+        <div class="result-row">
+          <span class="result-label">E<sub>total</sub></span>
+          <span class="result-val" id="val-total">3528.0 J</span>
+        </div>
+
+        <div class="ctrl-note">g = 9.8 m/s² · frictionless</div>
       </div>
 
-      <div class="ctrl-divider"></div>
-
-      <div class="result-row">
-        <span class="result-label">E<sub>total</sub></span>
-        <span class="result-val" id="val-total">3528.0 J</span>
+      <div class="canvas-wrap">
+        <canvas id="sim-canvas"></canvas>
       </div>
-
-      <div class="ctrl-note">g = 9.8 m/s² · frictionless</div>
-    </div>
-
-    <div class="canvas-wrap">
-      <canvas id="sim-canvas"></canvas>
     </div>
   </div>
-</div>
 
-<script>
-const canvas = document.getElementById('sim-canvas');
-const dpr    = window.devicePixelRatio || 1;
-let   ctx;
-const G = 9.8;
-let   mode = 'pe';
+  <script>
+    const canvas = document.getElementById('sim-canvas');
+    const dpr = window.devicePixelRatio || 1;
+    let ctx;
+    const G = 9.8;
+    let mode = 'pe';
 
-function resizeCanvas() {
-  const wrap = canvas.parentElement;
-  canvas.width  = wrap.clientWidth  * dpr;
-  canvas.height = wrap.clientHeight * dpr;
-  canvas.style.width  = wrap.clientWidth  + 'px';
-  canvas.style.height = wrap.clientHeight + 'px';
-  ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-function W() { return canvas.width  / dpr; }
-function H() { return canvas.height / dpr; }
-
-function setMode(m) {
-  mode = m;
-  document.getElementById('btn-pe').classList.toggle('active',   m === 'pe');
-  document.getElementById('btn-conv').classList.toggle('active', m === 'conversion');
-  document.getElementById('sl-pos-group').style.display = m === 'conversion' ? 'block' : 'none';
-  document.getElementById('ke-results').style.display   = m === 'conversion' ? 'block' : 'none';
-  document.getElementById('ctrl-eq').innerHTML = m === 'pe'
-    ? 'U<sub>g</sub> = mgh' : 'E<sub>total</sub> = PE + KE';
-  if (m === 'pe') document.getElementById('sl-pos').value = 0;
-  update();
-}
-
-function update() {
-  const m      = parseFloat(document.getElementById('sl-m').value);
-  const h      = parseFloat(document.getElementById('sl-h').value);
-  const posPct = parseInt(document.getElementById('sl-pos').value) / 100;
-
-  document.getElementById('lbl-m').textContent   = m.toFixed(1) + ' kg';
-  document.getElementById('lbl-h').textContent   = h.toFixed(1) + ' m';
-  document.getElementById('lbl-pos').textContent = Math.round(posPct * 100) + '%';
-
-  const totalE = m * G * h;
-  const curH   = mode === 'pe' ? h : h * (1 - posPct);
-  const pe     = m * G * curH;
-  const ke     = totalE - pe;
-  const v      = ke > 0 ? Math.sqrt(2 * ke / m) : 0;
-  const peFrac = totalE > 0 ? pe / totalE : 1;
-
-  document.getElementById('val-pe').textContent    = pe.toFixed(1) + ' J';
-  document.getElementById('val-ke').textContent    = ke.toFixed(1) + ' J';
-  document.getElementById('val-v').textContent     = v.toFixed(2) + ' m/s';
-  document.getElementById('val-total').textContent = totalE.toFixed(1) + ' J';
-  document.getElementById('bar-pe').style.width    = (peFrac * 100).toFixed(1) + '%';
-  document.getElementById('bar-ke').style.width    = ((1-peFrac) * 100).toFixed(1) + '%';
-  document.getElementById('pct-pe').textContent    = Math.round(peFrac * 100) + '%';
-  document.getElementById('pct-ke').textContent    = Math.round((1-peFrac) * 100) + '%';
-
-  drawScene(m, h, posPct, pe, ke, v, peFrac, totalE);
-}
-
-function dashedLine(x1, y1, x2, y2, dash=5, gap=4) {
-  const dx = x2-x1, dy = y2-y1, dist = Math.hypot(dx, dy);
-  if (!dist) return;
-  for (let i = 0; i*(dash+gap) < dist; i++) {
-    const t0 = i*(dash+gap)/dist, t1 = Math.min((i*(dash+gap)+dash)/dist, 1);
-    ctx.beginPath(); ctx.moveTo(x1+dx*t0, y1+dy*t0); ctx.lineTo(x1+dx*t1, y1+dy*t1); ctx.stroke();
-  }
-}
-
-function arrowHead(x, y, angle, size=8) {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
-  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-size*0.6, size*0.35); ctx.lineTo(-size*0.6, -size*0.35);
-  ctx.closePath(); ctx.fill(); ctx.restore();
-}
-
-function roundRect(x, y, w, h, r=[3,3,3,3]) {
-  ctx.beginPath();
-  ctx.moveTo(x+r[0],y); ctx.lineTo(x+w-r[1],y); ctx.arcTo(x+w,y,x+w,y+r[1],r[1]);
-  ctx.lineTo(x+w,y+h-r[2]); ctx.arcTo(x+w,y+h,x+w-r[2],y+h,r[2]);
-  ctx.lineTo(x+r[3],y+h); ctx.arcTo(x,y+h,x,y+h-r[3],r[3]);
-  ctx.lineTo(x,y+r[0]); ctx.arcTo(x,y,x+r[0],y,r[0]); ctx.closePath();
-}
-
-function drawBall(x, y, r, groundY) {
-  ctx.beginPath(); ctx.ellipse(x, groundY-2, r*0.9, 5, 0, 0, Math.PI*2);
-  ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fill();
-  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
-  ctx.fillStyle = '#c8cad8'; ctx.fill();
-  ctx.strokeStyle = '#7a7d8e'; ctx.lineWidth = 1.5; ctx.stroke();
-  ctx.beginPath(); ctx.arc(x-r*0.3, y-r*0.3, r*0.25, 0, Math.PI*2);
-  ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.fill();
-}
-
-function drawGrid(padL, padR, padT, groundY, pxPerM, maxHm) {
-  const drawW = W() - padL - padR;
-  ctx.font = '11px "DM Mono", monospace'; ctx.textAlign = 'right';
-  for (let hv = 0; hv <= maxHm; hv += 5) {
-    const ty = groundY - hv * pxPerM;
-    ctx.strokeStyle = '#1e2028'; ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.moveTo(padL, ty); ctx.lineTo(padL+drawW, ty); ctx.stroke();
-    ctx.fillStyle = '#4a4d5e'; ctx.fillText(hv + 'm', padL-8, ty+4);
-  }
-  ctx.strokeStyle = '#2a2b33'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, groundY); ctx.stroke();
-  ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(padL, groundY); ctx.lineTo(padL+drawW, groundY); ctx.stroke();
-  ctx.strokeStyle = '#2a2b33'; ctx.lineWidth = 1;
-  for (let x = padL; x < padL+drawW; x += 16) {
-    ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x-10, groundY+10); ctx.stroke();
-  }
-}
-
-function rampY(t, groundY, hPx) { return groundY - hPx * Math.pow(1-t, 1.5); }
-
-function drawScene(m, h, posPct, pe, ke, v, peFrac, totalE) {
-  ctx.clearRect(0, 0, W(), H());
-  const padL=56, padR=32, padT=32, padB=48;
-  const drawW = W()-padL-padR, drawH = H()-padT-padB;
-  const groundY = padT+drawH, pxPerM = drawH/30;
-
-  drawGrid(padL, padR, padT, groundY, pxPerM, 30);
-
-  ctx.textAlign = 'right'; ctx.fillStyle = '#4a4d5e';
-  ctx.font = '11px "DM Mono", monospace';
-  ctx.fillText('E_total = ' + totalE.toFixed(1) + ' J', padL+drawW, padT-10);
-
-  if (mode === 'pe') {
-    const hPx = h*pxPerM, ballX = padL+drawW*0.38, ballY = groundY-hPx, ballR = 18;
-    const brX = padL+drawW*0.14;
-    if (hPx > 6) {
-      ctx.strokeStyle = '#4a9eff'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(brX, groundY-2); ctx.lineTo(brX, ballY+ballR+2); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(brX-5,groundY-2); ctx.lineTo(brX+5,groundY-2); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(brX-5,ballY+ballR+2); ctx.lineTo(brX+5,ballY+ballR+2); ctx.stroke();
-      ctx.fillStyle = '#4a9eff';
-      ctx.font = 'italic 14px "DM Serif Display", serif'; ctx.textAlign = 'left';
-      ctx.fillText('h = ' + h.toFixed(1) + ' m', brX+10, (groundY+ballY)/2+5);
+    function resizeCanvas() {
+      const wrap = canvas.parentElement;
+      canvas.width = wrap.clientWidth * dpr;
+      canvas.height = wrap.clientHeight * dpr;
+      canvas.style.width = wrap.clientWidth + 'px';
+      canvas.style.height = wrap.clientHeight + 'px';
+      ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-    drawBall(ballX, ballY, ballR, groundY);
-    ctx.fillStyle = '#4a9eff'; ctx.font = '500 13px "DM Mono", monospace'; ctx.textAlign = 'left';
-    ctx.fillText('PE = ' + pe.toFixed(1) + ' J', ballX+ballR+10, ballY-6);
-    ctx.fillStyle = '#4a4d5e'; ctx.font = '12px "DM Mono", monospace';
-    ctx.fillText('= ' + m.toFixed(1) + ' × 9.8 × ' + h.toFixed(1), ballX+ballR+10, ballY+12);
+    function W() { return canvas.width / dpr; }
+    function H() { return canvas.height / dpr; }
 
-  } else {
-    const hPx = h*pxPerM;
-    ctx.beginPath();
-    for (let i = 0; i <= 200; i++) {
-      const t = i/200, px = padL+drawW*t, py = rampY(t, groundY, hPx);
-      i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
-    }
-    ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 3; ctx.stroke();
-
-    const bx = padL+drawW*posPct, by = rampY(posPct, groundY, hPx), ballR = 14;
-    const curH = h*(1-posPct);
-    if (curH > 0.3) {
-      ctx.strokeStyle = 'rgba(74,158,255,0.5)'; ctx.lineWidth = 1;
-      dashedLine(bx, by+ballR, bx, groundY);
-      ctx.fillStyle = '#4a9eff'; ctx.font = '11px "DM Mono", monospace'; ctx.textAlign = 'left';
-      ctx.fillText('h = ' + curH.toFixed(1) + 'm', bx+5, (by+groundY)/2+4);
-    }
-    drawBall(bx, by, ballR, groundY);
-    if (v > 0.2) {
-      const vScale = Math.min(v*7, 110);
-      ctx.strokeStyle = '#2dd4a0'; ctx.fillStyle = '#2dd4a0'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(bx+ballR, by); ctx.lineTo(bx+ballR+vScale, by); ctx.stroke();
-      arrowHead(bx+ballR+vScale, by, 0, 9);
-      ctx.font = '500 11px "DM Mono", monospace'; ctx.textAlign = 'left';
-      ctx.fillText('v = ' + v.toFixed(1) + ' m/s', bx+ballR+4, by-10);
+    function setMode(m) {
+      mode = m;
+      document.getElementById('btn-pe').classList.toggle('active', m === 'pe');
+      document.getElementById('btn-conv').classList.toggle('active', m === 'conversion');
+      document.getElementById('sl-pos-group').style.display = m === 'conversion' ? 'block' : 'none';
+      document.getElementById('ke-results').style.display = m === 'conversion' ? 'block' : 'none';
+      document.getElementById('ctrl-eq').innerHTML = m === 'pe'
+        ? 'U<sub>g</sub> = mgh' : 'E<sub>total</sub> = PE + KE';
+      if (m === 'pe') document.getElementById('sl-pos').value = 0;
+      update();
     }
 
-    const barW=18, barHTotal=Math.round(drawH*0.78);
-    const barX=padL+drawW+10, barY=padT+Math.round((drawH-barHTotal)/2);
-    const peBarH=Math.round(peFrac*barHTotal), keBarH=barHTotal-peBarH;
-    if (peBarH > 0) { ctx.fillStyle='#4a9eff'; roundRect(barX,barY,barW,peBarH,peBarH===barHTotal?[3,3,3,3]:[3,3,0,0]); ctx.fill(); }
-    if (keBarH > 0) { ctx.fillStyle='#2dd4a0'; roundRect(barX,barY+peBarH,barW,keBarH,keBarH===barHTotal?[3,3,3,3]:[0,0,3,3]); ctx.fill(); }
-    ctx.strokeStyle='#3a3b45'; ctx.lineWidth=0.5; ctx.strokeRect(barX,barY,barW,barHTotal);
-    ctx.font='11px "DM Mono", monospace'; ctx.textAlign='left';
-    ctx.fillStyle='#4a9eff'; ctx.fillText('PE', barX+barW+5, barY+10);
-    ctx.fillStyle='#2dd4a0'; ctx.fillText('KE', barX+barW+5, barY+barHTotal);
-  }
-}
+    function update() {
+      const m = parseFloat(document.getElementById('sl-m').value);
+      const h = parseFloat(document.getElementById('sl-h').value);
+      const posPct = parseInt(document.getElementById('sl-pos').value) / 100;
 
-window.addEventListener('resize', () => { resizeCanvas(); update(); });
-resizeCanvas();
-update();
-</script>
+      document.getElementById('lbl-m').textContent = m.toFixed(1) + ' kg';
+      document.getElementById('lbl-h').textContent = h.toFixed(1) + ' m';
+      document.getElementById('lbl-pos').textContent = Math.round(posPct * 100) + '%';
+
+      const totalE = m * G * h;
+      const curH = mode === 'pe' ? h : h * (1 - posPct);
+      const pe = m * G * curH;
+      const ke = totalE - pe;
+      const v = ke > 0 ? Math.sqrt(2 * ke / m) : 0;
+      const peFrac = totalE > 0 ? pe / totalE : 1;
+
+      document.getElementById('val-pe').textContent = pe.toFixed(1) + ' J';
+      document.getElementById('val-ke').textContent = ke.toFixed(1) + ' J';
+      document.getElementById('val-v').textContent = v.toFixed(2) + ' m/s';
+      document.getElementById('val-total').textContent = totalE.toFixed(1) + ' J';
+      document.getElementById('bar-pe').style.width = (peFrac * 100).toFixed(1) + '%';
+      document.getElementById('bar-ke').style.width = ((1 - peFrac) * 100).toFixed(1) + '%';
+      document.getElementById('pct-pe').textContent = Math.round(peFrac * 100) + '%';
+      document.getElementById('pct-ke').textContent = Math.round((1 - peFrac) * 100) + '%';
+
+      drawScene(m, h, posPct, pe, ke, v, peFrac, totalE);
+    }
+
+    function dashedLine(x1, y1, x2, y2, dash = 5, gap = 4) {
+      const dx = x2 - x1, dy = y2 - y1, dist = Math.hypot(dx, dy);
+      if (!dist) return;
+      for (let i = 0; i * (dash + gap) < dist; i++) {
+        const t0 = i * (dash + gap) / dist, t1 = Math.min((i * (dash + gap) + dash) / dist, 1);
+        ctx.beginPath(); ctx.moveTo(x1 + dx * t0, y1 + dy * t0); ctx.lineTo(x1 + dx * t1, y1 + dy * t1); ctx.stroke();
+      }
+    }
+
+    function arrowHead(x, y, angle, size = 8) {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-size * 0.6, size * 0.35); ctx.lineTo(-size * 0.6, -size * 0.35);
+      ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+
+    function roundRect(x, y, w, h, r = [3, 3, 3, 3]) {
+      ctx.beginPath();
+      ctx.moveTo(x + r[0], y); ctx.lineTo(x + w - r[1], y); ctx.arcTo(x + w, y, x + w, y + r[1], r[1]);
+      ctx.lineTo(x + w, y + h - r[2]); ctx.arcTo(x + w, y + h, x + w - r[2], y + h, r[2]);
+      ctx.lineTo(x + r[3], y + h); ctx.arcTo(x, y + h, x, y + h - r[3], r[3]);
+      ctx.lineTo(x, y + r[0]); ctx.arcTo(x, y, x + r[0], y, r[0]); ctx.closePath();
+    }
+
+    function drawBall(x, y, r, groundY) {
+      ctx.beginPath(); ctx.ellipse(x, groundY - 2, r * 0.9, 5, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = '#c8cad8'; ctx.fill();
+      ctx.strokeStyle = '#7a7d8e'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.3, r * 0.25, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.fill();
+    }
+
+    function drawGrid(padL, padR, padT, groundY, pxPerM, maxHm) {
+      const drawW = W() - padL - padR;
+      ctx.font = '11px "DM Mono", monospace'; ctx.textAlign = 'right';
+      for (let hv = 0; hv <= maxHm; hv += 5) {
+        const ty = groundY - hv * pxPerM;
+        ctx.strokeStyle = '#1e2028'; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(padL, ty); ctx.lineTo(padL + drawW, ty); ctx.stroke();
+        ctx.fillStyle = '#4a4d5e'; ctx.fillText(hv + 'm', padL - 8, ty + 4);
+      }
+      ctx.strokeStyle = '#2a2b33'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, groundY); ctx.stroke();
+      ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(padL, groundY); ctx.lineTo(padL + drawW, groundY); ctx.stroke();
+      ctx.strokeStyle = '#2a2b33'; ctx.lineWidth = 1;
+      for (let x = padL; x < padL + drawW; x += 16) {
+        ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x - 10, groundY + 10); ctx.stroke();
+      }
+    }
+
+    function rampY(t, groundY, hPx) { return groundY - hPx * Math.pow(1 - t, 1.5); }
+
+    function drawScene(m, h, posPct, pe, ke, v, peFrac, totalE) {
+      ctx.clearRect(0, 0, W(), H());
+      const padL = 56, padR = 32, padT = 32, padB = 48;
+      const drawW = W() - padL - padR, drawH = H() - padT - padB;
+      const groundY = padT + drawH, pxPerM = drawH / 30;
+
+      drawGrid(padL, padR, padT, groundY, pxPerM, 30);
+
+      ctx.textAlign = 'right'; ctx.fillStyle = '#4a4d5e';
+      ctx.font = '11px "DM Mono", monospace';
+      ctx.fillText('E_total = ' + totalE.toFixed(1) + ' J', padL + drawW, padT - 10);
+
+      if (mode === 'pe') {
+        const hPx = h * pxPerM, ballX = padL + drawW * 0.38, ballY = groundY - hPx, ballR = 18;
+        const brX = padL + drawW * 0.14;
+        if (hPx > 6) {
+          ctx.strokeStyle = '#4a9eff'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(brX, groundY - 2); ctx.lineTo(brX, ballY + ballR + 2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(brX - 5, groundY - 2); ctx.lineTo(brX + 5, groundY - 2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(brX - 5, ballY + ballR + 2); ctx.lineTo(brX + 5, ballY + ballR + 2); ctx.stroke();
+          ctx.fillStyle = '#4a9eff';
+          ctx.font = 'italic 14px "DM Serif Display", serif'; ctx.textAlign = 'left';
+          ctx.fillText('h = ' + h.toFixed(1) + ' m', brX + 10, (groundY + ballY) / 2 + 5);
+        }
+        drawBall(ballX, ballY, ballR, groundY);
+        ctx.fillStyle = '#4a9eff'; ctx.font = '500 13px "DM Mono", monospace'; ctx.textAlign = 'left';
+        ctx.fillText('PE = ' + pe.toFixed(1) + ' J', ballX + ballR + 10, ballY - 6);
+        ctx.fillStyle = '#4a4d5e'; ctx.font = '12px "DM Mono", monospace';
+        ctx.fillText('= ' + m.toFixed(1) + ' × 9.8 × ' + h.toFixed(1), ballX + ballR + 10, ballY + 12);
+
+      } else {
+        const hPx = h * pxPerM;
+        ctx.beginPath();
+        for (let i = 0; i <= 200; i++) {
+          const t = i / 200, px = padL + drawW * t, py = rampY(t, groundY, hPx);
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 3; ctx.stroke();
+
+        const bx = padL + drawW * posPct, by = rampY(posPct, groundY, hPx), ballR = 14;
+        const curH = h * (1 - posPct);
+        if (curH > 0.3) {
+          ctx.strokeStyle = 'rgba(74,158,255,0.5)'; ctx.lineWidth = 1;
+          dashedLine(bx, by + ballR, bx, groundY);
+          ctx.fillStyle = '#4a9eff'; ctx.font = '11px "DM Mono", monospace'; ctx.textAlign = 'left';
+          ctx.fillText('h = ' + curH.toFixed(1) + 'm', bx + 5, (by + groundY) / 2 + 4);
+        }
+        drawBall(bx, by, ballR, groundY);
+        if (v > 0.2) {
+          const vScale = Math.min(v * 7, 110);
+          ctx.strokeStyle = '#2dd4a0'; ctx.fillStyle = '#2dd4a0'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(bx + ballR, by); ctx.lineTo(bx + ballR + vScale, by); ctx.stroke();
+          arrowHead(bx + ballR + vScale, by, 0, 9);
+          ctx.font = '500 11px "DM Mono", monospace'; ctx.textAlign = 'left';
+          ctx.fillText('v = ' + v.toFixed(1) + ' m/s', bx + ballR + 4, by - 10);
+        }
+
+        const barW = 18, barHTotal = Math.round(drawH * 0.78);
+        const barX = padL + drawW + 10, barY = padT + Math.round((drawH - barHTotal) / 2);
+        const peBarH = Math.round(peFrac * barHTotal), keBarH = barHTotal - peBarH;
+        if (peBarH > 0) { ctx.fillStyle = '#4a9eff'; roundRect(barX, barY, barW, peBarH, peBarH === barHTotal ? [3, 3, 3, 3] : [3, 3, 0, 0]); ctx.fill(); }
+        if (keBarH > 0) { ctx.fillStyle = '#2dd4a0'; roundRect(barX, barY + peBarH, barW, keBarH, keBarH === barHTotal ? [3, 3, 3, 3] : [0, 0, 3, 3]); ctx.fill(); }
+        ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 0.5; ctx.strokeRect(barX, barY, barW, barHTotal);
+        ctx.font = '11px "DM Mono", monospace'; ctx.textAlign = 'left';
+        ctx.fillStyle = '#4a9eff'; ctx.fillText('PE', barX + barW + 5, barY + 10);
+        ctx.fillStyle = '#2dd4a0'; ctx.fillText('KE', barX + barW + 5, barY + barHTotal);
+      }
+    }
+
+    window.addEventListener('resize', () => { resizeCanvas(); update(); });
+    resizeCanvas();
+    update();
+  </script>
 </body>
+
 </html>

@@ -1,258 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AP Physics 1 Explorer</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css">
-<style>
-  .landing {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AP Physics 1 Explorer</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .landing {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-  /* ── Hero ── */
-  .hero {
-    padding: 56px 48px 40px;
-    border-bottom: 1px solid var(--border);
-  }
-  .hero-title {
-    font-family: var(--font-serif);
-    font-size: 42px;
-    color: var(--text);
-    line-height: 1.15;
-    margin-bottom: 10px;
-  }
-  .hero-title span { color: var(--blue); }
-  .hero-sub {
-    font-size: 15px;
-    color: var(--text-muted);
-    max-width: 520px;
-    line-height: 1.6;
-  }
-  .hero-meta {
-    margin-top: 16px;
-    display: flex;
-    gap: 20px;
-    font-size: 12px;
-    font-family: var(--font-mono);
-    color: var(--text-dim);
-  }
-  .hero-meta span { display: flex; align-items: center; gap: 5px; }
-  .hero-meta .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--teal);
-    display: inline-block;
-  }
+    /* ── Hero ── */
+    .hero {
+      padding: 56px 48px 40px;
+      border-bottom: 1px solid var(--border);
+    }
 
-  /* ── Sim grid ── */
-  .sim-grid-section {
-    padding: 40px 48px;
-    flex: 1;
-  }
-  .section-label {
-    font-size: 11px;
-    font-family: var(--font-mono);
-    color: var(--text-dim);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-  .sim-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
-  }
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: 42px;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
 
-  /* ── Sim card ── */
-  .sim-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px 20px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    transition: border-color 0.15s, transform 0.15s;
-    text-decoration: none;
-    color: inherit;
-    position: relative;
-    overflow: hidden;
-  }
-  .sim-card.ready:hover {
-    border-color: var(--border2);
-    transform: translateY(-2px);
-  }
-  .sim-card.soon {
-    opacity: 0.5;
-    cursor: default;
-    pointer-events: none;
-  }
+    .hero-title span {
+      color: var(--blue);
+    }
 
-  /* Accent bar top */
-  .sim-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--blue);
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-  .sim-card.ready:hover::before { opacity: 1; }
+    .hero-sub {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 520px;
+      line-height: 1.6;
+    }
 
-  .card-equation {
-    font-family: var(--font-serif);
-    font-size: 22px;
-    font-style: italic;
-    color: var(--blue);
-    margin-bottom: 10px;
-    line-height: 1.2;
-  }
-  .sim-card.soon .card-equation { color: var(--text-muted); }
+    .hero-meta {
+      margin-top: 16px;
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+    }
 
-  .card-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .card-desc {
-    font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    flex: 1;
-    margin-bottom: 16px;
-  }
+    .hero-meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-  .card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .card-tag {
-    font-size: 11px;
-    font-family: var(--font-mono);
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
-  .tag-ready {
-    background: var(--teal-dim);
-    color: var(--teal);
-  }
-  .tag-soon {
-    background: var(--surface2);
-    color: var(--text-dim);
-  }
-  .card-launch {
-    font-size: 12px;
-    font-family: var(--font-mono);
-    color: var(--blue);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-  .sim-card.ready:hover .card-launch { opacity: 1; }
+    .hero-meta .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      display: inline-block;
+    }
 
-  /* ── Footer ── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 16px 48px;
-    font-size: 12px;
-    font-family: var(--font-mono);
-    color: var(--text-dim);
-    display: flex;
-    gap: 24px;
-  }
-</style>
+    /* ── Sim grid ── */
+    .sim-grid-section {
+      padding: 40px 48px;
+      flex: 1;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── Sim card ── */
+    .sim-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      transition: border-color 0.15s, transform 0.15s;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sim-card.ready:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+    }
+
+    .sim-card.soon {
+      opacity: 0.5;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    /* Accent bar top */
+    .sim-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--blue);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .sim-card.ready:hover::before {
+      opacity: 1;
+    }
+
+    .card-equation {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-style: italic;
+      color: var(--blue);
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .sim-card.soon .card-equation {
+      color: var(--text-muted);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex: 1;
+      margin-bottom: 16px;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-tag {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .tag-ready {
+      background: var(--teal-dim);
+      color: var(--teal);
+    }
+
+    .tag-soon {
+      background: var(--surface2);
+      color: var(--text-dim);
+    }
+
+    .card-launch {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .sim-card.ready:hover .card-launch {
+      opacity: 1;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 16px 48px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      display: flex;
+      gap: 24px;
+    }
+  </style>
 </head>
+
 <body>
-<div class="landing">
+  <div class="landing">
 
-  <header class="site-header">
-    <span class="site-logo">AP Physics <span>1</span> Explorer</span>
-    <span class="site-tagline">interactive simulations</span>
-  </header>
 
-  <div class="hero">
-    <h1 class="hero-title">Learn physics by<br><span>doing physics.</span></h1>
-    <p class="hero-sub">Interactive simulations for AP Physics 1. Adjust parameters in real time and watch the equations come alive — no textbook can do this.</p>
-    <div class="hero-meta">
-      <span><span class="dot"></span>HTML · CSS · JavaScript only</span>
-      <span>g = 9.8 m/s²</span>
-      <span>no login required</span>
+    <!-- Site Header -->
+
+    <header class="site-header">
+      <span class="site-logo">AP Physics <span>1</span> Explorer</span>
+      <span class="site-tagline">interactive simulations</span>
+    </header>
+
+    <div class="hero">
+      <h1 class="hero-title">Physics<br><span>learn by doing</span></h1>
+      <p class="hero-sub">Interactive simulators for AP Physics 1</p>
+      <div class="hero-meta">
+        <span><span class="dot"></span>HTML · CSS · JavaScript only</span>
+        <span>g = 9.8 m/s²</span>
+        <span>no login required</span>
+      </div>
     </div>
-  </div>
 
-  <div class="sim-grid-section">
-    <div class="section-label">simulations</div>
-    <div class="sim-grid">
+    <!-- Cards (buttons) for each Experiment -->
 
-      <!-- Energy Conservation — READY -->
-      <a class="sim-card ready" href="simulations/energy-conservation.html">
-        <div class="card-equation">U<sub>g</sub> = mgh</div>
-        <div class="card-title">Energy Conservation</div>
-        <div class="card-desc">Explore gravitational potential energy and its conversion to kinetic energy as a ball descends a frictionless ramp.</div>
-        <div class="card-footer">
-          <span class="card-tag tag-ready">● live</span>
-          <span class="card-launch">launch →</span>
+    <div class="sim-grid-section">
+      <div class="section-label">simulations</div>
+      <div class="sim-grid">
+
+        <!-- Energy Conservation — READY -->
+        <a class="sim-card ready" href="simulations/energy-conservation.html">
+          <div class="card-equation">U<sub>g</sub> = mgh</div>
+          <div class="card-title">Energy Conservation</div>
+          <div class="card-desc">Explore gravitational potential energy and its conversion to kinetic energy as a ball
+            descends a frictionless ramp.</div>
+          <div class="card-footer">
+            <span class="card-tag tag-ready">● live</span>
+            <span class="card-launch">launch →</span>
+          </div>
+        </a>
+
+        <!-- Spring PE — SOON -->
+        <div class="sim-card soon">
+          <div class="card-equation">U = ½kx²</div>
+          <div class="card-title">Spring Potential Energy</div>
+          <div class="card-desc">Compress or stretch a spring and watch elastic PE convert to KE. Explore Hooke's Law
+            and simple harmonic motion.</div>
+          <div class="card-footer">
+            <span class="card-tag tag-soon">coming soon</span>
+          </div>
         </div>
-      </a>
 
-      <!-- Spring PE — SOON -->
-      <div class="sim-card soon">
-        <div class="card-equation">U = ½kx²</div>
-        <div class="card-title">Spring Potential Energy</div>
-        <div class="card-desc">Compress or stretch a spring and watch elastic PE convert to KE. Explore Hooke's Law and simple harmonic motion.</div>
-        <div class="card-footer">
-          <span class="card-tag tag-soon">coming soon</span>
+        <!-- Projectile Motion — SOON -->
+        <div class="sim-card soon">
+          <div class="card-equation">y(t) = v₀t − ½gt²</div>
+          <div class="card-title">Projectile Motion</div>
+          <div class="card-desc">Launch a projectile at any angle and speed. See the independence of horizontal and
+            vertical motion in real time.</div>
+          <div class="card-footer">
+            <span class="card-tag tag-soon">coming soon</span>
+          </div>
         </div>
+
+        <!-- Friction — SOON -->
+        <div class="sim-card soon">
+          <div class="card-equation">W<sub>f</sub> = μmgd</div>
+          <div class="card-title">Friction &amp; Dissipation</div>
+          <div class="card-desc">Add a friction coefficient and watch mechanical energy dissipate into heat. Compare
+            frictionless vs. real surfaces.</div>
+          <div class="card-footer">
+            <span class="card-tag tag-soon">coming soon</span>
+          </div>
+        </div>
+
+        <!-- Roller Coaster — SOON -->
+        <div class="sim-card soon">
+          <div class="card-equation">E<sub>total</sub> = const</div>
+          <div class="card-title">Roller Coaster</div>
+          <div class="card-desc">Send a cart over multiple hills and loops. Watch PE and KE trade off continuously while
+            total energy is conserved.</div>
+          <div class="card-footer">
+            <span class="card-tag tag-soon">coming soon</span>
+          </div>
+        </div>
+
       </div>
-
-      <!-- Projectile Motion — SOON -->
-      <div class="sim-card soon">
-        <div class="card-equation">y(t) = v₀t − ½gt²</div>
-        <div class="card-title">Projectile Motion</div>
-        <div class="card-desc">Launch a projectile at any angle and speed. See the independence of horizontal and vertical motion in real time.</div>
-        <div class="card-footer">
-          <span class="card-tag tag-soon">coming soon</span>
-        </div>
-      </div>
-
-      <!-- Friction — SOON -->
-      <div class="sim-card soon">
-        <div class="card-equation">W<sub>f</sub> = μmgd</div>
-        <div class="card-title">Friction &amp; Dissipation</div>
-        <div class="card-desc">Add a friction coefficient and watch mechanical energy dissipate into heat. Compare frictionless vs. real surfaces.</div>
-        <div class="card-footer">
-          <span class="card-tag tag-soon">coming soon</span>
-        </div>
-      </div>
-
-      <!-- Roller Coaster — SOON -->
-      <div class="sim-card soon">
-        <div class="card-equation">E<sub>total</sub> = const</div>
-        <div class="card-title">Roller Coaster</div>
-        <div class="card-desc">Send a cart over multiple hills and loops. Watch PE and KE trade off continuously while total energy is conserved.</div>
-        <div class="card-footer">
-          <span class="card-tag tag-soon">coming soon</span>
-        </div>
-      </div>
-
     </div>
+
+    <footer>
+      <span>AP Physics 1 Explorer</span>
+      <span>plain HTML · CSS · JS</span>
+      <span>no frameworks · no build step</span>
+    </footer>
+
   </div>
-
-  <footer>
-    <span>AP Physics 1 Explorer</span>
-    <span>plain HTML · CSS · JS</span>
-    <span>no frameworks · no build step</span>
-  </footer>
-
-</div>
 </body>
+
 </html>
