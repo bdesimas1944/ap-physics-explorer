@@ -30,6 +30,7 @@
       --blue-dim: #1a3a6a;
       --teal: #2dd4a0;
       --amber: #f5a623;
+      --red: #ff5f6d;
       --font-body: 'DM Sans', sans-serif;
       --font-mono: 'DM Mono', monospace;
       --font-serif: 'DM Serif Display', serif;
@@ -287,6 +288,10 @@
       background: var(--teal);
     }
 
+    .ebar-fill.red {
+      background: var(--red);
+    }
+
     .ebar-pct {
       font-size: 11px;
       font-family: var(--font-mono);
@@ -312,7 +317,7 @@
     }
 
     #ke-results {
-      display: none;
+      display: block;
     }
   </style>
 </head>
@@ -333,10 +338,6 @@
       <div class="ctrl-panel">
         <div class="ctrl-eq" id="ctrl-eq">U<sub>g</sub> = mgh</div>
 
-        <div class="mode-toggle">
-          <button class="mode-btn active" id="btn-pe" onclick="setMode('pe')">PE Only</button>
-          <button class="mode-btn" id="btn-conv" onclick="setMode('conversion')">PE → KE</button>
-        </div>
 
         <div class="slider-group">
           <div class="slider-header">
@@ -386,20 +387,25 @@
             </div>
             <span class="ebar-pct" id="pct-ke">0%</span>
           </div>
+
+          <div class="result-row" style="margin-top:6px">
+            <span class="result-label">E<sub>mech</sub> = PE + KE</span>
+            <span class="result-val" style="color:var(--red)" id="val-tme">0.0 J</span>
+          </div>
+          <div class="ebar-wrap">
+            <div class="ebar-track">
+              <div class="ebar-fill red" id="bar-tme" style="width:100%"></div>
+            </div>
+            <span class="ebar-pct" style="visibility:hidden">0%</span>
+          </div>
+
           <div class="result-row" style="margin-top:6px">
             <span class="result-label">v = √(2KE/m)</span>
             <span class="result-val amber" id="val-v">0.00 m/s</span>
           </div>
         </div>
 
-        <div class="ctrl-divider"></div>
-
-        <div class="result-row">
-          <span class="result-label">E<sub>total</sub></span>
-          <span class="result-val" id="val-total">3528.0 J</span>
-        </div>
-
-        <div class="ctrl-note">g = 9.8 m/s² · frictionless</div>
+        <div class="ctrl-note" style="margin-top:14px">g = 9.8 m/s² · frictionless</div>
       </div>
 
       <div class="canvas-wrap">
@@ -413,7 +419,7 @@
     const dpr = window.devicePixelRatio || 1;
     let ctx;
     const G = 9.8;
-    let mode = 'pe';
+    let mode = 'conversion';
 
     function resizeCanvas() {
       const wrap = canvas.parentElement;
@@ -427,17 +433,6 @@
     function W() { return canvas.width / dpr; }
     function H() { return canvas.height / dpr; }
 
-    function setMode(m) {
-      mode = m;
-      document.getElementById('btn-pe').classList.toggle('active', m === 'pe');
-      document.getElementById('btn-conv').classList.toggle('active', m === 'conversion');
-      document.getElementById('sl-pos-group').style.display = m === 'conversion' ? 'block' : 'none';
-      document.getElementById('ke-results').style.display = m === 'conversion' ? 'block' : 'none';
-      document.getElementById('ctrl-eq').innerHTML = m === 'pe'
-        ? 'U<sub>g</sub> = mgh' : 'E<sub>total</sub> = PE + KE';
-      if (m === 'pe') document.getElementById('sl-pos').value = 0;
-      update();
-    }
 
     function update() {
       const m = parseFloat(document.getElementById('sl-m').value);
@@ -448,8 +443,9 @@
       document.getElementById('lbl-h').textContent = h.toFixed(1) + ' m';
       document.getElementById('lbl-pos').textContent = Math.round(posPct * 100) + '%';
 
+      const maxE = 50 * G * 30;  // max possible: m=50kg, h=30m = 14700 J
       const totalE = m * G * h;
-      const curH = mode === 'pe' ? h : h * (1 - posPct);
+      const curH = h * (1 - posPct);
       const pe = m * G * curH;
       const ke = totalE - pe;
       const v = ke > 0 ? Math.sqrt(2 * ke / m) : 0;
@@ -458,9 +454,10 @@
       document.getElementById('val-pe').textContent = pe.toFixed(1) + ' J';
       document.getElementById('val-ke').textContent = ke.toFixed(1) + ' J';
       document.getElementById('val-v').textContent = v.toFixed(2) + ' m/s';
-      document.getElementById('val-total').textContent = totalE.toFixed(1) + ' J';
-      document.getElementById('bar-pe').style.width = (peFrac * 100).toFixed(1) + '%';
-      document.getElementById('bar-ke').style.width = ((1 - peFrac) * 100).toFixed(1) + '%';
+      document.getElementById('val-tme').textContent = totalE.toFixed(1) + ' J';
+      document.getElementById('bar-pe').style.width  = (pe     / maxE * 100).toFixed(1) + '%';
+      document.getElementById('bar-ke').style.width  = (ke     / maxE * 100).toFixed(1) + '%';
+      document.getElementById('bar-tme').style.width = (totalE / maxE * 100).toFixed(1) + '%';
       document.getElementById('pct-pe').textContent = Math.round(peFrac * 100) + '%';
       document.getElementById('pct-ke').textContent = Math.round((1 - peFrac) * 100) + '%';
 
@@ -592,6 +589,8 @@
 
     window.addEventListener('resize', () => { resizeCanvas(); update(); });
     resizeCanvas();
+    document.getElementById('ctrl-eq').innerHTML = 'E<sub>total</sub> = PE + KE';
+    document.getElementById('sl-pos-group').style.display = 'block';
     update();
   </script>
 </body>
