@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loop-the-Loop — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0f1014;
+  --surface:    #17181d;
+  --surface2:   #1e2028;
+  --border:     #2a2b33;
+  --border2:    #3a3b45;
+  --text:       #e8e9ef;
+  --text-muted: #7a7d8e;
+  --text-dim:   #4a4d5e;
+  --blue:       #4a9eff;
+  --blue-dim:   #1a3a6a;
+  --teal:       #2dd4a0;
+  --teal-dim:   #0a3a2a;
+  --amber:      #f5a623;
+  --amber-dim:  #3a2a0a;
+  --red:        #ff5f6d;
+  --red-dim:    #3a1a1e;
+  --purple:     #b98aff;
+  --purple-dim: #2a1a4a;
+  --font-body:  'DM Sans', sans-serif;
+  --font-mono:  'DM Mono', monospace;
+  --font-serif: 'DM Serif Display', serif;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+
+.site-header { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.site-logo { font-family: var(--font-serif); font-size: 18px; color: var(--text); text-decoration: none; }
+.site-logo span { color: var(--blue); }
+.site-tagline { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); letter-spacing: 0.05em; }
+.header-back { margin-left: auto; font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+.header-back:hover { color: var(--text); }
+
+.sim-shell  { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.sim-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Control panel ── */
+.ctrl-panel {
+  width: 300px; flex-shrink: 0;
+  background: var(--surface); border-right: 1px solid var(--border);
+  padding: 16px 18px; display: flex; flex-direction: column; overflow-y: auto; gap: 0;
+}
+.ctrl-divider { height: 1px; background: var(--border); margin: 12px 0; }
+.ctrl-note { margin-top: auto; padding-top: 12px; font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); border-top: 1px solid var(--border); }
+
+/* Equation display */
+.eq-block {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;
+}
+.eq-main {
+  font-family: var(--font-serif); font-size: 20px; font-style: italic;
+  color: var(--text); margin-bottom: 6px;
+}
+.eq-terms {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px;
+  font-size: 11px; font-family: var(--font-mono); color: var(--text-dim);
+}
+.eq-terms span { color: var(--text-muted); }
+
+/* T readout — the star of the show */
+.t-readout {
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+  border: 1px solid var(--border); background: var(--surface2);
+  transition: background 0.2s, border-color 0.2s;
+}
+.t-readout.positive { background: var(--teal-dim);   border-color: var(--teal); }
+.t-readout.zero     { background: var(--purple-dim); border-color: var(--purple); }
+.t-readout.negative { background: var(--red-dim);    border-color: var(--red); }
+.t-label { font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); margin-bottom: 3px; }
+.t-value { font-family: var(--font-serif); font-size: 28px; font-style: italic; color: var(--text); }
+.t-value.positive { color: var(--teal); }
+.t-value.zero     { color: var(--purple); }
+.t-value.negative { color: var(--red); }
+.t-meaning { font-size: 11px; font-family: var(--font-mono); margin-top: 3px; color: var(--text-dim); }
+.t-meaning.positive { color: var(--teal); }
+.t-meaning.zero     { color: var(--purple); }
+.t-meaning.negative { color: var(--red); }
+
+/* Status */
+.status-box {
+  padding: 7px 12px; border-radius: 6px; font-size: 11px;
+  font-family: var(--font-mono); margin-bottom: 12px;
+  border: 1px solid var(--border); background: var(--surface2); color: var(--text-dim);
+  line-height: 1.5;
+}
+.status-box.ok      { background: var(--teal-dim);   color: var(--teal);   border-color: var(--teal); }
+.status-box.warn    { background: var(--amber-dim);  color: var(--amber);  border-color: var(--amber); }
+.status-box.fatal   { background: var(--red-dim);    color: var(--red);    border-color: var(--red); }
+.status-box.insuff  { background: var(--blue-dim);   color: var(--blue);   border-color: var(--blue); }
+.status-box.perfect { background: var(--purple-dim); color: var(--purple); border-color: var(--purple); }
+
+/* Buttons */
+.btn-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.btn { flex: 1; padding: 8px 10px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+.btn.primary { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Sliders */
+.slider-group { margin-bottom: 12px; }
+.slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.slider-label { font-size: 13px; color: var(--text-muted); font-style: italic; font-family: var(--font-serif); }
+.slider-value { font-size: 13px; font-family: var(--font-mono); color: var(--text); font-weight: 500; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 3px; background: var(--border2); outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 2px solid var(--border2); cursor: grab; }
+input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 2px solid var(--border2); }
+
+/* Result rows */
+.result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.result-label { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+.result-val { font-size: 13px; font-family: var(--font-mono); font-weight: 500; color: var(--text); }
+.result-val.blue   { color: var(--blue); }
+.result-val.teal   { color: var(--teal); }
+.result-val.amber  { color: var(--amber); }
+.result-val.purple { color: var(--purple); }
+
+/* Energy bars */
+.ebar-wrap  { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.ebar-track { flex: 1; height: 7px; border-radius: 4px; background: var(--border); overflow: hidden; }
+.ebar-fill  { height: 100%; border-radius: 4px; transition: width 0.05s; }
+.ebar-fill.blue { background: var(--blue); }
+.ebar-fill.teal { background: var(--teal); }
+.ebar-fill.red  { background: var(--red); }
+.ebar-pct { font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); min-width: 34px; text-align: right; }
+
+/* Canvas */
+.canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+canvas { display: block; }
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">loop-the-loop</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+
+    <div class="ctrl-panel">
+
+      <!-- Equation -->
+      <div class="eq-block">
+        <div class="eq-main">T = mv²/R − mg·cos θ</div>
+        <div class="eq-terms">
+          <span>m = <span id="eq-m">10.0</span> kg</span>
+          <span>R = <span id="eq-R">5.0</span> m</span>
+          <span>v = <span id="eq-v">0.00</span> m/s</span>
+          <span>θ = <span id="eq-theta">0°</span></span>
+        </div>
+      </div>
+
+      <!-- T readout -->
+      <div class="t-readout" id="t-readout">
+        <div class="t-label">T  (constraint force)</div>
+        <div class="t-value" id="t-value">— N</div>
+        <div class="t-meaning" id="t-meaning">drop ball to begin</div>
+        <div style="margin-top:8px;">
+          <div style="height:10px; border-radius:5px; background:var(--border); overflow:hidden; position:relative;">
+            <div id="t-bar" style="height:100%; border-radius:5px; width:0%; background:var(--teal); transition:width 0.05s, background 0.1s;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:10px; font-family:var(--font-mono); color:var(--text-dim); margin-top:3px;">
+            <span>0</span><span id="t-bar-max" style="color:var(--text-dim)">— N max</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="status-box" id="status-box">● ready</div>
+
+      <!-- Buttons -->
+      <div class="btn-row">
+        <button class="btn primary" id="btn-drop"  onclick="dropBall()">▶ Drop</button>
+        <button class="btn"         id="btn-pause" onclick="togglePause()" disabled>⏸ Pause</button>
+        <button class="btn"         id="btn-reset" onclick="resetSim()">↺ Reset</button>
+      </div>
+
+      <!-- Sliders -->
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">m · mass</span><span class="slider-value" id="lbl-m">10.0 kg</span></div>
+        <input type="range" id="sl-m" min="1" max="50" step="0.5" value="10" oninput="onSlider()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">h · drop height</span><span class="slider-value" id="lbl-h">20.0 m</span></div>
+        <input type="range" id="sl-h" min="1" max="50" step="0.5" value="20" oninput="onSlider()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">R · loop radius</span><span class="slider-value" id="lbl-r">5.0 m</span></div>
+        <input type="range" id="sl-r" min="1" max="15" step="0.5" value="5" oninput="onSlider()">
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <!-- Energy -->
+      <div class="result-row"><span class="result-label">PE = mgh</span><span class="result-val blue" id="val-pe">—</span></div>
+      <div class="ebar-wrap"><div class="ebar-track"><div class="ebar-fill blue" id="bar-pe" style="width:100%"></div></div><span class="ebar-pct" id="pct-pe">100%</span></div>
+      <div class="result-row"><span class="result-label">KE = ½mv²</span><span class="result-val teal" id="val-ke">—</span></div>
+      <div class="ebar-wrap"><div class="ebar-track"><div class="ebar-fill teal" id="bar-ke" style="width:0%"></div></div><span class="ebar-pct" id="pct-ke">0%</span></div>
+      <div class="result-row"><span class="result-label">E = PE + KE</span><span class="result-val" style="color:var(--red)" id="val-tme">—</span></div>
+      <div class="ebar-wrap"><div class="ebar-track"><div class="ebar-fill red" id="bar-tme" style="width:100%"></div></div><span class="ebar-pct" style="visibility:hidden">—</span></div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="result-row"><span class="result-label">v (current)</span><span class="result-val amber" id="val-v">0.00 m/s</span></div>
+      <div class="result-row"><span class="result-label">v at top (predicted)</span><span class="result-val amber" id="val-vtop">— m/s</span></div>
+      <div class="result-row"><span class="result-label">v<sub>min</sub> = √(gR)</span><span class="result-val purple" id="val-vmin">— m/s</span></div>
+
+      <div class="ctrl-note">g = 9.8 m/s² · frictionless · T = constraint force</div>
+    </div>
+
+    <div class="canvas-wrap">
+      <canvas id="c"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+const G = 9.8;
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+// ── Canvas ─────────────────────────────────────
+function W() { return canvas.width  / (window.devicePixelRatio || 1); }
+function H() { return canvas.height / (window.devicePixelRatio || 1); }
+function setupCanvas() {
+  const wrap = canvas.parentElement, dpr = window.devicePixelRatio || 1;
+  canvas.width  = wrap.clientWidth  * dpr;
+  canvas.height = wrap.clientHeight * dpr;
+  canvas.style.width  = wrap.clientWidth  + 'px';
+  canvas.style.height = wrap.clientHeight + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+// ── Sliders ────────────────────────────────────
+const getM = () => parseFloat(document.getElementById('sl-m').value);
+const getH = () => parseFloat(document.getElementById('sl-h').value);
+const getR = () => parseFloat(document.getElementById('sl-r').value);
+
+// ── State ──────────────────────────────────────
+let simState  = 'idle';   // idle | rolling | projectile | done | returning
+let animId    = null;
+let lastTime  = null;
+
+// Ball position — always in physics metres
+// Origin at bottom of loop (ground level, loop centre x)
+let ballX = 0;   // metres, relative to loop centre
+let ballY = 0;   // metres above ground
+
+// Projectile state
+let projVx = 0, projVy = 0;
+
+// Track table for arc-length lookup
+let trackTable = [];
+
+// ── Geometry ───────────────────────────────────
+function geom() {
+  const w = W(), h = H();
+  const padL = 52, padR = 24, padT = 30, padB = 40;
+  const drawW = w - padL - padR;
+  const drawH = h - padT - padB;
+  const gy    = h - padB;  // ground y in pixels
+
+  const R     = getR();
+  const hDrop = getH();
+  const maxH  = Math.max(hDrop, R * 2 + 4);
+  const ppm   = drawH / (maxH * 1.2);  // pixels per metre
+
+  const flatW  = Math.max(40, drawW * 0.08);
+  const loopD  = R * 2 * ppm;
+  const rampW  = drawW - 2 * flatW - loopD;
+
+  const x0     = padL;               // ramp top-left
+  const x1     = padL + rampW;       // ramp bottom / flat start
+  const loopCx = x1 + flatW + loopD / 2;   // loop centre x
+  const loopCy = gy - R * ppm;             // loop centre y
+  const x4     = loopCx + loopD / 2 + flatW;  // exit flat end
+
+  return { padL, padR, padT, padB, drawW, drawH, gy, ppm, R,
+           x0, x1, loopCx, loopCy, x4, flatW };
+}
+
+// ── Track parametric (t: 0→1) ──────────────────
+// Returns {x_px, y_px, height_m, angle_rad (on circle, from top)}
+function trackPt(t, g) {
+  const { gy, ppm, x0, x1, loopCx, loopCy, x4, flatW } = g;
+  const h = getH(), R = getR();
+
+  if (t <= 0.25) {
+    // Parabolic ramp down
+    const u  = t / 0.25;
+    const ch = h * (1 - u) * (1 - u);
+    return { x: x0 + (x1 - x0) * u, y: gy - ch * ppm, height: ch, onCircle: false };
+  }
+  if (t <= 0.30) {
+    // Flat approach
+    const u  = (t - 0.25) / 0.05;
+    const cx = x1 + (loopCx - x1) * u;
+    return { x: cx, y: gy, height: 0, onCircle: false };
+  }
+  if (t <= 0.70) {
+    // Circle: enter bottom (6-oclock), go counterclockwise
+    // angle from top (12-oclock): starts at PI (bottom), goes to -PI (bottom again)
+    // parametric: u=0 → bottom, u=0.5 → top, u=1 → bottom
+    const u     = (t - 0.30) / 0.40;
+    // angle measured from top (12): bottom=π, going CCW means angle decreases
+    // CCW from bottom: bottom(π) → right(π/2) → top(0) → left(-π/2) → bottom(-π)
+    const phi   = Math.PI - u * 2 * Math.PI;   // angle from top, CCW
+    const cx    = loopCx + R * ppm * Math.sin(phi);   // sin because from top
+    const cy    = loopCy - R * ppm * Math.cos(phi);   // cos because from top
+    const height = R + R * Math.cos(phi);              // 0 at bottom(cos=-1), 2R at top(cos=1)
+    return { x: cx, y: cy, height: Math.max(0, height), onCircle: true, phi };
+  }
+  if (t <= 0.75) {
+    // Flat exit
+    const u  = (t - 0.70) / 0.05;
+    const cx = loopCx + (x4 - loopCx) * u;
+    return { x: cx, y: gy, height: 0, onCircle: false };
+  }
+  return { x: x4, y: gy, height: 0, onCircle: false };
+}
+
+// ── Build arc-length table ─────────────────────
+function buildTable(g) {
+  const N = 1200;
+  const table = [];
+  let s = 0, prev = null;
+  for (let i = 0; i <= N; i++) {
+    const t  = i / N;
+    const pt = trackPt(t, g);
+    if (prev) {
+      const dx = pt.x - prev.x, dy = pt.y - prev.y;
+      s += Math.sqrt(dx*dx + dy*dy) / g.ppm;  // metres
+    }
+    table.push({ s, t, x: pt.x, y: pt.y, height: pt.height, onCircle: pt.onCircle, phi: pt.phi });
+    prev = pt;
+  }
+  return table;
+}
+
+function posFromS(s_m) {
+  const table = trackTable;
+  if (!table.length) return null;
+  if (s_m <= 0) return table[0];
+  const last = table[table.length - 1];
+  if (s_m >= last.s) return last;
+  let lo = 0, hi = table.length - 1;
+  while (hi - lo > 1) { const mid = (lo+hi)>>1; if (table[mid].s <= s_m) lo=mid; else hi=mid; }
+  const a = table[lo], b = table[hi];
+  const f = (s_m - a.s) / (b.s - a.s);
+  return {
+    s: s_m, t: a.t+(b.t-a.t)*f,
+    x: a.x+(b.x-a.x)*f, y: a.y+(b.y-a.y)*f,
+    height: a.height+(b.height-a.height)*f,
+    onCircle: a.onCircle,
+    phi: (a.phi !== undefined && b.phi !== undefined) ? a.phi+(b.phi-a.phi)*f : undefined,
+  };
+}
+
+// ── Physics ────────────────────────────────────
+function vFromEnergy(height) {
+  const m = getM(), h = getH();
+  const ke = Math.max(0, m * G * h - m * G * height);
+  return Math.sqrt(2 * ke / m);
+}
+
+// T = mv²/R - mg·cos(phi)   where phi is angle from top
+// phi=0 → top, phi=PI → bottom
+function tension(v, phi) {
+  const m = getM(), R = getR();
+  return m * v * v / R - m * G * Math.cos(phi);
+}
+
+// ── UI helpers ─────────────────────────────────
+function setStatus(cls, txt) {
+  const b = document.getElementById('status-box');
+  b.className = 'status-box ' + cls;
+  b.textContent = txt;
+}
+
+function tMax() {
+  // Max T occurs at bottom of loop: T = mv²_bottom/R + mg
+  // v²_bottom = 2gh (all PE converted to KE)
+  const m = getM(), h = getH(), R = getR();
+  const vBot2 = 2 * G * h;
+  return m * vBot2 / R + m * G;  // always positive, use as scale
+}
+
+function updateTReadout(T, onCircle) {
+  const box = document.getElementById('t-readout');
+  const val = document.getElementById('t-value');
+  const msg = document.getElementById('t-meaning');
+  const bar = document.getElementById('t-bar');
+  const barMax = document.getElementById('t-bar-max');
+
+  if (!onCircle || T === null) {
+    box.className = 't-readout';
+    val.className = 't-value';
+    val.textContent = '— N';
+    msg.className = 't-meaning';
+    msg.textContent = 'not on circle';
+    bar.style.width = '0%';
+    bar.style.background = 'var(--border2)';
+    barMax.textContent = '— N max';
+    return;
+  }
+
+  const Tref = tMax();
+  const cls  = T > 0.5 ? 'positive' : T < -0.5 ? 'negative' : 'zero';
+
+  box.className = 't-readout ' + cls;
+  val.className = 't-value ' + cls;
+  val.textContent = T.toFixed(1) + ' N';
+  msg.className = 't-meaning ' + cls;
+  msg.textContent = T > 0.5  ? 'T > 0 · circular motion valid'
+                  : T < -0.5 ? 'T < 0 · leaves track!'
+                  :             'T ≈ 0 · threshold (minimum speed)';
+
+  // Bar: only fills green when T > 0, shows magnitude relative to T_max at bottom
+  if (T > 0) {
+    const pct = Math.min(T / Tref * 100, 100).toFixed(1);
+    bar.style.width = pct + '%';
+    bar.style.background = 'var(--teal)';
+  } else {
+    // Negative T: show red bar proportional to how negative
+    const pct = Math.min(Math.abs(T) / Tref * 100, 100).toFixed(1);
+    bar.style.width = pct + '%';
+    bar.style.background = 'var(--red)';
+  }
+  barMax.textContent = Tref.toFixed(0) + ' N max';
+}
+
+const maxE_ref = 50 * G * 50;
+function updateReadouts(height, v, T, onCircle) {
+  const m = getM(), h = getH(), R = getR();
+  const totalE = m * G * h;
+  const pe     = m * G * height;
+  const ke     = Math.max(0, totalE - pe);
+  const vTop   = vFromEnergy(2 * R);
+  const vMin   = Math.sqrt(G * R);
+
+  document.getElementById('lbl-m').textContent = m.toFixed(1) + ' kg';
+  document.getElementById('lbl-h').textContent = h.toFixed(1) + ' m';
+  document.getElementById('lbl-r').textContent = R.toFixed(1) + ' m';
+  document.getElementById('eq-m').textContent  = m.toFixed(1);
+  document.getElementById('eq-R').textContent  = R.toFixed(1);
+  document.getElementById('eq-v').textContent  = v.toFixed(2);
+
+  const phiDeg = T !== null && onCircle
+    ? Math.round(Math.abs(document._lastPhi || 0) * 180 / Math.PI) : '—';
+  document.getElementById('eq-theta').textContent = onCircle && document._lastPhi !== undefined
+    ? Math.round(document._lastPhi * 180 / Math.PI) + '°' : '—';
+
+  document.getElementById('val-pe').textContent  = pe.toFixed(1) + ' J';
+  document.getElementById('val-ke').textContent  = ke.toFixed(1) + ' J';
+  document.getElementById('val-tme').textContent = totalE.toFixed(1) + ' J';
+  document.getElementById('bar-pe').style.width  = (pe / maxE_ref * 100).toFixed(1) + '%';
+  document.getElementById('bar-ke').style.width  = (ke / maxE_ref * 100).toFixed(1) + '%';
+  document.getElementById('bar-tme').style.width = (totalE / maxE_ref * 100).toFixed(1) + '%';
+  document.getElementById('pct-pe').textContent  = totalE > 0 ? Math.round(pe/totalE*100)+'%' : '100%';
+  document.getElementById('pct-ke').textContent  = totalE > 0 ? Math.round(ke/totalE*100)+'%' : '0%';
+  document.getElementById('val-v').textContent   = v.toFixed(2) + ' m/s';
+  document.getElementById('val-vtop').textContent = vTop.toFixed(2) + ' m/s';
+  document.getElementById('val-vmin').textContent = vMin.toFixed(2) + ' m/s';
+
+  updateTReadout(T, onCircle);
+}
+
+function onSlider() {
+  updateReadouts(getH(), 0, null, false);
+  updateTReadout(null, false);
+  if (simState === 'idle') {
+    setStatus('', '● ready');
+    draw();
+  }
+}
+
+// ── Sim controls ───────────────────────────────
+let s_arc = 0;  // arc-length position along track (metres)
+let dir   = 1;
+
+function dropBall() {
+  if (simState === 'rolling') return;
+  const g = geom();
+  trackTable = buildTable(g);
+  simState  = 'rolling';
+  s_arc     = 0.3;  // tiny offset from dead stop
+  dir       = 1;
+  lastTime  = null;
+  document.getElementById('btn-drop').disabled  = true;
+  document.getElementById('btn-pause').disabled = false;
+  setStatus('ok', '● rolling…');
+  animId = requestAnimationFrame(tick);
+}
+
+function togglePause() {
+  if (simState === 'paused') {
+    simState = 'rolling';
+    lastTime = null;
+    document.getElementById('btn-pause').textContent = '⏸ Pause';
+    animId = requestAnimationFrame(tick);
+  } else if (simState === 'rolling' || simState === 'projectile') {
+    simState = 'paused';
+    document.getElementById('btn-pause').textContent = '▶ Resume';
+    cancelAnimationFrame(animId);
+  }
+}
+
+function resetSim() {
+  cancelAnimationFrame(animId);
+  simState = 'idle'; s_arc = 0; dir = 1;
+  trackTable = [];
+  ballX = 0; ballY = 0; projVx = 0; projVy = 0;
+  document.getElementById('btn-drop').disabled  = false;
+  document.getElementById('btn-pause').disabled = true;
+  document.getElementById('btn-pause').textContent = '⏸ Pause';
+  updateReadouts(getH(), 0, null, false);
+  updateTReadout(null, false);
+  setStatus('', '● ready');
+  draw();
+}
+
+// ── Main tick ──────────────────────────────────
+function tick(ts) {
+  if (simState !== 'rolling' && simState !== 'returning' && simState !== 'projectile') return;
+  if (!lastTime) { lastTime = ts; animId = requestAnimationFrame(tick); return; }
+  const dt = Math.min((ts - lastTime) / 1000, 0.05);
+  lastTime = ts;
+
+  const m = getM(), h = getH(), R = getR();
+  const totalE = m * G * h;
+  const g = geom();
+
+  if (simState === 'projectile') {
+    tickProjectile(dt, g);
+    return;
+  }
+
+  // ── Rolling on track ──
+  const pos = posFromS(s_arc);
+  if (!pos) { simState = 'done'; draw(); return; }
+
+  const v   = vFromEnergy(pos.height);
+
+  // Compute T if on circle
+  let T = null;
+  if (pos.onCircle && pos.phi !== undefined) {
+    document._lastPhi = pos.phi;
+    T = tension(v, pos.phi);
+  }
+
+  updateReadouts(pos.height, v, T, pos.onCircle);
+
+  // ── Check T < 0 → detach ──────────────────────
+  if (pos.onCircle && T !== null && T < 0) {
+    // Detach: switch to projectile from current position
+    // Velocity direction: tangent to circle at phi
+    // Tangent CCW: (-cos(phi), sin(phi)) in (x, y-up) coords
+    // In canvas coords: x-right, y-down
+    const vx_m =  v * (-Math.cos(pos.phi));  // rightward component
+    const vy_m =  v * (-Math.sin(pos.phi));  // upward component (physics)
+    ballX = pos.x; ballY = pos.y;
+    projVx = vx_m; projVy = vy_m;
+    simState = 'projectile';
+    setStatus('fatal', '● T < 0 — leaves track! Projectile motion');
+    updateTReadout(T, true);
+    animId = requestAnimationFrame(tick);
+    return;
+  }
+
+  // ── Check v ≈ 0 on upswing → reverse ──────────
+  if (dir === 1 && pos.onCircle && v < 0.15) {
+    dir = -1;
+    setStatus('insuff', '● v → 0 · ball returns');
+  }
+
+  // ── Advance ───────────────────────────────────
+  const sMax = trackTable[trackTable.length-1].s;
+  const sExit = trackTable.find(p => p.t >= 0.75)?.s ?? sMax;
+
+  s_arc += dir * v * dt;
+
+  if (dir === 1 && s_arc >= sExit) {
+    s_arc = sExit;
+    simState = 'done';
+    document.getElementById('btn-pause').disabled = true;
+    const keTop = Math.max(0, totalE - m * G * 2 * R);
+    const vTop  = Math.sqrt(2 * keTop / m);
+    const Ttop  = tension(vTop, 0);
+    setStatus('ok', '● Loop complete! T at top = ' + Ttop.toFixed(1) + ' N');
+    updateTReadout(Ttop, true);
+    draw(); return;
+  }
+
+  if (dir === -1 && s_arc <= 0) {
+    s_arc = 0;
+    simState = 'done';
+    document.getElementById('btn-pause').disabled = true;
+    setStatus('insuff', '● Ball returned — not enough energy');
+    draw(); return;
+  }
+
+  draw();
+  animId = requestAnimationFrame(tick);
+}
+
+// ── Projectile tick ────────────────────────────
+function tickProjectile(dt, g) {
+  const { gy, ppm } = g;
+
+  // Convert pixel position to physics coords for drawing
+  projVy -= G * dt;  // gravity in physics (y-up) coords
+  ballX  += projVx * dt * ppm;  // pixels
+  ballY  -= projVy * dt * ppm;  // pixels (y-down in canvas)
+
+  // Hit ground?
+  if (ballY >= gy - 11) {
+    ballY = gy - 11;
+    simState = 'done';
+    document.getElementById('btn-pause').disabled = true;
+    draw(); return;
+  }
+
+  draw();
+  animId = requestAnimationFrame(tick);
+}
+
+// ── Draw ───────────────────────────────────────
+function draw() {
+  if (!ctx || W() === 0) return;
+  const g = geom();
+  const { padL, padT, drawW, gy, ppm, x0, x1, loopCx, loopCy, x4 } = g;
+  const h = getH(), R = getR(), m = getM();
+
+  ctx.clearRect(0, 0, W(), H());
+
+  // Grid
+  ctx.font = '11px "DM Mono", monospace';
+  ctx.textAlign = 'right';
+  const maxG = Math.ceil(Math.max(h, R*2) / 5) * 5 + 5;
+  for (let hv = 0; hv <= maxG; hv += 5) {
+    const ty = gy - hv * ppm;
+    if (ty < padT) break;
+    ctx.strokeStyle = '#1a1b22'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(padL, ty); ctx.lineTo(padL + drawW, ty); ctx.stroke();
+    if (hv % 10 === 0) { ctx.fillStyle = '#4a4d5e'; ctx.fillText(hv + 'm', padL - 6, ty + 4); }
+  }
+  ctx.strokeStyle = '#2a2b33'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, gy + 8); ctx.stroke();
+  ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(padL + drawW + 20, gy); ctx.stroke();
+  ctx.strokeStyle = '#222330'; ctx.lineWidth = 1;
+  for (let x = padL; x <= padL + drawW + 20; x += 18) {
+    ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x-10, gy+11); ctx.stroke();
+  }
+
+  // Track: ramp
+  ctx.beginPath();
+  for (let i = 0; i <= 80; i++) {
+    const pt = trackPt((i/80)*0.25, g);
+    i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y);
+  }
+  ctx.strokeStyle = '#3a3b55'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
+
+  // Track: flat approach
+  ctx.beginPath(); ctx.moveTo(x1, gy); ctx.lineTo(loopCx, gy);
+  ctx.strokeStyle = '#3a3b55'; ctx.lineWidth = 3; ctx.stroke();
+
+  // Track: circle
+  ctx.beginPath(); ctx.arc(loopCx, loopCy, R * ppm, 0, Math.PI * 2);
+  ctx.strokeStyle = '#3a3b55'; ctx.lineWidth = 3; ctx.stroke();
+
+  // Track: flat exit
+  ctx.beginPath(); ctx.moveTo(loopCx, gy); ctx.lineTo(x4, gy);
+  ctx.strokeStyle = '#3a3b55'; ctx.lineWidth = 3; ctx.stroke();
+
+  // Annotations
+  // h line
+  const yH = gy - h * ppm;
+  ctx.strokeStyle = 'rgba(74,158,255,0.4)'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(x0-4, yH); ctx.lineTo(x0+60, yH); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#4a9eff'; ctx.font = '12px "DM Mono", monospace'; ctx.textAlign = 'left';
+  ctx.fillText('h = ' + h.toFixed(1) + 'm', x0+6, yH - 5);
+
+  // 2R line
+  const y2R = gy - 2*R*ppm;
+  const outcome = predictOutcome();
+  const col2R = outcome === 'ok' ? '#2dd4a0' : outcome === 'fatal' ? '#ff5f6d' : '#4a9eff';
+  ctx.strokeStyle = col2R + '55'; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(loopCx - R*ppm - 16, y2R); ctx.lineTo(loopCx + R*ppm + 16, y2R); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = col2R; ctx.textAlign = 'right'; ctx.font = '11px "DM Mono", monospace';
+  ctx.fillText('2R = ' + (2*R).toFixed(1) + 'm', loopCx - R*ppm - 8, y2R - 4);
+
+  // R annotation
+  ctx.strokeStyle = 'rgba(185,138,255,0.3)'; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(loopCx, loopCy); ctx.lineTo(loopCx, loopCy - R*ppm); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(185,138,255,0.7)'; ctx.textAlign = 'left';
+  ctx.fillText('R = ' + R.toFixed(1) + 'm', loopCx + 6, loopCy - R*ppm*0.5);
+
+  // E label
+  ctx.fillStyle = '#4a4d5e'; ctx.textAlign = 'right';
+  ctx.fillText('E = ' + (m*G*h).toFixed(1) + ' J', padL + drawW, padT - 12);
+
+  // ── Ball ──
+  const BR = 11;
+  let bx, by;
+
+  if (simState === 'projectile') {
+    bx = ballX; by = ballY;
+  } else if (simState === 'idle' || !trackTable.length) {
+    const pt = trackPt(0, g);
+    bx = pt.x; by = pt.y - BR;
+  } else {
+    const pos = posFromS(s_arc);
+    if (pos) { bx = pos.x; by = pos.y - BR; }
+    else { bx = trackPt(0,g).x; by = trackPt(0,g).y - BR; }
+
+    // Draw T force arrow on circle
+    if (pos && pos.onCircle && pos.phi !== undefined) {
+      const T = tension(vFromEnergy(pos.height), pos.phi);
+      const arrowColor = T >= 0 ? '#2dd4a0' : '#ff5f6d';
+      // Inward direction (toward centre)
+      const inX = loopCx - pos.x;
+      const inY = loopCy - pos.y;
+      const inLen = Math.sqrt(inX*inX + inY*inY);
+      if (inLen > 0 && Math.abs(T) > 1) {
+        const arrowLen = Math.min(Math.abs(T) * 0.15, 50);
+        const nx = inX/inLen, ny = inY/inLen;
+        const ax = pos.x, ay = pos.y - BR;
+        ctx.strokeStyle = arrowColor; ctx.fillStyle = arrowColor; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + nx*arrowLen, ay + ny*arrowLen); ctx.stroke();
+        const angle = Math.atan2(ny, nx);
+        ctx.save(); ctx.translate(ax + nx*arrowLen, ay + ny*arrowLen); ctx.rotate(angle);
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-7,3); ctx.lineTo(-7,-3); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+
+  // velocity arrow
+  if ((simState === 'rolling' || simState === 'returning') && trackTable.length > 0) {
+    const pos = posFromS(s_arc);
+    if (pos) {
+      const v = vFromEnergy(pos.height);
+      if (v > 0.5) {
+        const pos2 = posFromS(s_arc + dir * 0.3);
+        if (pos2) {
+          const dx = (pos2.x - pos.x) * dir, dy = (pos2.y - pos.y) * dir;
+          const len = Math.hypot(dx, dy);
+          if (len > 0) {
+            const arrowLen = Math.min(v * 3, 60);
+            const nx = dx/len, ny = dy/len;
+            const ax = bx + nx*(BR+2), ay = (by+BR) + ny*(BR+2);
+            ctx.strokeStyle = '#f5a623'; ctx.fillStyle = '#f5a623'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(ax+nx*arrowLen, ay+ny*arrowLen); ctx.stroke();
+            const ang = Math.atan2(ny,nx);
+            ctx.save(); ctx.translate(ax+nx*arrowLen, ay+ny*arrowLen); ctx.rotate(ang);
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-7,3); ctx.lineTo(-7,-3); ctx.closePath(); ctx.fill();
+            ctx.restore();
+          }
+        }
+      }
+    }
+  }
+
+  // Shadow
+  ctx.beginPath(); ctx.ellipse(bx, by+BR+3, BR*0.8, 4, 0, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fill();
+  // Body
+  ctx.beginPath(); ctx.arc(bx, by, BR, 0, Math.PI*2);
+  ctx.fillStyle = '#c8cad8'; ctx.fill();
+  ctx.strokeStyle = '#7a7d8e'; ctx.lineWidth = 1.5; ctx.stroke();
+  // Highlight
+  ctx.beginPath(); ctx.arc(bx - BR*0.28, by - BR*0.3, BR*0.26, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fill();
+}
+
+// ── Outcome predictor (for color cues) ────────
+function predictOutcome() {
+  const m = getM(), h = getH(), R = getR();
+  const totalE = m * G * h;
+  const keTop  = totalE - m * G * 2 * R;
+  if (keTop <= 0) return 'insuff';
+  const vTop = Math.sqrt(2 * keTop / m);
+  const Ttop = tension(vTop, 0);
+  return Ttop >= 0 ? 'ok' : 'fatal';
+}
+
+// ── Init ──────────────────────────────────────
+window.addEventListener('resize', () => { setupCanvas(); draw(); });
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  setupCanvas();
+  updateReadouts(getH(), 0, null, false);
+  onSlider();
+  draw();
+}));
+</script>
+</body>
+</html>
