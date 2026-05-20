@@ -10,329 +10,360 @@
     rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <style>
-    .landing {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0f1014;
+  --surface:    #17181d;
+  --surface2:   #1e2028;
+  --border:     #2a2b33;
+  --border2:    #3a3b45;
+  --text:       #e8e9ef;
+  --text-muted: #7a7d8e;
+  --text-dim:   #4a4d5e;
+  --blue:       #4a9eff;
+  --blue-dim:   #1a3a6a;
+  --teal:       #2dd4a0;
+  --teal-dim:   #0a3a2a;
+  --amber:      #f5a623;
+  --red:        #ff5f6d;
+  --purple:     #b98aff;
+  --font-body:  'DM Sans', sans-serif;
+  --font-mono:  'DM Mono', monospace;
+  --font-serif: 'DM Serif Display', serif;
 
-    /* ── Hero ── */
-    .hero {
-      padding: 56px 48px 40px;
-      border-bottom: 1px solid var(--border);
-    }
+  /* Unit colors */
+  --u1: #4a9eff;  /* Kinematics — blue */
+  --u2: #f5a623;  /* Forces — amber */
+  --u3: #2dd4a0;  /* Energy — teal */
+  --u4: #b98aff;  /* Momentum — purple */
+  --u5: #ff6eb4;  /* Torque — pink */
+  --u6: #ff9f4a;  /* Rotating Systems — orange */
+  --u7: #7dd4fb;  /* Oscillations — sky */
+  --u8: #4affb4;  /* Fluids — mint */
+}
 
-    .hero-title {
-      font-family: var(--font-serif);
-      font-size: 42px;
-      color: var(--text);
-      line-height: 1.15;
-      margin-bottom: 10px;
-    }
+html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; }
 
-    .hero-title span {
-      color: var(--blue);
-    }
+/* ── Header ── */
+.site-header { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.site-logo { font-family: var(--font-serif); font-size: 18px; color: var(--text); text-decoration: none; }
+.site-logo span { color: var(--blue); }
+.site-tagline { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); letter-spacing: 0.05em; }
 
-    .hero-sub {
-      font-size: 15px;
-      color: var(--text-muted);
-      max-width: 520px;
-      line-height: 1.6;
-    }
+/* ── Hero ── */
+.hero { padding: 40px 48px 32px; border-bottom: 1px solid var(--border); }
+.hero-title { font-family: var(--font-serif); font-size: 38px; color: var(--text); line-height: 1.15; margin-bottom: 8px; }
+.hero-title span { color: var(--blue); }
+.hero-sub { font-size: 14px; color: var(--text-muted); max-width: 520px; line-height: 1.6; }
+.hero-meta { margin-top: 14px; display: flex; gap: 20px; font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); }
+.hero-meta span { display: flex; align-items: center; gap: 5px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); display: inline-block; }
 
-    .hero-meta {
-      margin-top: 16px;
-      display: flex;
-      gap: 20px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      color: var(--text-dim);
-    }
+/* ── Periodic table layout ── */
+.periodic-section { padding: 32px 48px 48px; }
+.periodic-title { font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 20px; }
 
-    .hero-meta span {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+.periodic-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  max-width: 1100px;
+}
 
-    .hero-meta .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--teal);
-      display: inline-block;
-    }
+/* ── Unit tile ── */
+.unit-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 18px 14px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.15s;
+  cursor: default;
+}
+.unit-tile::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--unit-color);
+}
+.unit-tile.has-live { cursor: default; }
+.unit-tile.has-live:hover { border-color: var(--unit-color); transform: translateY(-1px); }
 
-    /* ── Sim grid ── */
-    .sim-grid-section {
-      padding: 40px 48px;
-      flex: 1;
-    }
+.unit-num {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.unit-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.unit-eq {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--unit-color);
+  margin-bottom: 12px;
+  opacity: 0.8;
+  min-height: 18px;
+}
+.unit-sims {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 
-    .section-label {
-      font-size: 11px;
-      font-family: var(--font-mono);
-      color: var(--text-dim);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 20px;
-    }
+/* ── Sim node (clickable) ── */
+.sim-node {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.sim-node.live {
+  color: var(--text);
+  border-color: var(--border2);
+}
+.sim-node.live:hover {
+  background: var(--surface2);
+  border-color: var(--unit-color);
+  color: var(--unit-color);
+}
+.sim-node-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--border2);
+}
+.sim-node.live .sim-node-dot { background: var(--unit-color); }
 
-    .sim-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
-    }
+.unit-footer {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.live-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--teal-dim);
+  color: var(--teal);
+}
+.soon-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--text-dim);
+}
 
-    /* ── Sim card ── */
-    .sim-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px 20px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      transition: border-color 0.15s, transform 0.15s;
-      text-decoration: none;
-      color: inherit;
-      position: relative;
-      overflow: hidden;
-    }
+/* Coming soon tiles are dimmed */
+.unit-tile.soon { opacity: 0.45; }
 
-    .sim-card.ready:hover {
-      border-color: var(--border2);
-      transform: translateY(-2px);
-    }
-
-    .sim-card.soon {
-      opacity: 0.5;
-      cursor: default;
-      pointer-events: none;
-    }
-
-    /* Accent bar top */
-    .sim-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--blue);
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-
-    .sim-card.ready:hover::before {
-      opacity: 1;
-    }
-
-    .card-equation {
-      font-family: var(--font-serif);
-      font-size: 22px;
-      font-style: italic;
-      color: var(--blue);
-      margin-bottom: 10px;
-      line-height: 1.2;
-    }
-
-    .sim-card.soon .card-equation {
-      color: var(--text-muted);
-    }
-
-    .card-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .card-desc {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      flex: 1;
-      margin-bottom: 16px;
-    }
-
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .card-tag {
-      font-size: 11px;
-      font-family: var(--font-mono);
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-
-    .tag-ready {
-      background: var(--teal-dim);
-      color: var(--teal);
-    }
-
-    .tag-soon {
-      background: var(--surface2);
-      color: var(--text-dim);
-    }
-
-    .card-launch {
-      font-size: 12px;
-      font-family: var(--font-mono);
-      color: var(--blue);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-
-    .sim-card.ready:hover .card-launch {
-      opacity: 1;
-    }
-
-    /* ── Footer ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 16px 48px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      color: var(--text-dim);
-      display: flex;
-      gap: 24px;
-    }
-  </style>
+footer { border-top: 1px solid var(--border); padding: 16px 48px; font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); display: flex; gap: 24px; }
+</style>
 </head>
 
 <body>
-  <div class="landing">
+<div class="landing">
 
+  <header class="site-header">
+    <span class="site-logo">AP Physics <span>1</span> Explorer</span>
+    <span class="site-tagline">interactive simulations</span>
+  </header>
 
-    <!-- Site Header -->
-
-    <header class="site-header">
-      <span class="site-logo">AP Physics <span>1</span> Explorer</span>
-      <span class="site-tagline">interactive simulations</span>
-    </header>
-
-    <div class="hero">
-      <h1 class="hero-title">Physics<br><span>learn by doing</span></h1>
-      <p class="hero-sub">Interactive simulators for AP Physics 1</p>
-      <div class="hero-meta">
-        <span><span class="dot"></span>HTML · CSS · JavaScript only</span>
-        <span>g = 9.8 m/s²</span>
-        <span>no login required</span>
-      </div>
+  <div class="hero">
+    <h1 class="hero-title">Physics<br><span>learn by doing</span></h1>
+    <p class="hero-sub">Interactive simulators for AP Physics 1 — eight units, one simulation at a time.</p>
+    <div class="hero-meta">
+      <span><span class="dot"></span>HTML · CSS · JavaScript only</span>
+      <span>g = 9.8 m/s²</span>
+      <span>no login required</span>
     </div>
-
-    <!-- Cards (buttons) for each Experiment -->
-
-    <div class="sim-grid-section">
-      <div class="section-label">simulations</div>
-      <div class="sim-grid">
-
-        <!-- Energy Conservation — READY -->
-        <a class="sim-card ready" href="simulations/energy-conservation.html">
-          <div class="card-equation">U<sub>g</sub> = mgh</div>
-          <div class="card-title">Energy Conservation</div>
-          <div class="card-desc">A gravitational potential energy calculator shows the conservation of Mechanical energy as a ball descends down a frictionless ramp.</div>
-          <div class="card-footer">
-            <span class="card-tag tag-ready">● live</span>
-            <span class="card-launch">launch →</span>
-          </div>
-        </a>
-
-        <a class="sim-card ready" href="simulations/energy-bowl.html">
-          <div class="card-equation">E = PE + KE</div>
-          <div class="card-title">Energy Bowl</div>
-          <div class="card-desc">Play this game using gravity, mass, height and a frictionless parabolic ramp to learn how PE and KE work togther.</div>
-          <div class="card-footer">
-
-            <span class="card-tag tag-ready">● live</span>
-            <span class="card-launch">launch →</span>
-          </div>
-        </a>
-
-        <!-- Loop-the-Loop — READY -->
-        <a class="sim-card ready" href="simulations/loop-the-loop.html">
-          <div class="card-equation">T = m(v²/R − g)</div>
-          <div class="card-title">Loop-the-Loop</div>
-          <div class="card-desc">Engineer a vertical loop. Adjust mass, drop height, and loop radius to explore centripetal force and the critical speed condition — the same physics behind real roller coaster loop design.</div>
-          <div class="card-footer">
-            <span class="card-tag tag-ready">● live</span>
-            <span class="card-launch">launch →</span>
-          </div>
-        </a>
-
-        <!-- Vertical Circular Motion Diagnostic — READY -->
-        <a class="sim-card ready" href="simulations/vertical-circular-motion.html">
-          <div class="card-equation">T = mv²/R − mg·cos θ</div>
-          <div class="card-title">Vertical Circular Motion</div>
-          <div class="card-desc">Three-circle diagnostic: explore how geometry, energy, and forces combine independently at any angle θ. Watch Tension (T) drain toward zero as the ball climbs.</div>
-          <div class="card-footer">
-            <span class="card-tag tag-ready">● live</span>
-            <span class="card-launch">launch →</span>
-          </div>
-        </a>
-
-        <!-- Spring PE — SOON -->
-        <div class="sim-card soon">
-          <div class="card-equation">U = ½kx²</div>
-          <div class="card-title">Spring Potential Energy</div>
-          <div class="card-desc">Compress or stretch a spring and watch elastic PE convert to KE. Explore Hooke's Law
-            and simple harmonic motion.</div>
-          <div class="card-footer">
-            <span class="card-tag tag-soon">coming soon</span>
-          </div>
-        </div>
-
-        <!-- Projectile Motion — SOON -->
-        <div class="sim-card soon">
-          <div class="card-equation">y(t) = v₀t − ½gt²</div>
-          <div class="card-title">Projectile Motion</div>
-          <div class="card-desc">Launch a projectile at any angle and speed. See the independence of horizontal and
-            vertical motion in real time.</div>
-          <div class="card-footer">
-            <span class="card-tag tag-soon">coming soon</span>
-          </div>
-        </div>
-
-        <!-- Friction — SOON -->
-        <div class="sim-card soon">
-          <div class="card-equation">W<sub>f</sub> = μmgd</div>
-          <div class="card-title">Friction &amp; Dissipation</div>
-          <div class="card-desc">Add a friction coefficient and watch mechanical energy dissipate into heat. Compare
-            frictionless vs. real surfaces.</div>
-          <div class="card-footer">
-            <span class="card-tag tag-soon">coming soon</span>
-          </div>
-        </div>
-
-        <!-- Roller Coaster — SOON -->
-        <div class="sim-card soon">
-          <div class="card-equation">E<sub>total</sub> = const</div>
-          <div class="card-title">Roller Coaster</div>
-          <div class="card-desc">Send a cart over multiple hills and loops. Watch PE and KE trade off continuously while
-            total energy is conserved.</div>
-          <div class="card-footer">
-            <span class="card-tag tag-soon">coming soon</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <footer>
-      <span>AP Physics 1 Explorer</span>
-      <span>plain HTML · CSS · JS</span>
-      <span>no frameworks · no build step</span>
-    </footer>
-
   </div>
-</body>
 
-</html>
+  <div class="periodic-section">
+    <div class="periodic-title">AP Physics 1 — Course Map</div>
+    <div class="periodic-grid">
+
+      <!-- Unit 1 — Kinematics -->
+      <div class="unit-tile soon" style="--unit-color: var(--u1)">
+        <div class="unit-num">Unit 1</div>
+        <div class="unit-name">Kinematics</div>
+        <div class="unit-eq">x = x₀ + v₀t + ½at²</div>
+        <div class="unit-sims">
+          <span class="sim-node">
+            <span class="sim-node-dot"></span>Velocity &amp; Acceleration
+          </span>
+          <span class="sim-node">
+            <span class="sim-node-dot"></span>Projectile Motion
+          </span>
+        </div>
+        <div class="unit-footer">
+          <span>0 of 2 live</span>
+          <span class="soon-badge">coming soon</span>
+        </div>
+      </div>
+
+      <!-- Unit 2 — Forces -->
+      <div class="unit-tile soon" style="--unit-color: var(--u2)">
+        <div class="unit-num">Unit 2</div>
+        <div class="unit-name">Forces &amp; Translational Dynamics</div>
+        <div class="unit-eq">F = ma</div>
+        <div class="unit-sims">
+          <span class="sim-node">
+            <span class="sim-node-dot"></span>Newton's First Law
+          </span>
+          <span class="sim-node">
+            <span class="sim-node-dot"></span>Newton's Second Law
+          </span>
+          <span class="sim-node">
+            <span class="sim-node-dot"></span>Newton's Third Law
+          </span>
+          <span class="sim-node">
+            <span class="sim-node-dot"></span>Friction &amp; Inclined Planes
+          </span>
+        </div>
+        <div class="unit-footer">
+          <span>0 of 4 live</span>
+          <span class="soon-badge">coming soon</span>
+        </div>
+      </div>
+
+      <!-- Unit 3 — Energy (LIVE) -->
+      <div class="unit-tile has-live" style="--unit-color: var(--u3); grid-column: span 2;">
+        <div class="unit-num">Unit 3</div>
+        <div class="unit-name">Work, Energy &amp; Power</div>
+        <div class="unit-eq">E = PE + KE = mgh + ½mv²</div>
+        <div class="unit-sims">
+          <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:4px;">Core</div>
+          <a class="sim-node live" href="simulations/energy-conservation.html" style="--unit-color: var(--u3)">
+            <span class="sim-node-dot"></span>Energy Conservation
+          </a>
+          <a class="sim-node live" href="simulations/energy-bowl.html" style="--unit-color: var(--u3)">
+            <span class="sim-node-dot"></span>Energy Bowl
+          </a>
+          <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; margin: 8px 0 4px;">Centripetal Force</div>
+          <a class="sim-node live" href="simulations/loop-the-loop.html" style="--unit-color: var(--u3)">
+            <span class="sim-node-dot"></span>Loop-the-Loop
+          </a>
+          <a class="sim-node live" href="simulations/vertical-circular-motion.html" style="--unit-color: var(--u3)">
+            <span class="sim-node-dot"></span>Vertical Circular Motion
+          </a>
+        </div>
+        <div class="unit-footer">
+          <span>4 of 4 live</span>
+          <span class="live-badge">● live</span>
+        </div>
+      </div>
+
+      <!-- Unit 4 — Momentum -->
+      <div class="unit-tile soon" style="--unit-color: var(--u4)">
+        <div class="unit-num">Unit 4</div>
+        <div class="unit-name">Linear Momentum</div>
+        <div class="unit-eq">p = mv</div>
+        <div class="unit-sims">
+          <span class="sim-node"><span class="sim-node-dot"></span>Collisions</span>
+          <span class="sim-node"><span class="sim-node-dot"></span>Impulse</span>
+        </div>
+        <div class="unit-footer">
+          <span>0 of 2 live</span>
+          <span class="soon-badge">coming soon</span>
+        </div>
+      </div>
+
+      <!-- Unit 5 — Torque -->
+      <div class="unit-tile soon" style="--unit-color: var(--u5)">
+        <div class="unit-num">Unit 5</div>
+        <div class="unit-name">Torque &amp; Rotational Dynamics</div>
+        <div class="unit-eq">τ = rF sinθ</div>
+        <div class="unit-sims">
+          <span class="sim-node"><span class="sim-node-dot"></span>Torque &amp; Levers</span>
+          <span class="sim-node"><span class="sim-node-dot"></span>Rotational Inertia</span>
+        </div>
+        <div class="unit-footer">
+          <span>0 of 2 live</span>
+          <span class="soon-badge">coming soon</span>
+        </div>
+      </div>
+
+      <!-- Unit 6 — Rotating Systems -->
+      <div class="unit-tile soon" style="--unit-color: var(--u6)">
+        <div class="unit-num">Unit 6</div>
+        <div class="unit-name">Energy &amp; Momentum of Rotating Systems</div>
+        <div class="unit-eq">L = Iω</div>
+        <div class="unit-sims">
+          <span class="sim-node"><span class="sim-node-dot"></span>Angular Momentum</span>
+          <span class="sim-node"><span class="sim-node-dot"></span>Rolling Motion</span>
+        </div>
+        <div class="unit-footer">
+          <span>0 of 2 live</span>
+          <span class="soon-badge">coming soon</span>
+        </div>
+      </div>
+
+      <!-- Unit 7 — Oscillations -->
+      <div class="unit-tile soon" style="--unit-color: var(--u7)">
+        <div class="unit-num">Unit 7</div>
+        <div class="unit-name">Oscillations</div>
+        <div class="unit-eq">T = 2π√(L/g)</div>
+        <div class="unit-sims">
+          <span class="sim-node"><span class="sim-node-dot"></span>Pendulum</span>
+          <span class="sim-node"><span class="sim-node-dot"></span>Spring &amp; SHM</span>
+        </div>
+        <div class="unit-footer">
+          <span>0 of 2 live</span>
+          <span class="soon-badge">coming soon</span>
+        </div>
+      </div>
+
+      <!-- Unit 8 — Fluids -->
+      <div class="unit-tile soon" style="--unit-color: var(--u8)">
+        <div class="unit-num">Unit 8</div>
+        <div class="unit-name">Fluids</div>
+        <div class="unit-eq">P + ½ρv² + ρgh = const</div>
+        <div class="unit-sims">
+          <span class="sim-node"><span class="sim-node-dot"></span>Bernoulli's Principle</span>
+          <span class="sim-node"><span class="sim-node-dot"></span>Buoyancy</span>
+        </div>
+        <div class="unit-footer">
+          <span>0 of 2 live</span>
+          <span class="soon-badge">coming soon</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <span>AP Physics 1 Explorer</span>
+    <span>plain HTML · CSS · JS</span>
+    <span>no frameworks · no build step</span>
+  </footer>
+
+</div>
+</body>
