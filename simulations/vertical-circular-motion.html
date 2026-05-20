@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertical Circular Motion — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0f1014;
+  --surface:    #17181d;
+  --surface2:   #1e2028;
+  --border:     #2a2b33;
+  --border2:    #3a3b45;
+  --text:       #e8e9ef;
+  --text-muted: #7a7d8e;
+  --text-dim:   #4a4d5e;
+  --blue:       #4a9eff;
+  --blue-dim:   #1a3a6a;
+  --teal:       #2dd4a0;
+  --teal-dim:   #0a3a2a;
+  --amber:      #f5a623;
+  --red:        #ff5f6d;
+  --red-dim:    #3a1a1e;
+  --purple:     #b98aff;
+  --pink:       #ff6eb4;
+  --font-body:  'DM Sans', sans-serif;
+  --font-mono:  'DM Mono', monospace;
+  --font-serif: 'DM Serif Display', serif;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; }
+
+.site-header { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.site-logo { font-family: var(--font-serif); font-size: 18px; color: var(--text); text-decoration: none; }
+.site-logo span { color: var(--blue); }
+.site-tagline { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); letter-spacing: 0.05em; }
+.header-back { margin-left: auto; font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+.header-back:hover { color: var(--text); }
+
+.sim-shell  { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.sim-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Control panel ── */
+.ctrl-panel {
+  width: 280px; flex-shrink: 0;
+  background: var(--surface); border-right: 1px solid var(--border);
+  padding: 16px 18px; display: flex; flex-direction: column; overflow-y: auto;
+}
+.ctrl-divider { height: 1px; background: var(--border); margin: 12px 0; }
+.ctrl-note { margin-top: auto; padding-top: 12px; font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); border-top: 1px solid var(--border); line-height: 1.6; }
+
+/* Equation */
+.eq-block { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
+.eq-main  { font-family: var(--font-serif); font-size: 18px; font-style: italic; color: var(--text); margin-bottom: 4px; }
+.eq-sub   { font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); line-height: 1.7; }
+
+/* T readout */
+.t-readout { border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; border: 1px solid var(--border); background: var(--surface2); transition: background 0.2s, border-color 0.2s; }
+.t-readout.positive { background: var(--teal-dim);   border-color: var(--teal); }
+.t-readout.negative { background: var(--red-dim);    border-color: var(--red); }
+.t-label  { font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); margin-bottom: 2px; }
+.t-value  { font-family: var(--font-serif); font-size: 26px; font-style: italic; }
+.t-value.positive { color: var(--teal); }
+.t-value.negative { color: var(--red); }
+.t-value.neutral  { color: var(--text); }
+.t-meaning { font-size: 11px; font-family: var(--font-mono); margin-top: 3px; }
+.t-meaning.positive { color: var(--teal); }
+.t-meaning.negative { color: var(--red); }
+.t-meaning.neutral  { color: var(--text-dim); }
+.t-bar-wrap { margin-top: 8px; }
+.t-bar-track { height: 9px; border-radius: 5px; background: var(--border); overflow: hidden; }
+.t-bar-fill  { height: 100%; border-radius: 5px; transition: width 0.08s, background 0.15s; }
+.t-bar-scale { display: flex; justify-content: space-between; font-size: 10px; font-family: var(--font-mono); color: var(--text-dim); margin-top: 3px; }
+
+/* Sliders */
+.slider-group  { margin-bottom: 12px; }
+.slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.slider-label  { font-size: 13px; color: var(--text-muted); font-style: italic; font-family: var(--font-serif); }
+.slider-value  { font-size: 13px; font-family: var(--font-mono); color: var(--text); font-weight: 500; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 3px; background: var(--border2); outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 2px solid var(--border2); cursor: grab; }
+input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 2px solid var(--border2); }
+
+/* Result rows */
+.result-row   { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.result-label { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+.result-val   { font-size: 13px; font-family: var(--font-mono); font-weight: 500; }
+.result-val.blue   { color: var(--blue); }
+.result-val.teal   { color: var(--teal); }
+.result-val.amber  { color: var(--amber); }
+.result-val.pink   { color: var(--pink); }
+.result-val.purple { color: var(--purple); }
+
+/* Canvas area */
+.canvas-wrap { flex: 1; position: relative; overflow: hidden; background: var(--bg); }
+canvas { display: block; }
+
+/* Circle labels */
+.circle-labels {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; pointer-events: none;
+  padding: 12px 24px 0;
+}
+.circle-label {
+  flex: 1; text-align: center;
+  font-size: 11px; font-family: var(--font-mono);
+  color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.circle-label span { color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">vertical circular motion — diagnostic</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+
+    <!-- Controls -->
+    <div class="ctrl-panel">
+
+      <div class="eq-block">
+        <div class="eq-main">T = mv²/R − mg·cos θ</div>
+        <div class="eq-sub">
+          v² = 2g(h − y)<br>
+          y = R(1 + cos θ)
+        </div>
+      </div>
+
+      <!-- T readout -->
+      <div class="t-readout" id="t-readout">
+        <div class="t-label">T  (constraint force)</div>
+        <div class="t-value neutral" id="t-value">— N</div>
+        <div class="t-meaning neutral" id="t-meaning">adjust sliders</div>
+        <div class="t-bar-wrap">
+          <div class="t-bar-track"><div class="t-bar-fill" id="t-bar" style="width:0%;background:var(--teal)"></div></div>
+          <div class="t-bar-scale"><span>0</span><span id="t-bar-max">— N max</span></div>
+        </div>
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">m · mass</span><span class="slider-value" id="lbl-m">10.0 kg</span></div>
+        <input type="range" id="sl-m" min="1" max="50" step="0.5" value="10" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">h · drop height</span><span class="slider-value" id="lbl-h">20.0 m</span></div>
+        <input type="range" id="sl-h" min="1" max="50" step="0.5" value="20" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">R · loop radius</span><span class="slider-value" id="lbl-r">5.0 m</span></div>
+        <input type="range" id="sl-r" min="1" max="15" step="0.5" value="5" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">θ · angle from vertical</span><span class="slider-value" id="lbl-theta">45°</span></div>
+        <input type="range" id="sl-theta" min="0" max="180" step="1" value="45" oninput="update()">
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="result-row"><span class="result-label">y = R(1+cosθ)</span><span class="result-val blue" id="val-y">— m</span></div>
+      <div class="result-row"><span class="result-label">v = √2g(h−y)</span><span class="result-val amber" id="val-v">— m/s</span></div>
+      <div class="result-row"><span class="result-label">mv²/R</span><span class="result-val teal" id="val-cent">— N</span></div>
+      <div class="result-row"><span class="result-label">mg·cosθ</span><span class="result-val pink" id="val-mgcos">— N</span></div>
+      <div class="result-row"><span class="result-label">mg</span><span class="result-val purple" id="val-mg">— N</span></div>
+
+      <div class="ctrl-note">
+        Three circles show the independent<br>
+        inputs: geometry → energy → forces.<br>
+        θ: 0° = top · 90° = side · 180° = bottom
+      </div>
+    </div>
+
+    <!-- Three-circle canvas -->
+    <div class="canvas-wrap">
+      <div class="circle-labels">
+        <div class="circle-label">① Geometry + mg<br><span>decompose gravity on string</span></div>
+        <div class="circle-label">② Energy + centripetal<br><span>mv²/R demand vs mg·cosθ share</span></div>
+        <div class="circle-label">③ Net T<br><span>constraint force result</span></div>
+      </div>
+      <canvas id="c"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+const G = 9.8;
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+function W() { return canvas.width  / (window.devicePixelRatio||1); }
+function H() { return canvas.height / (window.devicePixelRatio||1); }
+
+function setupCanvas() {
+  const wrap = canvas.parentElement, dpr = window.devicePixelRatio||1;
+  canvas.width  = wrap.clientWidth  * dpr;
+  canvas.height = wrap.clientHeight * dpr;
+  canvas.style.width  = wrap.clientWidth  + 'px';
+  canvas.style.height = wrap.clientHeight + 'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+const getM     = () => parseFloat(document.getElementById('sl-m').value);
+const getH     = () => parseFloat(document.getElementById('sl-h').value);
+const getR     = () => parseFloat(document.getElementById('sl-r').value);
+const getTheta = () => parseFloat(document.getElementById('sl-theta').value) * Math.PI / 180;
+
+// ── Arrow helper ───────────────────────────────
+function arrow(x1, y1, x2, y2, color, width=2, headSize=7) {
+  const dx = x2-x1, dy = y2-y1;
+  const len = Math.hypot(dx,dy);
+  if (len < 2) return;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  const angle = Math.atan2(dy,dx);
+  ctx.save(); ctx.translate(x2,y2); ctx.rotate(angle);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-headSize, headSize*0.4); ctx.lineTo(-headSize,-headSize*0.4);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
+// ── Dashed line helper ─────────────────────────
+function dashed(x1,y1,x2,y2,color,dash=[4,4]) {
+  ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=1; ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  ctx.setLineDash([]); ctx.restore();
+}
+
+// ── Label helper ───────────────────────────────
+function label(text, x, y, color, align='center', size=11) {
+  ctx.fillStyle = color;
+  ctx.font = `${size}px "DM Mono", monospace`;
+  ctx.textAlign = align;
+  ctx.fillText(text, x, y);
+}
+
+// ── Draw one circle diagram ────────────────────
+function drawCircle(cx, cy, R_px, theta, circleNum, physics) {
+  const { m, h, R, y, v, cent, mgcos, mg, T } = physics;
+
+  // Ball position on circle
+  const bx = cx + R_px * Math.sin(theta);
+  const by = cy - R_px * Math.cos(theta);
+
+  // Inward unit vector (ball → center)
+  const inX = (cx - bx) / R_px;
+  const inY = (cy - by) / R_px;
+
+  // Stable scale: fixed reference so arrows don't jump with sliders
+  // Use max possible mg = 50*9.8 = 490N as reference
+  const scale = R_px / (490 * 1.6);
+
+  // ── Draw circle ──
+  ctx.beginPath(); ctx.arc(cx, cy, R_px, 0, Math.PI*2);
+  ctx.strokeStyle = '#2a2b3a'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Axes through center
+  dashed(cx, cy - R_px*1.3, cx, cy + R_px*1.3, '#1e2028', [3,3]);
+  dashed(cx - R_px*1.3, cy, cx + R_px*1.3, cy, '#1e2028', [3,3]);
+
+  // ── String (hypotenuse) ──
+  ctx.strokeStyle = '#3a3b55'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(bx, by); ctx.stroke();
+
+  // ── Theta arc ──
+  if (theta > 0.02) {
+    const arcR = R_px * 0.22;
+    ctx.strokeStyle = '#4a4d6e'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, arcR, -Math.PI/2, -Math.PI/2 + theta);
+    ctx.stroke();
+    const midAngle = -Math.PI/2 + theta/2;
+    const lx = cx + (arcR+10) * Math.cos(midAngle);
+    const ly = cy + (arcR+10) * Math.sin(midAngle);
+    label('θ', lx, ly, '#4a4d6e', 'center', 11);
+  }
+
+  if (circleNum === 1) {
+    // ── CIRCLE 1: Geometry + mg decomposition ──
+
+    // Triangle legs
+    const footY = by;  // foot of perpendicular from ball to vertical axis
+
+    // Adjacent (vertical from center to foot)
+    ctx.strokeStyle = '#3a3b55'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, footY); ctx.stroke();
+
+    // Opposite (horizontal from foot to ball)
+    ctx.beginPath(); ctx.moveTo(cx, footY); ctx.lineTo(bx, footY); ctx.stroke();
+
+    // Right angle mark at foot
+    const sq = 6;
+    ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx + (bx>cx?1:-1)*sq, footY);
+    ctx.lineTo(cx + (bx>cx?1:-1)*sq, footY + sq);
+    ctx.lineTo(cx, footY + sq);
+    ctx.stroke();
+
+    // R label on string
+    label('R', cx + R_px*0.38*Math.sin(theta) - 10, cy - R_px*0.38*Math.cos(theta) - 6, '#4a4d6e', 'center', 11);
+
+    // R·cosθ label on adjacent
+    if (theta > 0.1) {
+      const adjMidY = (cy + footY) / 2;
+      label('R·cosθ', cx - 44, adjMidY, '#4a4d6e', 'right', 10);
+    }
+
+    // y height annotation
+    const groundY = cy + R_px;
+    dashed(bx, by, bx + R_px*0.55, by, '#1a3a6a', [3,3]);
+    dashed(bx + R_px*0.55, by, bx + R_px*0.55, groundY, '#1a3a6a', [3,3]);
+    label('y=R(1+cosθ)', bx + R_px*0.55 + 10, (by+groundY)/2 + 4, '#4a9eff', 'left', 10);
+
+    // Ground line
+    ctx.strokeStyle = '#2a2b33'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx-R_px*1.1, groundY); ctx.lineTo(cx+R_px*1.1, groundY); ctx.stroke();
+
+    // ── mg straight down from center (blue) ──
+    const mgLen = mg * scale;
+    // mg always points straight down, starts at center
+    arrow(cx, cy, cx, cy + mgLen, '#4a9eff', 2.5, 7);
+    label('mg', cx + 8, cy + mgLen*0.55, '#4a9eff', 'left', 11);
+
+    // ── Copy of mg placed along string from center (blue, dashed) ──
+    const mgsx = cx + mgLen * Math.sin(theta);
+    const mgsy = cy - mgLen * Math.cos(theta);
+    // dashed copy along string
+    ctx.save(); ctx.strokeStyle = '#4a9eff88'; ctx.lineWidth = 2; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(mgsx, mgsy); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+    label('mg', mgsx + 8*Math.sin(theta), mgsy - 8*Math.cos(theta) - 4, '#4a9eff88', 'left', 10);
+
+    // ── Perpendicular from tip of string-copy to vertical axis ──
+    dashed(mgsx, mgsy, cx, mgsy, '#ff6eb488', [3,3]);
+
+    // Right angle mark at projection foot on vertical axis
+    const sq2 = 5;
+    ctx.strokeStyle = '#ff6eb466'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx + sq2, mgsy);
+    ctx.lineTo(cx + sq2, mgsy + sq2);
+    ctx.lineTo(cx, mgsy + sq2);
+    ctx.stroke();
+
+    // ── mg·cosθ segment on vertical axis (pink) ──
+    ctx.strokeStyle = '#ff6eb4'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, mgsy); ctx.stroke();
+    label('mg·cosθ', cx - 8, (cy + mgsy)/2, '#ff6eb4', 'right', 10);
+
+  } else if (circleNum === 2) {
+    // ── CIRCLE 2: Energy — centripetal demand + gravity share + v ──
+
+    // mv²/R — full centripetal requirement, inward from ball
+    const centLen = cent * scale;
+    arrow(bx, by, bx + inX*centLen, by + inY*centLen, '#2dd4a0', 2.5, 7);
+    // label at midpoint
+    const cmx = bx + inX*centLen*0.5;
+    const cmy = by + inY*centLen*0.5;
+    label('mv²/R', cmx + 10, cmy - 6, '#2dd4a0', 'left', 10);
+
+    // mg·cosθ — gravity's inward contribution, tail on ball
+    const mgcosLen = Math.abs(mgcos) * scale;
+    const mgcosDir = mgcos >= 0 ? 1 : -1;
+    arrow(bx, by, bx + inX*mgcosLen*mgcosDir, by + inY*mgcosLen*mgcosDir, '#ff6eb4', 2, 6);
+    label('mg·cosθ', bx + inX*mgcosLen*mgcosDir*0.5 - 12,
+          by + inY*mgcosLen*mgcosDir*0.5 + 14, '#ff6eb4', 'center', 10);
+
+    // v tangent arrow (amber) — tangent direction clockwise: (cosθ, sinθ)
+    const vScale = R_px / 25;
+    const vLen   = Math.min(v * vScale, R_px * 0.85);
+    const vtx = bx + vLen * Math.cos(theta);
+    const vty = by + vLen * Math.sin(theta);
+    arrow(bx, by, vtx, vty, '#f5a623', 2.5, 7);
+    label('v', vtx + 8, vty - 4, '#f5a623', 'left', 11);
+
+    // Energy annotation
+    label('v = √2g(h−y)', cx, cy + R_px + 20, '#f5a62366', 'center', 10);
+
+  } else if (circleNum === 3) {
+    // ── CIRCLE 3: Net T — clean and simple ──
+
+    const Tlen   = Math.abs(T) * scale;
+    const Tcolor = T >= 0 ? '#2dd4a0' : '#ff5f6d';
+
+    if (Tlen > 3) {
+      arrow(bx, by, bx + inX*Tlen, by + inY*Tlen, Tcolor, 3.5, 9);
+    } else {
+      // T ≈ 0 — draw a dot at ball to indicate zero
+      ctx.beginPath(); ctx.arc(bx, by, 5, 0, Math.PI*2);
+      ctx.fillStyle = '#b98aff'; ctx.fill();
+    }
+
+    // T label — large and prominent
+    const Tstr = T.toFixed(1) + ' N';
+    label('T = ' + Tstr, cx, cy + R_px*0.6, Tcolor, 'center', 14);
+
+    // Status line
+    const statusTxt = T > 0.5  ? 'circular motion valid'
+                    : T < -0.5 ? 'leaves track'
+                    :             'T ≈ 0  threshold';
+    label(statusTxt, cx, cy + R_px*0.6 + 18, Tcolor + '99', 'center', 10);
+
+    // Show the equation with live values
+    label('mv²/R − mg·cosθ', cx, cy + R_px + 20, '#4a4d6e', 'center', 10);
+    label(cent.toFixed(1) + ' − ' + mgcos.toFixed(1) + ' = ' + T.toFixed(1) + ' N',
+          cx, cy + R_px + 34, Tcolor + 'aa', 'center', 10);
+  }
+
+  // ── Ball ──
+  const BR = 9;
+  ctx.beginPath(); ctx.arc(bx, by, BR, 0, Math.PI*2);
+  ctx.fillStyle = '#c8cad8'; ctx.fill();
+  ctx.strokeStyle = '#7a7d8e'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(bx-BR*0.28, by-BR*0.3, BR*0.26, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fill();
+
+  // Circle number watermark
+  label('①②③'[circleNum-1], cx - R_px*0.82, cy - R_px*0.82, '#1e2028', 'center', 18);
+}
+
+
+// ── Update UI readouts ─────────────────────────
+function updateReadouts(m, h, R, theta, y, v, cent, mgcos, mg, T) {
+  document.getElementById('lbl-m').textContent     = m.toFixed(1) + ' kg';
+  document.getElementById('lbl-h').textContent     = h.toFixed(1) + ' m';
+  document.getElementById('lbl-r').textContent     = R.toFixed(1) + ' m';
+  document.getElementById('lbl-theta').textContent = Math.round(theta * 180/Math.PI) + '°';
+  document.getElementById('val-y').textContent     = y.toFixed(2) + ' m';
+  document.getElementById('val-v').textContent     = v.toFixed(2) + ' m/s';
+  document.getElementById('val-cent').textContent  = cent.toFixed(1) + ' N';
+  document.getElementById('val-mgcos').textContent = mgcos.toFixed(1) + ' N';
+  document.getElementById('val-mg').textContent    = mg.toFixed(1) + ' N';
+
+  // T readout
+  const box = document.getElementById('t-readout');
+  const val = document.getElementById('t-value');
+  const msg = document.getElementById('t-meaning');
+  const bar = document.getElementById('t-bar');
+  const barMax = document.getElementById('t-bar-max');
+
+  // T_max at bottom: mv²_bot/R + mg
+  const vBot2 = 2*G*h;
+  const Tmax  = m*vBot2/R + m*G;
+
+  const cls = T > 0.5 ? 'positive' : T < -0.5 ? 'negative' : 'neutral';
+  box.className = 't-readout ' + (T > 0.5 ? 'positive' : T < -0.5 ? 'negative' : '');
+  val.className = 't-value ' + cls;
+  val.textContent = T.toFixed(1) + ' N';
+  msg.className = 't-meaning ' + cls;
+  msg.textContent = T > 0.5  ? 'T > 0 · circular motion valid'
+                  : T < -0.5 ? 'T < 0 · leaves track!'
+                  :             'T ≈ 0 · threshold';
+
+  const pct = Math.min(Math.abs(T) / Tmax * 100, 100).toFixed(1);
+  bar.style.width = pct + '%';
+  bar.style.background = T >= 0 ? 'var(--teal)' : 'var(--red)';
+  barMax.textContent = Tmax.toFixed(0) + ' N max';
+}
+
+// ── Main update ────────────────────────────────
+function update() {
+  const m     = getM();
+  const h     = getH();
+  const R     = getR();
+  const theta = getTheta();
+
+  // Physics
+  const y     = R * (1 + Math.cos(theta));
+  const v2    = Math.max(0, 2*G*(h - y));
+  const v     = Math.sqrt(v2);
+  const cent  = m*v2/R;
+  const mgcos = m*G*Math.cos(theta);
+  const mg    = m*G;
+  const T     = cent - mgcos;
+
+  updateReadouts(m,h,R,theta,y,v,cent,mgcos,mg,T);
+
+  const physics = { m,h,R,y,v,cent,mgcos,mg,T };
+  draw(theta, physics);
+}
+
+// ── Draw ───────────────────────────────────────
+function draw(theta, physics) {
+  if (!ctx || W()===0) return;
+  ctx.clearRect(0,0,W(),H());
+
+  const w = W(), hh = H();
+  const topPad = 36, botPad = 20, sidePad = 16;
+  const availW = w - 2*sidePad;
+  const availH = hh - topPad - botPad;
+
+  // Three circles, equal width slots
+  const slotW = availW / 3;
+  const R_px  = Math.min(slotW * 0.35, availH * 0.38);
+  const cy    = topPad + availH * 0.45;
+
+  for (let i = 1; i <= 3; i++) {
+    const cx = sidePad + slotW*(i-1) + slotW/2;
+    drawCircle(cx, cy, R_px, theta, i, physics);
+  }
+
+  // Bottom formula bar
+  const { m, v, R: Rv, mgcos, T } = physics;
+  const cent = physics.cent;
+  ctx.fillStyle = '#17181d';
+  ctx.fillRect(sidePad, hh - botPad - 28, availW, 28);
+  ctx.fillStyle = '#2a2b33';
+  ctx.fillRect(sidePad, hh - botPad - 29, availW, 1);
+
+  const fy = hh - botPad - 10;
+  ctx.font = 'italic 13px "DM Serif Display", serif';
+  ctx.textAlign = 'center';
+  // T = mv²/R - mg·cosθ with live values
+  const parts = [
+    { text: 'T = ', color: '#7a7d8e' },
+    { text: T.toFixed(1) + ' N', color: T >= 0 ? '#2dd4a0' : '#ff5f6d' },
+    { text: '   =   mv²/R − mg·cosθ   =   ', color: '#7a7d8e' },
+    { text: cent.toFixed(1) + ' N', color: '#2dd4a0' },
+    { text: ' − ', color: '#7a7d8e' },
+    { text: mgcos.toFixed(1) + ' N', color: '#ff6eb4' },
+  ];
+  let fx = w/2 - 180;
+  ctx.textAlign = 'left';
+  for (const p of parts) {
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.text, fx, fy);
+    fx += ctx.measureText(p.text).width;
+  }
+}
+
+// ── Init ──────────────────────────────────────
+window.addEventListener('resize', () => { setupCanvas(); update(); });
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  setupCanvas();
+  update();
+}));
+</script>
+</body>
+</html>

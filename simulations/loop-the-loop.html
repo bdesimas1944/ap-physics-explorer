@@ -149,12 +149,25 @@ canvas { display: block; }
 
       <!-- Equation -->
       <div class="eq-block">
-        <div class="eq-main">T = mv²/R − mg·cos θ</div>
+        <div class="eq-main" id="eq-main">T = mv²/R − mg·cos θ</div>
         <div class="eq-terms">
           <span>m = <span id="eq-m">10.0</span> kg</span>
           <span>R = <span id="eq-R">5.0</span> m</span>
           <span>v = <span id="eq-v">0.00</span> m/s</span>
-          <span>θ = <span id="eq-theta">0°</span></span>
+          <span><span id="eq-angle-label">θ</span> = <span id="eq-theta">0°</span></span>
+        </div>
+        <!-- Orientation toggle -->
+        <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:6px;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; font-family:var(--font-mono); color:var(--text-muted);">
+            <input type="radio" name="orientation" value="pendulum" checked onchange="setOrientation('pendulum')"
+              style="accent-color:var(--blue); cursor:pointer;">
+            <span>Pendulum &nbsp;<span style="color:var(--text-dim)">θ from top · cos θ</span></span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; font-family:var(--font-mono); color:var(--text-muted);">
+            <input type="radio" name="orientation" value="inclined" onchange="setOrientation('inclined')"
+              style="accent-color:var(--blue); cursor:pointer;">
+            <span>Inclined Plane &nbsp;<span style="color:var(--text-dim)">φ from horizontal · sin φ</span></span>
+          </label>
         </div>
       </div>
 
@@ -385,6 +398,44 @@ function setStatus(cls, txt) {
   b.textContent = txt;
 }
 
+// ── Orientation ───────────────────────────────
+// pendulum: theta from top (0 at 12-oclock), formula cos theta
+// inclined:  phi from horizontal (0 at 3-oclock), formula sin phi
+let orientation = 'pendulum';
+
+function setOrientation(o) {
+  orientation = o;
+  const eqEl    = document.getElementById('eq-main');
+  const lblEl   = document.getElementById('eq-angle-label');
+  if (o === 'pendulum') {
+    eqEl.textContent  = 'T = mv²/R − mg·cos θ';
+    lblEl.textContent = 'θ';
+  } else {
+    eqEl.textContent  = 'T = mv²/R − mg·sin φ';
+    lblEl.textContent = 'φ';
+  }
+  // Recompute displayed angle from last known phi
+  updateAngleDisplay(document._lastPhi);
+}
+
+// phi_circle = angle from top (pendulum convention, 0 at top)
+// pendulum: theta = phi_circle  (0 at top, 180 at bottom)
+// inclined:  phi  = phi_circle - PI/2  (0 at 3-oclock, 90 at top, -90 at 9-oclock)
+function displayAngle(phi_circle) {
+  if (phi_circle === undefined) return '—';
+  if (orientation === 'pendulum') {
+    return Math.round(phi_circle * 180 / Math.PI) + '°';
+  } else {
+    // phi from horizontal: 0 at 3-oclock (right side), +90 at top, -90 at 9-oclock
+    const phi_inc = phi_circle - Math.PI / 2;
+    return Math.round(phi_inc * 180 / Math.PI) + '°';
+  }
+}
+
+function updateAngleDisplay(phi_circle) {
+  document.getElementById('eq-theta').textContent = displayAngle(phi_circle);
+}
+
 function tMax() {
   // Max T occurs at bottom of loop: T = mv²_bottom/R + mg
   // v²_bottom = 2gh (all PE converted to KE)
@@ -455,8 +506,7 @@ function updateReadouts(height, v, T, onCircle) {
 
   const phiDeg = T !== null && onCircle
     ? Math.round(Math.abs(document._lastPhi || 0) * 180 / Math.PI) : '—';
-  document.getElementById('eq-theta').textContent = onCircle && document._lastPhi !== undefined
-    ? Math.round(document._lastPhi * 180 / Math.PI) + '°' : '—';
+  updateAngleDisplay(onCircle ? document._lastPhi : undefined);
 
   document.getElementById('val-pe').textContent  = pe.toFixed(1) + ' J';
   document.getElementById('val-ke').textContent  = ke.toFixed(1) + ' J';
