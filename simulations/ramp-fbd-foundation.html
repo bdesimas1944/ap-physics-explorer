@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ramp FBD — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0f1014;
+  --surface:    #17181d;
+  --surface2:   #1e2028;
+  --border:     #2a2b33;
+  --border2:    #3a3b45;
+  --text:       #e8e9ef;
+  --text-muted: #7a7d8e;
+  --text-dim:   #4a4d5e;
+  --blue:       #4a9eff;
+  --blue-dim:   #1a3a6a;
+  --teal:       #2dd4a0;
+  --teal-dim:   #0a3a2a;
+  --amber:      #f5a623;
+  --gray:       #9a9db0;
+  --purple:     #b98aff;
+  --font-body:  'DM Sans', sans-serif;
+  --font-mono:  'DM Mono', monospace;
+  --font-serif: 'DM Serif Display', serif;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; }
+.site-header { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.site-logo { font-family: var(--font-serif); font-size: 18px; color: var(--text); text-decoration: none; }
+.site-logo span { color: var(--blue); }
+.site-tagline { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); }
+.header-back { margin-left: auto; font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); text-decoration: none; }
+.header-back:hover { color: var(--text); }
+.sim-shell  { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.sim-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Left panel ── */
+.ctrl-panel { width: 260px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); padding: 16px 18px; display: flex; flex-direction: column; overflow-y: auto; }
+.ctrl-divider { height: 1px; background: var(--border); margin: 12px 0; }
+.ctrl-note { margin-top: auto; padding-top: 12px; font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); border-top: 1px solid var(--border); line-height: 1.7; }
+
+.eq-block { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
+.eq-main { font-family: var(--font-serif); font-size: 16px; font-style: italic; color: var(--text); margin-bottom: 4px; }
+.eq-sub  { font-size: 11px; font-family: var(--font-mono); color: var(--text-dim); line-height: 1.9; }
+
+.slider-group { margin-bottom: 13px; }
+.slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.slider-label { font-size: 13px; color: var(--text-muted); font-style: italic; font-family: var(--font-serif); }
+.slider-value { font-size: 13px; font-family: var(--font-mono); color: var(--text); font-weight: 500; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 3px; background: var(--border2); outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 2px solid var(--border2); cursor: grab; }
+
+.result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.result-label { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+.result-val { font-size: 13px; font-family: var(--font-mono); font-weight: 500; }
+
+.cbar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.cbar-name { font-size: 11px; font-family: var(--font-mono); min-width: 44px; }
+.cbar-track { flex: 1; height: 9px; border-radius: 5px; background: var(--border); overflow: hidden; }
+.cbar-fill  { height: 100%; border-radius: 5px; transition: width 0.05s; }
+.cbar-val   { font-size: 11px; font-family: var(--font-mono); min-width: 50px; text-align: right; }
+
+.angle-btn { padding: 4px 8px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 5px; color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; cursor: pointer; transition: all 0.15s; }
+.angle-btn:hover, .angle-btn.active { border-color: var(--amber); color: var(--amber); background: #3a2a0a; }
+
+/* ── Canvas area ── */
+.canvas-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── Tab bar ── */
+.tab-bar { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.tab-btn { flex: 1; padding: 10px 8px; font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; text-align: center; line-height: 1.3; }
+.tab-btn:hover { color: var(--text-muted); }
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+.canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+canvas { display: block; }
+
+/* ── Step description ── */
+.step-desc { padding: 10px 20px; background: var(--surface); border-top: 1px solid var(--border); font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); flex-shrink: 0; line-height: 1.5; min-height: 44px; }
+.step-desc .highlight { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">2.2 · ramp FBD · no friction</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+
+    <!-- Left panel -->
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-main">mg on a frictionless ramp</div>
+        <div class="eq-sub">
+          <span style="color:var(--gray)">mg — weight, straight down</span><br>
+          <span style="color:var(--teal)">N = mg·cosθ — ⊥ surface</span><br>
+          <span style="color:var(--blue)">F∥ = mg·sinθ — ∥ surface</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:7px;">Quick angles</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <button onclick="setAngle(0)"  class="angle-btn">0°</button>
+          <button onclick="setAngle(30)" class="angle-btn">30°</button>
+          <button onclick="setAngle(45)" class="angle-btn active">45°</button>
+          <button onclick="setAngle(60)" class="angle-btn">60°</button>
+          <button onclick="setAngle(90)" class="angle-btn">90°</button>
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">θ · ramp angle</span><span class="slider-value" id="lbl-theta">45°</span></div>
+        <input type="range" id="sl-theta" min="0" max="90" step="1" value="45" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">m · mass</span><span class="slider-value" id="lbl-m">10.0 kg</span></div>
+        <input type="range" id="sl-m" min="1" max="50" step="0.5" value="10" oninput="update()">
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="result-row"><span class="result-label">mg</span><span class="result-val" style="color:var(--gray)" id="val-mg">98.0 N</span></div>
+      <div class="result-row"><span class="result-label">N = mg·cosθ</span><span class="result-val" style="color:var(--teal)" id="val-n">—</span></div>
+      <div class="result-row"><span class="result-label">F∥ = mg·sinθ</span><span class="result-val" style="color:var(--blue)" id="val-f">—</span></div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="cbar-row">
+        <span class="cbar-name" style="color:var(--gray)">mg</span>
+        <div class="cbar-track"><div class="cbar-fill" id="bar-mg" style="width:100%;background:var(--gray)"></div></div>
+        <span class="cbar-val" id="bval-mg" style="color:var(--gray)">98.0 N</span>
+      </div>
+      <div class="cbar-row">
+        <span class="cbar-name" style="color:var(--teal)">N</span>
+        <div class="cbar-track"><div class="cbar-fill" id="bar-n" style="background:var(--teal)"></div></div>
+        <span class="cbar-val" id="bval-n" style="color:var(--teal)">— N</span>
+      </div>
+      <div class="cbar-row">
+        <span class="cbar-name" style="color:var(--blue)">F∥</span>
+        <div class="cbar-track"><div class="cbar-fill" id="bar-f" style="background:var(--blue)"></div></div>
+        <span class="cbar-val" id="bval-f" style="color:var(--blue)">— N</span>
+      </div>
+
+      <div class="ctrl-note">
+        Step through tabs 1→4<br>
+        to see where the angles<br>
+        come from — then drag θ
+      </div>
+    </div>
+
+    <!-- Canvas area with tabs -->
+    <div class="canvas-area">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab1" onclick="setTab(1)">① Base<br><span style="font-size:10px;opacity:0.6">ramp + mg</span></button>
+        <button class="tab-btn" id="tab2" onclick="setTab(2)">② Rectangle<br><span style="font-size:10px;opacity:0.6">construction</span></button>
+        <button class="tab-btn" id="tab3" onclick="setTab(3)">③ Vectors<br><span style="font-size:10px;opacity:0.6">FBD result</span></button>
+        <button class="tab-btn" id="tab4" onclick="setTab(4)">④ Clean FBD<br><span style="font-size:10px;opacity:0.6">final</span></button>
+      </div>
+      <div class="canvas-wrap"><canvas id="c"></canvas></div>
+      <div class="step-desc" id="step-desc">
+        <span class="highlight">Step 1 — The base.</span> A block sits on a frictionless ramp at angle θ. The only force acting is <span style="color:var(--gray)">mg</span> — straight down, always.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const G = 9.8;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let currentTab = 1;
+
+function W() { return canvas.width/(window.devicePixelRatio||1); }
+function H() { return canvas.height/(window.devicePixelRatio||1); }
+
+function setupCanvas() {
+  const wrap = canvas.parentElement, dpr = window.devicePixelRatio||1;
+  canvas.width  = wrap.clientWidth*dpr;
+  canvas.height = wrap.clientHeight*dpr;
+  canvas.style.width  = wrap.clientWidth+'px';
+  canvas.style.height = wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+const getTheta = () => parseFloat(document.getElementById('sl-theta').value);
+const getM     = () => parseFloat(document.getElementById('sl-m').value);
+
+// ── Drawing helpers ────────────────────────────
+function arrow(x1,y1,x2,y2,color,lw=2.5,hs=9) {
+  const dx=x2-x1,dy=y2-y1;
+  if(Math.hypot(dx,dy)<4)return;
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);
+  ctx.save();ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-hs,hs*0.38);ctx.lineTo(-hs,-hs*0.38);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+
+function line(x1,y1,x2,y2,color,lw=1.5,dash=[]) {
+  ctx.save();ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.setLineDash(dash);
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+}
+
+function lbl(text,x,y,color,align='center',size=12,italic=false) {
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align;ctx.fillText(text,x,y);
+}
+
+function sqMark(ox,oy,d1x,d1y,d2x,d2y,color,size=8) {
+  ctx.strokeStyle=color;ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(ox+d1x*size,oy+d1y*size);
+  ctx.lineTo(ox+d1x*size+d2x*size,oy+d1y*size+d2y*size);
+  ctx.lineTo(ox+d2x*size,oy+d2y*size);
+  ctx.stroke();
+}
+
+function arcAngle(cx,cy,r,a1,a2,color,lw=1.5) {
+  ctx.strokeStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.arc(cx,cy,r,a1,a2);ctx.stroke();
+}
+
+// ── Ramp geometry ──────────────────────────────
+function getRamp() {
+  const w=W(),h=H();
+  const theta = getTheta()*Math.PI/180;
+  const rampLen = Math.min(w,h)*0.50;
+  const baseX = w*0.18, baseY = h*0.74;
+  const topX  = baseX + rampLen*Math.cos(theta);
+  const topY  = baseY - rampLen*Math.sin(theta);
+  const rightX= topX, rightY= baseY;
+
+  // Ball midway up ramp — centre ON the surface
+  const t   = 0.52;
+  const bCx = baseX + rampLen*t*Math.cos(theta);
+  const bCy = baseY - rampLen*t*Math.sin(theta);
+  const bSx = bCx, bSy = bCy;
+
+  // Unit vectors
+  const rSx =  Math.cos(theta);   // along ramp up
+  const rSy = -Math.sin(theta);   // canvas y-down
+  const nX  = -Math.sin(theta);   // normal away from surface (upper-left)
+  const nY  = -Math.cos(theta);
+
+  const blockSize = 10;  // ball radius
+  // Keep block corners for compatibility (not used for ball)
+  const b1x=bCx, b1y=bCy, b2x=bCx, b2y=bCy;
+  const b3x=bCx, b3y=bCy, b4x=bCx, b4y=bCy;
+
+  // Force scale — based on rampLen
+  const m=getM(), mg=m*G;
+  const scale = rampLen*0.38/mg;
+  const mgLen = mg*scale;
+  const NLen  = mg*Math.cos(theta)*scale;
+  const FpLen = mg*Math.sin(theta)*scale;
+
+  // mg tip
+  const mgTipX=bCx, mgTipY=bCy+mgLen;
+
+  // Rectangle corners (construction):
+  // From bCx,bCy drop perpendicular to ramp direction → point A (along ramp from block foot)
+  // From mgTip drop perpendicular to ramp direction → point B
+  // A and B connected by line parallel to ramp
+  // The rectangle: bCx,bCy — mgTipX,mgTipY — B — A
+  // Perpendicular from block centre to ramp line:
+  //   ramp line passes through baseX,baseY in direction rSx,rSy
+  //   foot of perpendicular from bCx,bCy onto ramp:
+  const t_bc = (bCx-baseX)*rSx + (bCy-baseY)*rSy;
+  const footBCx = baseX+t_bc*rSx, footBCy=baseY+t_bc*rSy;
+  // foot of perpendicular from mgTip onto ramp:
+  const t_mg=(mgTipX-baseX)*rSx+(mgTipY-baseY)*rSy;
+  const footMGx=baseX+t_mg*rSx, footMGy=baseY+t_mg*rSy;
+
+  return {
+    theta,rampLen,baseX,baseY,topX,topY,rightX,rightY,
+    bSx,bSy,bCx,bCy,b1x,b1y,b2x,b2y,b3x,b3y,b4x,b4y,
+    rSx,rSy,nX,nY,blockSize,
+    m,mg,scale,mgLen,NLen,FpLen,
+    mgTipX,mgTipY,
+    footBCx,footBCy,footMGx,footMGy
+  };
+}
+
+// ── Draw ground ──────────────────────────────
+function drawGround(g) {
+  line(g.baseX-30,g.baseY,g.rightX+30,g.baseY,'#3a3b45',1.5);
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  for(let gx=g.baseX-30;gx<=g.rightX+30;gx+=14){
+    ctx.beginPath();ctx.moveTo(gx,g.baseY);ctx.lineTo(gx-8,g.baseY+9);ctx.stroke();
+  }
+}
+
+// ── Draw ramp ──────────────────────────────
+function drawRamp(g) {
+  ctx.fillStyle='#13141a';
+  ctx.beginPath();ctx.moveTo(g.baseX,g.baseY);ctx.lineTo(g.topX,g.topY);ctx.lineTo(g.rightX,g.rightY);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#4a4b6a';ctx.lineWidth=2.5;ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(g.baseX,g.baseY);ctx.lineTo(g.topX,g.topY);ctx.lineTo(g.rightX,g.rightY);ctx.stroke();
+  // right angle at base-right
+  sqMark(g.rightX,g.rightY,-1,0,0,-1,'#3a3b4a',10);
+  // θ arc at base
+  arcAngle(g.baseX,g.baseY,46,-g.theta,0,'#f5a62388',1.5);
+  const midA=-g.theta/2;
+  lbl('θ',g.baseX+(46+14)*Math.cos(midA),g.baseY+(46+14)*Math.sin(midA)+4,'#f5a623','center',14,true);
+}
+
+// ── Draw ball ──────────────────────────────
+function drawBlock(g) {
+  const BR = 10;
+  ctx.beginPath(); ctx.arc(g.bCx, g.bCy, BR, 0, Math.PI*2);
+  ctx.fillStyle = '#c8cad8'; ctx.fill();
+  ctx.strokeStyle = '#7a7d8e'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(g.bCx-BR*0.28, g.bCy-BR*0.3, BR*0.26, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fill();
+}
+
+// ── Draw mg ──────────────────────────────
+function drawMg(g,alpha=1) {
+  const color=`rgba(154,157,176,${alpha})`;
+  arrow(g.bCx,g.bCy,g.mgTipX,g.mgTipY,color,3,10);
+  lbl('mg',g.mgTipX+30,g.mgTipY,'#9a9db0','left',13,true);
+}
+
+// ── Tab 1: Base ──────────────────────────────
+function drawTab1(g) {
+  drawGround(g); drawRamp(g); drawBlock(g); drawMg(g);
+}
+
+// ── Tab 2: Rectangle construction ──────────
+function drawTab2(g) {
+  drawGround(g); drawRamp(g); drawBlock(g); drawMg(g);
+
+  // Force triangle + rectangle construction
+  // mg = vertical hypotenuse from ball straight down (already drawn)
+  // into-ramp unit vector (perpendicular to surface, pointing into ramp)
+  const pX = -g.nX, pY = -g.nY;  // (sinθ, cosθ) in canvas coords
+
+  // Adjacent leg (GREEN): from ball, perpendicular to ramp (into ramp direction)
+  // length = NLen = mg*cosθ
+  const Bx2 = g.bCx + pX*g.NLen,  By2 = g.bCy + pY*g.NLen;
+
+  // Opposite leg (BLUE): from end of green, parallel to ramp, to mg tip
+  // length = FpLen = mg*sinθ
+  // mg tip is at (bCx, bCy+mgLen) — straight down
+  // from B, go parallel to ramp direction to reach mg tip
+  // Direction: ramp down-left = (-rSx, -rSy)
+  const Dx2 = g.mgTipX, Dy2 = g.mgTipY;  // mg tip
+
+  // Dashed (GRAY): from mg tip, parallel to green leg (perpendicular to ramp)
+  // back up to ramp — closes the rectangle
+  // This goes from mg tip in the anti-into-ramp direction (nX,nY) back to ramp surface
+  // End point = mg tip + (-pX,-pY)*NLen = ball position (closes rectangle)
+  // So dashed goes from mg tip back to ball — but that's mg itself
+  // Actually dashed goes from mg tip upward parallel to green to a point on ramp
+  // That point = (mgTipX + nX*NLen, mgTipY + nY*NLen)
+  const Ex2 = Dx2 + g.nX*g.NLen, Ey2 = Dy2 + g.nY*g.NLen;
+
+  // Draw:
+  // 1. Adjacent (green) — ball to B, perpendicular to ramp, solid
+  line(g.bCx, g.bCy, Bx2, By2, '#2dd4a0', 2.5, []);
+  // 2. Opposite (blue) — B to mg tip, parallel to ramp, solid  
+  line(Bx2, By2, Dx2, Dy2, '#4a9eff', 2.5, []);
+  // 3. Dashed gray — mg tip to E, parallel to adjacent, closes rectangle
+  line(Dx2, Dy2, Ex2, Ey2, '#7a7d9e', 1.5, [4,4]);
+  // 4. Right angle mark at B (between green and blue)
+  // from B, green came from ball direction (-pX,-pY), blue goes to mg tip (-rSx,-rSy)
+  sqMark(Bx2, By2, -pX, -pY, -g.rSx, -g.rSy, '#7a7d9e', 8);
+
+  // θ arc: acute angle between green (into ramp) and mg (straight down)
+  // green = atan2(pY,pX) where pX=sinθ, pY=cosθ → angle between 0 and π/2
+  // mg = π/2 (straight down in canvas)
+  // green angle < mg angle, so sweep clockwise from greenDir to mgDir (anticlockwise=false)
+  const greenDir = Math.atan2(pY, pX);   // < π/2
+  const mgDir    = Math.PI / 2;           // π/2
+  ctx.strokeStyle = '#f5a62388'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(g.bCx, g.bCy, 28, greenDir, mgDir, false);  // clockwise = acute arc
+  ctx.stroke();
+  // Label at midpoint of acute arc
+  const arcMid = (greenDir + mgDir) / 2;
+  lbl('θ', g.bCx + Math.cos(arcMid)*44, g.bCy + Math.sin(arcMid)*44, '#f5a623', 'center', 13, true);
+
+  // Label
+  const rcx2 = (g.bCx+Bx2+Dx2+Ex2)/4;
+  const rcy2 = (g.bCy+By2+Dy2+Ey2)/4;
+
+}
+
+// ── Tab 3: Similar triangles ──────────────
+function drawTab3(g) {
+  drawGround(g); drawRamp(g); drawBlock(g); drawMg(g);
+
+  // Force triangle + rectangle construction
+  // mg = vertical hypotenuse from ball straight down (already drawn)
+  // into-ramp unit vector (perpendicular to surface, pointing into ramp)
+  const pX = -g.nX, pY = -g.nY;  // (sinθ, cosθ) in canvas coords
+
+  // Adjacent leg (GREEN): from ball, perpendicular to ramp (into ramp direction)
+  // length = NLen = mg*cosθ
+  const Bx2 = g.bCx + pX*g.NLen,  By2 = g.bCy + pY*g.NLen;
+
+  // Opposite leg (BLUE): from end of green, parallel to ramp, to mg tip
+  // length = FpLen = mg*sinθ
+  // mg tip is at (bCx, bCy+mgLen) — straight down
+  // from B, go parallel to ramp direction to reach mg tip
+  // Direction: ramp down-left = (-rSx, -rSy)
+  const Dx2 = g.mgTipX, Dy2 = g.mgTipY;  // mg tip
+
+  // Dashed (GRAY): from mg tip, parallel to green leg (perpendicular to ramp)
+  // back up to ramp — closes the rectangle
+  // This goes from mg tip in the anti-into-ramp direction (nX,nY) back to ramp surface
+  // End point = mg tip + (-pX,-pY)*NLen = ball position (closes rectangle)
+  // So dashed goes from mg tip back to ball — but that's mg itself
+  // Actually dashed goes from mg tip upward parallel to green to a point on ramp
+  // That point = (mgTipX + nX*NLen, mgTipY + nY*NLen)
+  const Ex2 = Dx2 + g.nX*g.NLen, Ey2 = Dy2 + g.nY*g.NLen;
+
+  // Draw:
+  // 1. Adjacent (green) — ball to B, perpendicular to ramp, solid
+  line(g.bCx, g.bCy, Bx2, By2, '#2dd4a066', 1.2, []);
+  // 2. Opposite (blue) — B to mg tip, parallel to ramp, solid  
+  line(Bx2, By2, Dx2, Dy2, '#4a9eff66', 1.2, []);
+  // 3. Dashed gray — mg tip to E, parallel to adjacent, closes rectangle
+  line(Dx2, Dy2, Ex2, Ey2, '#7a7d9e', 1.5, [4,4]);
+  // 4. Right angle mark at B (between green and blue)
+  // from B, green came from ball direction (-pX,-pY), blue goes to mg tip (-rSx,-rSy)
+  sqMark(Bx2, By2, -pX, -pY, -g.rSx, -g.rSy, '#7a7d9e', 8);
+
+  // θ arc: acute angle between green (into ramp) and mg (straight down)
+  // green = atan2(pY,pX) where pX=sinθ, pY=cosθ → angle between 0 and π/2
+  // mg = π/2 (straight down in canvas)
+  // green angle < mg angle, so sweep clockwise from greenDir to mgDir (anticlockwise=false)
+  const greenDir = Math.atan2(pY, pX);   // < π/2
+  const mgDir    = Math.PI / 2;           // π/2
+  ctx.strokeStyle = '#f5a62388'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(g.bCx, g.bCy, 28, greenDir, mgDir, false);  // clockwise = acute arc
+  ctx.stroke();
+  // Label at midpoint of acute arc
+  const arcMid = (greenDir + mgDir) / 2;
+  lbl('θ', g.bCx + Math.cos(arcMid)*44, g.bCy + Math.sin(arcMid)*44, '#f5a623', 'center', 13, true);
+
+  // Label
+  const rcx2 = (g.bCx+Bx2+Dx2+Ex2)/4;
+  const rcy2 = (g.bCy+By2+Dy2+Ey2)/4;
+
+
+  // N = mg·cosθ — perpendicular away from ramp (teal/green)
+  const nTipX = g.bCx + g.nX*g.NLen, nTipY = g.bCy + g.nY*g.NLen;
+  arrow(g.bCx, g.bCy, nTipX, nTipY, '#2dd4a0', 3, 10);
+
+  // F∥ = mg·sinθ — down the slope (blue)
+  const fpTipX = g.bCx - g.rSx*g.FpLen, fpTipY = g.bCy - g.rSy*g.FpLen;
+  arrow(g.bCx, g.bCy, fpTipX, fpTipY, '#4a9eff', 3, 10);
+}
+
+// ── Tab 3: Similar triangles ──────────────
+// ── Tab 4: Vectors emerge ──────────────────
+function drawTab4(g) {
+  drawGround(g); drawRamp(g); drawBlock(g);
+
+  // mg faint ghost
+  drawMg(g, 0.25);
+
+  // Ghost lines where legs were
+  const pX4=-g.nX, pY4=-g.nY;
+  const Bx4=g.bCx-g.rSx*g.NLen, By4=g.bCy-g.rSy*g.NLen;
+  const Cx4=Bx4+pX4*g.FpLen, Cy4=By4+pY4*g.FpLen;
+  line(g.bCx,g.bCy,Bx4,By4,'#2a2b38',1,[2,3]);
+  line(Bx4,By4,Cx4,Cy4,'#2a2b38',1,[2,3]);
+  line(Cx4,Cy4,g.mgTipX,g.mgTipY,'#2a2b38',1,[2,3]);
+
+  // N vector — moved to block, pointing perpendicular away from surface (teal)
+  const nTipX=g.bCx+g.nX*g.NLen, nTipY=g.bCy+g.nY*g.NLen;
+  arrow(g.bCx,g.bCy,nTipX,nTipY,'#2dd4a0',3,10);
+  lbl('N = mg·cosθ',nTipX+g.rSx*14,nTipY+g.rSy*14,'#2dd4a0','left',12,true);
+
+  // F∥ vector — moved to ramp surface, pointing down the slope (blue)
+  const fpTipX=g.bCx-g.rSx*g.FpLen, fpTipY=g.bCy-g.rSy*g.FpLen;
+  arrow(g.bCx,g.bCy,fpTipX,fpTipY,'#4a9eff',3,10);
+  lbl('F∥ = mg·sinθ',fpTipX+g.nX*20,fpTipY+g.nY*20,'#4a9eff','center',12,true);
+
+  // Right angle mark between N and F∥
+  sqMark(g.bCx,g.bCy,g.nX,g.nY,-g.rSx,-g.rSy,'#4a4d6e',9);
+
+  // θ at block — just the two relevant ones, clean
+  arcAngle(g.bCx,g.bCy,28,Math.atan2(-g.rSy,-g.rSx),Math.PI/2,'#f5a62366',1.5);
+  lbl('θ',g.bCx-20,g.bCy+30,'#f5a623aa','center',12,true);
+
+  lbl('vectors in physical position — FBD complete',W()/2,H()-16,'#3a3b5a','center',11);
+}
+
+// ── Tab descriptions ──────────────────────
+const descriptions = {
+  1: '<span class="highlight">Step 1 — The base.</span> A block sits on a frictionless ramp at angle <span style="color:#f5a623">θ</span>. The only force is <span style="color:#9a9db0">mg</span> — straight down, always. Nothing else.',
+  2: '<span class="highlight">Step 2 — Rectangle construction.</span> Draw three lines: two perpendicular to the ramp from the block and from the mg tip, connected by a line parallel to the ramp. Four right angles. This rectangle is the key.',
+  4: '<span class="highlight">Step 3 — Vectors emerge.</span> Move the legs to their physical positions. <span style="color:#2dd4a0">N = mg·cosθ</span> points away from the surface. <span style="color:#4a9eff">F∥ = mg·sinθ</span> points down the slope. The angles came from the geometry — not from memorization.',
+};
+
+// ── Controls ──────────────────────────────
+function setTab(n) {
+  currentTab=n;
+  [1,2,3,4].forEach(i=>{
+    document.getElementById('tab'+i).classList.toggle('active',i===n);
+  });
+  document.getElementById('step-desc').innerHTML=descriptions[n];
+  update();
+}
+
+function setAngle(deg) {
+  document.getElementById('sl-theta').value=deg;
+  document.querySelectorAll('.angle-btn').forEach(b=>{
+    b.classList.toggle('active',parseInt(b.textContent)===deg);
+  });
+  update();
+}
+
+function update() {
+  const m=getM(), theta=getTheta();
+  const mg=m*G, N=mg*Math.cos(theta*Math.PI/180), Fp=mg*Math.sin(theta*Math.PI/180);
+  document.getElementById('lbl-theta').textContent=theta+'°';
+  document.getElementById('lbl-m').textContent=m.toFixed(1)+' kg';
+  document.getElementById('val-mg').textContent=mg.toFixed(1)+' N';
+  document.getElementById('val-n').textContent=N.toFixed(1)+' N';
+  document.getElementById('val-f').textContent=Fp.toFixed(1)+' N';
+  document.getElementById('bar-mg').style.width='100%';
+  document.getElementById('bval-mg').textContent=mg.toFixed(1)+' N';
+  document.getElementById('bar-n').style.width=(N/mg*100).toFixed(1)+'%';
+  document.getElementById('bval-n').textContent=N.toFixed(1)+' N';
+  document.getElementById('bar-f').style.width=(Fp/mg*100).toFixed(1)+'%';
+  document.getElementById('bval-f').textContent=Fp.toFixed(1)+' N';
+
+  if(!ctx||W()===0)return;
+  ctx.clearRect(0,0,W(),H());
+  const g=getRamp();
+  if(currentTab===1) drawTab1(g);
+  else if(currentTab===2) drawTab2(g);
+  else if(currentTab===3) drawTab3(g);
+  else drawTab4(g);
+}
+
+window.addEventListener('resize',()=>{setupCanvas();update();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();update();}));
+</script>
+</body>
+</html>
