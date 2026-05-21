@@ -173,15 +173,15 @@ canvas { display: block; }
 
       <!-- T readout -->
       <div class="t-readout" id="t-readout">
-        <div class="t-label">T  (constraint force)</div>
+        <div class="t-label" style="color:var(--text-muted)">T  (constraint force)</div>
         <div class="t-value" id="t-value">— N</div>
         <div class="t-meaning" id="t-meaning">drop ball to begin</div>
         <div style="margin-top:8px;">
           <div style="height:10px; border-radius:5px; background:var(--border); overflow:hidden; position:relative;">
             <div id="t-bar" style="height:100%; border-radius:5px; width:0%; background:var(--teal); transition:width 0.05s, background 0.1s;"></div>
           </div>
-          <div style="display:flex; justify-content:space-between; font-size:10px; font-family:var(--font-mono); color:var(--text-dim); margin-top:3px;">
-            <span>0</span><span id="t-bar-max" style="color:var(--text-dim)">— N max</span>
+          <div style="display:flex; justify-content:space-between; font-size:10px; font-family:var(--font-mono); color:var(--text-muted); margin-top:3px;">
+            <span>0</span><span id="t-bar-max">— N max</span>
           </div>
         </div>
       </div>
@@ -223,6 +223,8 @@ canvas { display: block; }
       <div class="ctrl-divider"></div>
 
       <div class="result-row"><span class="result-label">v (current)</span><span class="result-val amber" id="val-v">0.00 m/s</span></div>
+      <div class="result-row"><span class="result-label">a = v²/R</span><span class="result-val teal" id="val-ac">— m/s²</span></div>
+      <div class="result-row"><span class="result-label">F<sub>c</sub> = mv²/R</span><span class="result-val teal" id="val-fc">— N</span></div>
       <div class="result-row"><span class="result-label">v at top (predicted)</span><span class="result-val amber" id="val-vtop">— m/s</span></div>
       <div class="result-row"><span class="result-label">v<sub>min</sub> = √(gR)</span><span class="result-val purple" id="val-vmin">— m/s</span></div>
 
@@ -517,6 +519,10 @@ function updateReadouts(height, v, T, onCircle) {
   document.getElementById('pct-pe').textContent  = totalE > 0 ? Math.round(pe/totalE*100)+'%' : '100%';
   document.getElementById('pct-ke').textContent  = totalE > 0 ? Math.round(ke/totalE*100)+'%' : '0%';
   document.getElementById('val-v').textContent   = v.toFixed(2) + ' m/s';
+  const ac = v*v / R;
+  const fc = m * ac;
+  document.getElementById('val-ac').textContent  = ac.toFixed(2) + ' m/s²';
+  document.getElementById('val-fc').textContent  = fc.toFixed(1) + ' N';
   document.getElementById('val-vtop').textContent = vTop.toFixed(2) + ' m/s';
   document.getElementById('val-vmin').textContent = vMin.toFixed(2) + ' m/s';
 
@@ -775,24 +781,32 @@ function draw() {
     if (pos) { bx = pos.x; by = pos.y - BR; }
     else { bx = trackPt(0,g).x; by = trackPt(0,g).y - BR; }
 
-    // Draw T force arrow on circle
+    // ── Vectors on circle: a_c (teal) and T (purple/red) ──
     if (pos && pos.onCircle && pos.phi !== undefined) {
-      const T = tension(vFromEnergy(pos.height), pos.phi);
-      const arrowColor = T >= 0 ? '#2dd4a0' : '#ff5f6d';
-      // Inward direction (toward centre)
+      const v   = vFromEnergy(pos.height);
+      const T   = tension(v, pos.phi);
+      const m   = getM(), Rv = getR();
       const inX = loopCx - pos.x;
       const inY = loopCy - pos.y;
       const inLen = Math.sqrt(inX*inX + inY*inY);
-      if (inLen > 0 && Math.abs(T) > 1) {
-        const arrowLen = Math.min(Math.abs(T) * 0.15, 50);
+      if (inLen > 0) {
         const nx = inX/inLen, ny = inY/inLen;
         const ax = pos.x, ay = pos.y - BR;
-        ctx.strokeStyle = arrowColor; ctx.fillStyle = arrowColor; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + nx*arrowLen, ay + ny*arrowLen); ctx.stroke();
-        const angle = Math.atan2(ny, nx);
-        ctx.save(); ctx.translate(ax + nx*arrowLen, ay + ny*arrowLen); ctx.rotate(angle);
-        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-7,3); ctx.lineTo(-7,-3); ctx.closePath(); ctx.fill();
-        ctx.restore();
+        const fScale = 0.15;
+
+        // Centripetal acceleration a=v²/R shown as force m*a_c (teal)
+        const ac    = v*v / Rv;
+        const acLen = Math.min(m * ac * fScale, 55);
+        if (acLen > 3) {
+          ctx.strokeStyle='#2dd4a0'; ctx.fillStyle='#2dd4a0'; ctx.lineWidth=2;
+          ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(ax+nx*acLen,ay+ny*acLen); ctx.stroke();
+          ctx.save(); ctx.translate(ax+nx*acLen,ay+ny*acLen); ctx.rotate(Math.atan2(ny,nx));
+          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-7,3); ctx.lineTo(-7,-3); ctx.closePath(); ctx.fill(); ctx.restore();
+          ctx.fillStyle='#2dd4a0'; ctx.font='10px "DM Mono",monospace'; ctx.textAlign='left';
+          ctx.fillText('a=v²/R', ax+nx*(acLen+8), ay+ny*(acLen+8)+4);
+        }
+
+
       }
     }
   }

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Displacement, Velocity & Acceleration — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0f1014;
+  --surface:    #17181d;
+  --surface2:   #1e2028;
+  --border:     #2a2b33;
+  --border2:    #3a3b45;
+  --text:       #e8e9ef;
+  --text-muted: #7a7d8e;
+  --text-dim:   #4a4d5e;
+  --blue:       #4a9eff;
+  --blue-dim:   #1a3a6a;
+  --teal:       #2dd4a0;
+  --teal-dim:   #0a3a2a;
+  --amber:      #f5a623;
+  --red:        #ff5f6d;
+  --purple:     #b98aff;
+  --gray:       #9a9db0;
+  --font-body:  'DM Sans', sans-serif;
+  --font-mono:  'DM Mono', monospace;
+  --font-serif: 'DM Serif Display', serif;
+}
+html, body { height:100%; background:var(--bg); color:var(--text); font-family:var(--font-body); font-size:15px; }
+.site-header { display:flex; align-items:center; gap:16px; padding:0 24px; height:52px; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0; }
+.site-logo { font-family:var(--font-serif); font-size:18px; color:var(--text); text-decoration:none; }
+.site-logo span { color:var(--blue); }
+.site-tagline { font-size:12px; color:var(--text-dim); font-family:var(--font-mono); }
+.header-back { margin-left:auto; font-size:12px; font-family:var(--font-mono); color:var(--text-muted); text-decoration:none; }
+.header-back:hover { color:var(--text); }
+.sim-shell { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+.sim-layout { display:flex; flex:1; overflow:hidden; }
+.ctrl-panel { width:280px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border); padding:16px 18px; display:flex; flex-direction:column; overflow-y:auto; }
+.ctrl-divider { height:1px; background:var(--border); margin:12px 0; }
+.ctrl-note { margin-top:auto; padding-top:12px; font-size:11px; color:var(--text-dim); font-family:var(--font-mono); border-top:1px solid var(--border); line-height:1.7; }
+.eq-block { background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:12px 14px; margin-bottom:14px; }
+.eq-main { font-family:var(--font-serif); font-size:16px; font-style:italic; color:var(--text); margin-bottom:4px; }
+.eq-sub  { font-size:11px; font-family:var(--font-mono); color:var(--text-dim); line-height:1.9; }
+.slider-group { margin-bottom:12px; }
+.slider-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; }
+.slider-label { font-size:13px; color:var(--text-muted); font-style:italic; font-family:var(--font-serif); }
+.slider-value { font-size:13px; font-family:var(--font-mono); color:var(--text); font-weight:500; }
+input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:5px; border-radius:3px; background:var(--border2); outline:none; cursor:pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--text); border:2px solid var(--border2); cursor:grab; }
+.result-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.result-label { font-size:12px; color:var(--text-muted); font-family:var(--font-mono); }
+.result-val { font-size:13px; font-family:var(--font-mono); font-weight:500; }
+.canvas-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.tab-bar { display:flex; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0; }
+.tab-btn { flex:1; padding:10px 8px; font-size:12px; font-family:var(--font-mono); color:var(--text-dim); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; transition:all 0.15s; text-align:center; line-height:1.3; }
+.tab-btn:hover { color:var(--text-muted); }
+.tab-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+.canvas-wrap { flex:1; position:relative; overflow:hidden; }
+canvas { display:block; }
+.step-desc { padding:10px 20px; background:var(--surface); border-top:1px solid var(--border); font-size:12px; font-family:var(--font-mono); color:var(--text-muted); flex-shrink:0; line-height:1.5; min-height:44px; }
+.step-desc .hl { color:var(--text); }
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">1.2 · displacement · velocity · acceleration</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-main">x = x₀ + v₀t + ½at²</div>
+        <div class="eq-sub">
+          <span style="color:var(--blue)">x — displacement (m)</span><br>
+          <span style="color:var(--teal)">v = v₀ + at — velocity (m/s)</span><br>
+          <span style="color:var(--amber)">a — acceleration (m/s²)</span><br>
+          <span style="color:var(--text-dim)">slope of x-t = v · slope of v-t = a</span>
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">v₀ · initial velocity</span><span class="slider-value" id="lbl-v0">3.0 m/s</span></div>
+        <input type="range" id="sl-v0" min="-10" max="10" step="0.5" value="3" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">a · acceleration</span><span class="slider-value" id="lbl-a">2.0 m/s²</span></div>
+        <input type="range" id="sl-a" min="-10" max="10" step="0.5" value="2" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">t · time</span><span class="slider-value" id="lbl-t">2.0 s</span></div>
+        <input type="range" id="sl-t" min="0" max="5" step="0.1" value="2" oninput="update()">
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="result-row"><span class="result-label">x = x₀+v₀t+½at²</span><span class="result-val" style="color:var(--blue)" id="val-x">— m</span></div>
+      <div class="result-row"><span class="result-label">v = v₀ + at</span><span class="result-val" style="color:var(--teal)" id="val-v">— m/s</span></div>
+      <div class="result-row"><span class="result-label">a (constant)</span><span class="result-val" style="color:var(--amber)" id="val-a">— m/s²</span></div>
+
+      <div class="ctrl-divider"></div>
+
+      <div style="font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Key relationships</div>
+      <div class="result-row"><span class="result-label">slope of x-t</span><span class="result-val" style="color:var(--teal)" id="val-slope-x">= v</span></div>
+      <div class="result-row"><span class="result-label">slope of v-t</span><span class="result-val" style="color:var(--amber)" id="val-slope-v">= a</span></div>
+      <div class="result-row"><span class="result-label">area under v-t</span><span class="result-val" style="color:var(--blue)" id="val-area">= Δx</span></div>
+
+      <div class="ctrl-note">
+        drag t to move ball<br>
+        drag a to change motion<br>
+        a=0 → straight line on x-t
+      </div>
+    </div>
+
+    <div class="canvas-area">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab1" onclick="setTab(1)">① Motion<br><span style="font-size:10px;opacity:0.6">ball on track</span></button>
+        <button class="tab-btn" id="tab2" onclick="setTab(2)">② x-t Graph<br><span style="font-size:10px;opacity:0.6">displacement</span></button>
+        <button class="tab-btn" id="tab3" onclick="setTab(3)">③ v-t Graph<br><span style="font-size:10px;opacity:0.6">velocity</span></button>
+        <button class="tab-btn" id="tab4" onclick="setTab(4)">④ All Three<br><span style="font-size:10px;opacity:0.6">connected</span></button>
+      </div>
+      <div class="canvas-wrap"><canvas id="c"></canvas></div>
+      <div class="step-desc" id="step-desc">
+        <span class="hl">Motion tab:</span> watch the ball move. Drag <span style="color:var(--amber)">a</span> to change acceleration, <span style="color:var(--teal)">v₀</span> to change starting speed, <span style="color:var(--text)">t</span> to scrub through time.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let currentTab = 1;
+const TMAX = 5;
+
+function W() { return canvas.width/(window.devicePixelRatio||1); }
+function H() { return canvas.height/(window.devicePixelRatio||1); }
+function setupCanvas() {
+  const wrap=canvas.parentElement, dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr; canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px'; canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+const getV0 = () => parseFloat(document.getElementById('sl-v0').value);
+const getA  = () => parseFloat(document.getElementById('sl-a').value);
+const getT  = () => parseFloat(document.getElementById('sl-t').value);
+
+function xAt(t)  { const v0=getV0(),a=getA(); return v0*t + 0.5*a*t*t; }
+function vAt(t)  { return getV0() + getA()*t; }
+
+function arrow(x1,y1,x2,y2,color,lw=2.5,hs=8) {
+  const dx=x2-x1,dy=y2-y1;
+  if(Math.hypot(dx,dy)<4)return;
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const ang=Math.atan2(dy,dx);
+  ctx.save();ctx.translate(x2,y2);ctx.rotate(ang);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-hs,hs*0.38);ctx.lineTo(-hs,-hs*0.38);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+
+function lbl(text,x,y,color,align='center',size=12,italic=false) {
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align; ctx.fillText(text,x,y);
+}
+
+function setTab(n) {
+  currentTab=n;
+  [1,2,3,4].forEach(i=>document.getElementById('tab'+i).classList.toggle('active',i===n));
+  const descs={
+    1:'<span class="hl">Motion:</span> drag <span style="color:var(--amber)">a</span> to change acceleration, <span style="color:var(--teal)">v₀</span> for starting speed, <span style="color:var(--text)">t</span> to scrub time. Arrows show displacement (blue), velocity (teal), acceleration (amber).',
+    2:'<span class="hl">x-t Graph:</span> position vs time. <span style="color:var(--amber)">a=0</span> → straight line. <span style="color:var(--amber)">a≠0</span> → parabola. The <span style="color:var(--teal)">slope at any point = velocity</span> at that moment.',
+    3:'<span class="hl">v-t Graph:</span> velocity vs time. Always a straight line (constant acceleration). The <span style="color:var(--amber)">slope = acceleration</span>. The <span style="color:var(--blue)">area under the curve = displacement</span>.',
+    4:'<span class="hl">All three together:</span> they are connected. Slope of x-t = v-t. Slope of v-t = a-t. Change <span style="color:var(--amber)">a</span> and watch all three respond.'
+  };
+  document.getElementById('step-desc').innerHTML=descs[n];
+  update();
+}
+
+function update() {
+  const v0=getV0(), a=getA(), t=getT();
+  const x=xAt(t), v=vAt(t);
+
+  document.getElementById('lbl-v0').textContent = v0.toFixed(1)+' m/s';
+  document.getElementById('lbl-a').textContent  = a.toFixed(1)+' m/s²';
+  document.getElementById('lbl-t').textContent  = t.toFixed(1)+' s';
+  document.getElementById('val-x').textContent  = x.toFixed(2)+' m';
+  document.getElementById('val-v').textContent  = v.toFixed(2)+' m/s';
+  document.getElementById('val-a').textContent  = a.toFixed(1)+' m/s²';
+  document.getElementById('val-slope-x').textContent = '= '+v.toFixed(2)+' m/s';
+  document.getElementById('val-slope-v').textContent = '= '+a.toFixed(1)+' m/s²';
+  document.getElementById('val-area').textContent    = '= '+x.toFixed(2)+' m';
+
+  if(!ctx||W()===0)return;
+  ctx.clearRect(0,0,W(),H());
+  if(currentTab===1) drawMotion();
+  else if(currentTab===2) drawGraph('x');
+  else if(currentTab===3) drawGraph('v');
+  else drawAll();
+}
+
+// ── Tab 1: Motion ──────────────────────────
+function drawMotion() {
+  const w=W(),h=H();
+  const v0=getV0(),a=getA(),t=getT();
+  const x=xAt(t), v=vAt(t);
+
+  // Track
+  const trackY = h*0.50;
+  const cx     = w/2;
+  const ppm    = w*0.035;  // pixels per metre — 1m = ppm px
+  const maxX   = Math.max(Math.abs(xAt(TMAX)), Math.abs(xAt(0)), 0.1);
+  const scale  = (w*0.42) / Math.max(maxX, 0.1);
+
+  // Ground
+  ctx.strokeStyle='#3a3b45';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(w*0.05,trackY);ctx.lineTo(w*0.95,trackY);ctx.stroke();
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  for(let gx=w*0.05;gx<=w*0.95;gx+=18){
+    ctx.beginPath();ctx.moveTo(gx,trackY);ctx.lineTo(gx-8,trackY+9);ctx.stroke();
+  }
+
+  // Origin marker
+  ctx.strokeStyle='#3a3b45';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx,trackY-20);ctx.lineTo(cx,trackY+20);ctx.stroke();
+  lbl('x=0',cx,trackY+34,'#3a3b45','center',10);
+
+  // Tick marks
+  for(let xi=-20;xi<=20;xi+=5) {
+    const px=cx+xi*scale;
+    if(px<w*0.05||px>w*0.95)continue;
+    ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(px,trackY-6);ctx.lineTo(px,trackY+6);ctx.stroke();
+    lbl(xi.toString(),px,trackY-12,'#2a2b33','center',9);
+  }
+  lbl('m',w*0.95+14,trackY+4,'#2a2b33','left',10);
+
+  // Displacement arrow (blue, from origin to ball)
+  const ballX = cx + x*scale;
+  if(Math.abs(x)>0.1) {
+    arrow(cx, trackY-50, ballX, trackY-50, '#4a9eff', 2.5, 8);
+    ctx.strokeStyle='#4a9eff33';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(cx,trackY-50);ctx.lineTo(cx,trackY-8);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ballX,trackY-50);ctx.lineTo(ballX,trackY-8);ctx.stroke();
+    ctx.setLineDash([]);
+    lbl('x = '+x.toFixed(2)+' m',(cx+ballX)/2,trackY-64,'#4a9eff','center',11,true);
+  }
+
+  // Ball
+  const BR=14;
+  ctx.beginPath();ctx.arc(ballX,trackY-BR,BR,0,Math.PI*2);
+  ctx.fillStyle='#c8cad8';ctx.fill();
+  ctx.strokeStyle='#7a7d8e';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.arc(ballX-BR*0.28,trackY-BR-BR*0.3,BR*0.26,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fill();
+
+  // Velocity arrow (teal, from ball)
+  const vScale=scale*0.5;
+  if(Math.abs(v)>0.1) {
+    arrow(ballX,trackY-BR,ballX+v*vScale,trackY-BR,'#2dd4a0',3,9);
+    lbl('v='+v.toFixed(1),(ballX+ballX+v*vScale)/2,trackY-BR-18,'#2dd4a0','center',11,true);
+  } else {
+    ctx.beginPath();ctx.arc(ballX,trackY-BR,5,0,Math.PI*2);
+    ctx.fillStyle='#2dd4a0';ctx.fill();
+    lbl('v=0',ballX,trackY-BR-18,'#2dd4a0','center',11,true);
+  }
+
+  // Acceleration arrow (amber, below ball)
+  if(Math.abs(a)>0.1) {
+    const aScale=scale*0.5;
+    arrow(ballX,trackY+30,ballX+a*aScale,trackY+30,'#f5a623',2.5,8);
+    lbl('a='+a.toFixed(1),(ballX+ballX+a*aScale)/2,trackY+48,'#f5a623','center',11,true);
+  } else {
+    lbl('a=0',ballX,trackY+44,'#f5a62366','center',11);
+  }
+
+  // Trail — ghost positions
+  ctx.strokeStyle='#c8cad822';ctx.lineWidth=1;
+  const trailStep = t > 0 ? t/20 : 1;
+  for(let ti=0;ti<=t;ti+=trailStep) {
+    const xi=cx+xAt(ti)*scale;
+    ctx.beginPath();ctx.arc(xi,trackY-BR,3,0,Math.PI*2);ctx.fillStyle='#c8cad822';ctx.fill();
+  }
+
+  // Time display
+  lbl('t = '+t.toFixed(1)+' s', w*0.5, h*0.88, '#4a4d5e', 'center', 13, true);
+
+  // Info box
+  const bx=w*0.06,by=h*0.72,bw=w*0.88,bh=60;
+  ctx.fillStyle='#13141a';ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,6);ctx.fill();ctx.stroke();
+  const col=bw/3;
+  lbl('x = '+x.toFixed(2)+' m',bx+col*0.5,by+24,'#4a9eff','center',13,true);
+  lbl('displacement',bx+col*0.5,by+42,'#4a9eff66','center',10);
+  lbl('v = '+v.toFixed(2)+' m/s',bx+col*1.5,by+24,'#2dd4a0','center',13,true);
+  lbl('velocity',bx+col*1.5,by+42,'#2dd4a066','center',10);
+  lbl('a = '+a.toFixed(1)+' m/s²',bx+col*2.5,by+24,'#f5a623','center',13,true);
+  lbl('acceleration',bx+col*2.5,by+42,'#f5a62366','center',10);
+}
+
+// ── Shared graph drawing ────────────────────
+function drawGraph(type, miniY, miniH, w, h) {
+  const full = (miniY === undefined);
+  const W2=w||W(), H2=h||H();
+  const gx   = full ? W2*0.12 : W2*0.12;
+  const gy   = full ? (miniY || H2*0.12) : miniY;
+  const gw   = full ? W2*0.78 : W2*0.78;
+  const gh   = full ? (miniH || H2*0.72) : miniH;
+
+  const v0=getV0(),a=getA(),t=getT();
+  const tMax=TMAX;
+
+  // Determine y range
+  let vals=[];
+  for(let ti=0;ti<=tMax;ti+=0.1) vals.push(type==='x'?xAt(ti):vAt(ti));
+  let yMin=Math.min(...vals), yMax=Math.max(...vals);
+  const yPad=(yMax-yMin)*0.2||2;
+  yMin-=yPad; yMax+=yPad;
+
+  const tx2px = (t2) => gx + (t2/tMax)*gw;
+  const yRange = yMax - yMin || 1;  // prevent divide by zero
+  const y2px  = (y)  => gy+gh - ((y-yMin)/yRange)*gh;
+  const y0px  = y2px(0);
+
+  // Grid
+  ctx.strokeStyle='#1a1b22';ctx.lineWidth=0.5;
+  for(let i=0;i<=5;i++){
+    const ty=gy+i*gh/5;
+    ctx.beginPath();ctx.moveTo(gx,ty);ctx.lineTo(gx+gw,ty);ctx.stroke();
+  }
+  for(let i=0;i<=tMax;i++){
+    const tx=tx2px(i);
+    ctx.beginPath();ctx.moveTo(tx,gy);ctx.lineTo(tx,gy+gh);ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx,gy+gh);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(gx,gy+gh);ctx.lineTo(gx+gw,gy+gh);ctx.stroke();
+  // Zero line
+  if(y0px>gy && y0px<gy+gh) {
+    ctx.strokeStyle='#3a3b45';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(gx,y0px);ctx.lineTo(gx+gw,y0px);ctx.stroke();
+    lbl('0',gx-8,y0px+4,'#3a3b45','right',10);
+  }
+
+  // Axis labels
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  for(let i=0;i<=tMax;i++){
+    const tx=tx2px(i);
+    ctx.beginPath();ctx.moveTo(tx,gy+gh);ctx.lineTo(tx,gy+gh+5);ctx.stroke();
+    lbl(i.toString(),tx,gy+gh+16,'#3a3b45','center',10);
+  }
+  lbl('t (s)',gx+gw+16,gy+gh+4,'#3a3b45','left',10);
+
+  // Y axis label
+  const color = type==='x'?'#4a9eff':type==='v'?'#2dd4a0':'#f5a623';
+  const yLabel= type==='x'?'x (m)':type==='v'?'v (m/s)':'a (m/s²)';
+  ctx.save();ctx.translate(gx-28,gy+gh/2);ctx.rotate(-Math.PI/2);
+  lbl(yLabel,0,0,color,'center',11);ctx.restore();
+
+  // Curve
+  ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.lineJoin='round';
+  ctx.beginPath();
+  for(let i=0;i<=100;i++){
+    const ti=i/100*tMax;
+    const yi=type==='x'?xAt(ti):vAt(ti);
+    const px=tx2px(ti), py=y2px(yi);
+    i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+
+  // Area fill under v-t curve (= displacement)
+  if(type==='v' && full) {
+    ctx.fillStyle='#4a9eff18';
+    ctx.beginPath();
+    ctx.moveTo(tx2px(0),y0px);
+    for(let i=0;i<=100;i++){
+      const ti=i/100*t;
+      ctx.lineTo(tx2px(ti),y2px(vAt(ti)));
+    }
+    ctx.lineTo(tx2px(t),y0px);
+    ctx.closePath();ctx.fill();
+  }
+
+  // Current time dot
+  const cx2=tx2px(t);
+  const cy2=y2px(type==='x'?xAt(t):vAt(t));
+  ctx.beginPath();ctx.arc(cx2,cy2,6,0,Math.PI*2);
+  ctx.fillStyle=color;ctx.fill();
+  ctx.strokeStyle='#0f1014';ctx.lineWidth=2;ctx.stroke();
+
+  // Vertical time line
+  ctx.strokeStyle=color+'55';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(cx2,gy);ctx.lineTo(cx2,gy+gh);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Value label at dot
+  const curVal = type==='x'?xAt(t):vAt(t);
+  lbl((curVal>=0?'+':'')+curVal.toFixed(2),cx2+10,cy2-8,color,'left',11,true);
+
+  // Tangent line at current point — true slope = v
+  if(full && type==='x') {
+    const slopeV = vAt(t);
+    // slope in pixels: dy/dx = (slopeV / (yMax-yMin)) * gh / gw * tMax
+    // For a dt of 1.5 seconds on either side:
+    const dt2   = Math.min(1.5, tMax*0.25);
+    const x1t   = Math.max(0, t - dt2);
+    const x2t   = Math.min(tMax, t + dt2);
+    const tx1   = tx2px(x1t);
+    const tx2   = tx2px(x2t);
+    // tangent y at those x positions using point-slope: y = y(t) + slope*(xi - t)
+    const ty1   = cy2 - (slopeV/yRange)*gh * ((x1t - t)/tMax) * tMax;
+    const ty2   = cy2 - (slopeV/yRange)*gh * ((x2t - t)/tMax) * tMax;
+    ctx.strokeStyle='#2dd4a077';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(tx1,ty1);ctx.lineTo(tx2,ty2);ctx.stroke();
+    ctx.setLineDash([]);
+    lbl('slope = v = '+slopeV.toFixed(1),cx2+10,ty2-10,'#2dd4a088','left',10);
+  }
+  if(full && type==='v') {
+    lbl('slope = a = '+a.toFixed(1),gx+gw*0.5,gy+16,'#f5a62388','center',10);
+    if(t>0.2) lbl('area = x = '+xAt(t).toFixed(2)+' m',tx2px(t/2),Math.min(y2px(vAt(t/2))+16,gy+gh-10),'#4a9eff66','center',10);
+  }
+}
+
+// ── Tab 4: All three ────────────────────────
+function drawAll() {
+  const w=W(),h=H();
+  const padT=20, padB=30, gap=14;
+  const gh=(h-padT-padB-gap*2)/3;
+  const gy1=padT, gy2=padT+gh+gap, gy3=padT+gh*2+gap*2;
+
+  // Draw x-t
+  drawGraph('x',gy1,gh,w,h);
+  // Draw v-t
+  drawGraph('v',gy2,gh,w,h);
+  // Draw a-t (constant)
+  const gx=w*0.12, gw2=w*0.78;
+  const aVal=getA();
+  const aMin=aVal-3, aMax=aVal+3;
+  const ay0=gy3+gh/2;
+  ctx.strokeStyle='#1a1b22';ctx.lineWidth=0.5;
+  for(let i=0;i<=5;i++){const ty=gy3+i*gh/5;ctx.beginPath();ctx.moveTo(gx,ty);ctx.lineTo(gx+gw2,ty);ctx.stroke();}
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(gx,gy3);ctx.lineTo(gx,gy3+gh);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(gx,gy3+gh);ctx.lineTo(gx+gw2,gy3+gh);ctx.stroke();
+  ctx.strokeStyle='#3a3b45';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(gx,ay0);ctx.lineTo(gx+gw2,ay0);ctx.stroke();
+  lbl('0',gx-8,ay0+4,'#3a3b45','right',9);
+  // a line
+  ctx.strokeStyle='#f5a623';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(gx,ay0-(aVal/(aMax-aMin))*gh*0.4);ctx.lineTo(gx+gw2,ay0-(aVal/(aMax-aMin))*gh*0.4);ctx.stroke();
+  lbl('a = '+aVal.toFixed(1)+' m/s²',gx+gw2*0.5,ay0-(aVal/(aMax-aMin))*gh*0.4-10,'#f5a623','center',10,true);
+  ctx.save();ctx.translate(gx-28,gy3+gh/2);ctx.rotate(-Math.PI/2);lbl('a (m/s²)',0,0,'#f5a623','center',10);ctx.restore();
+  for(let i=0;i<=TMAX;i++){
+    const tx=gx+(i/TMAX)*gw2;
+    ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(tx,gy3+gh);ctx.lineTo(tx,gy3+gh+5);ctx.stroke();
+    lbl(i.toString(),tx,gy3+gh+16,'#3a3b45','center',9);
+  }
+  lbl('t (s)',gx+gw2+16,gy3+gh+4,'#3a3b45','left',9);
+  // connector arrows between graphs
+  const tx=gx+(getT()/TMAX)*gw2;
+  ctx.strokeStyle='#4a4d5e33';ctx.lineWidth=1;ctx.setLineDash([2,3]);
+  ctx.beginPath();ctx.moveTo(tx,gy1+gh);ctx.lineTo(tx,gy2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(tx,gy2+gh);ctx.lineTo(tx,gy3);ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+window.addEventListener('resize',()=>{setupCanvas();update();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();update();}));
+</script>
+</body>
+</html>
