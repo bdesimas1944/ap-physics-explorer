@@ -375,17 +375,47 @@ function drawGraph(type, miniY, miniH, w, h) {
   }
   ctx.stroke();
 
-  // Area fill under v-t curve (= displacement)
+  // Area fill under v-t curve — color coded by sign of displacement
   if(type==='v' && full) {
-    ctx.fillStyle='#4a9eff18';
-    ctx.beginPath();
-    ctx.moveTo(tx2px(0),y0px);
-    for(let i=0;i<=100;i++){
-      const ti=i/100*t;
-      ctx.lineTo(tx2px(ti),y2px(vAt(ti)));
+    // Split into positive (blue) and negative (red) segments
+    const steps = 200;
+    // Collect segments by sign
+    let posPath = null, negPath = null;
+    for(let i=0;i<=steps;i++){
+      const ti = i/steps*t;
+      const vi = vAt(ti);
+      const px = tx2px(ti), py = y2px(vi);
+      if(vi >= 0) {
+        if(!posPath) { posPath = [[px,y0px],[px,py]]; }
+        else posPath.push([px,py]);
+        // Close negative path if switching
+        if(negPath) { negPath.push([px,y0px]); negPath = null; }
+      } else {
+        if(!negPath) { negPath = [[px,y0px],[px,py]]; }
+        else negPath.push([px,py]);
+        if(posPath) { posPath.push([px,y0px]); posPath = null; }
+      }
     }
-    ctx.lineTo(tx2px(t),y0px);
-    ctx.closePath();ctx.fill();
+    // Close any open paths
+    const closeTx = tx2px(t);
+    if(posPath) posPath.push([closeTx,y0px]);
+    if(negPath) negPath.push([closeTx,y0px]);
+
+    // Draw positive area (blue)
+    [[posPath,'#4a9eff18'],[negPath,'#ff5f6d18']].forEach(([path,color])=>{
+      if(!path||path.length<3)return;
+      ctx.fillStyle=color;
+      ctx.beginPath();
+      ctx.moveTo(path[0][0],path[0][1]);
+      path.forEach(([x,y])=>ctx.lineTo(x,y));
+      ctx.closePath();ctx.fill();
+    });
+
+    // Label
+    const xVal = xAt(t);
+    const areaColor = xVal >= 0 ? '#4a9eff88' : '#ff5f6d88';
+    lbl('area = x = '+(xVal>=0?'+':'')+xVal.toFixed(2)+' m',
+        tx2px(t/2), Math.min(y2px(vAt(t/2))+16, gy+gh-10), areaColor, 'center', 10);
   }
 
   // Current time dot
