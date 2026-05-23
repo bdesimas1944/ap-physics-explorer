@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0f1014;
+  --surface:    #17181d;
+  --surface2:   #1e2028;
+  --border:     #2a2b33;
+  --border2:    #3a3b45;
+  --text:       #e8e9ef;
+  --text-muted: #7a7d8e;
+  --text-dim:   #4a4d5e;
+  --blue:       #4a9eff;
+  --blue-dim:   #1a3a6a;
+  --teal:       #2dd4a0;
+  --teal-dim:   #0a3a2a;
+  --amber:      #f5a623;
+  --red:        #ff5f6d;
+  --purple:     #b98aff;
+  --purple-dim: #2a1a4a;
+  --gray:       #9a9db0;
+  --font-body:  'DM Sans', sans-serif;
+  --font-mono:  'DM Mono', monospace;
+  --font-serif: 'DM Serif Display', serif;
+}
+html, body { height:100%; background:var(--bg); color:var(--text); font-family:var(--font-body); font-size:15px; }
+.site-header { display:flex; align-items:center; gap:16px; padding:0 24px; height:52px; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0; }
+.site-logo { font-family:var(--font-serif); font-size:18px; color:var(--text); text-decoration:none; }
+.site-logo span { color:var(--blue); }
+.site-tagline { font-size:12px; color:var(--text-dim); font-family:var(--font-mono); }
+.header-back { margin-left:auto; font-size:12px; font-family:var(--font-mono); color:var(--text-muted); text-decoration:none; }
+.header-back:hover { color:var(--text); }
+.sim-shell { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+.sim-layout { display:flex; flex:1; overflow:hidden; }
+.ctrl-panel { width:280px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border); padding:16px 18px; display:flex; flex-direction:column; overflow-y:auto; }
+.ctrl-divider { height:1px; background:var(--border); margin:12px 0; }
+.ctrl-note { margin-top:auto; padding-top:12px; font-size:11px; color:var(--text-dim); font-family:var(--font-mono); border-top:1px solid var(--border); line-height:1.7; }
+.eq-block { background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:12px 14px; margin-bottom:14px; }
+.eq-main { font-family:var(--font-serif); font-size:20px; font-style:italic; color:var(--text); margin-bottom:4px; }
+.eq-sub  { font-size:11px; font-family:var(--font-mono); color:var(--text-dim); line-height:1.9; }
+/* Power readout */
+.p-readout { border-radius:8px; padding:12px 14px; margin-bottom:14px; background:var(--purple-dim); border:1px solid var(--purple); }
+.p-label { font-size:11px; font-family:var(--font-mono); color:var(--text-muted); margin-bottom:3px; }
+.p-value { font-family:var(--font-serif); font-size:32px; font-style:italic; color:var(--purple); }
+.p-sub   { font-size:11px; font-family:var(--font-mono); color:var(--purple); opacity:0.7; margin-top:3px; }
+.p-bar-track { margin-top:8px; height:9px; border-radius:5px; background:var(--border); overflow:hidden; }
+.p-bar-fill  { height:100%; border-radius:5px; background:var(--purple); transition:width 0.05s; }
+.p-bar-scale { display:flex; justify-content:space-between; font-size:10px; font-family:var(--font-mono); color:var(--text-muted); margin-top:3px; }
+.slider-group { margin-bottom:12px; }
+.slider-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; }
+.slider-label { font-size:13px; color:var(--text-muted); font-style:italic; font-family:var(--font-serif); }
+.slider-value { font-size:13px; font-family:var(--font-mono); color:var(--text); font-weight:500; }
+input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:5px; border-radius:3px; background:var(--border2); outline:none; cursor:pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--text); border:2px solid var(--border2); cursor:grab; }
+.result-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.result-label { font-size:12px; color:var(--text-muted); font-family:var(--font-mono); }
+.result-val { font-size:13px; font-family:var(--font-mono); font-weight:500; }
+.canvas-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.tab-bar { display:flex; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0; }
+.tab-btn { flex:1; padding:10px 8px; font-size:12px; font-family:var(--font-mono); color:var(--text-dim); background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; transition:all 0.15s; text-align:center; line-height:1.3; }
+.tab-btn:hover { color:var(--text-muted); }
+.tab-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+.canvas-wrap { flex:1; position:relative; overflow:hidden; }
+canvas { display:block; }
+.step-desc { padding:10px 20px; background:var(--surface); border-top:1px solid var(--border); font-size:12px; font-family:var(--font-mono); color:var(--text-muted); flex-shrink:0; line-height:1.5; min-height:44px; }
+.step-desc .hl { color:var(--text); }
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">3.5 · power</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-main">W = F·d</div>
+        <div class="eq-main" style="font-size:16px;margin-top:4px;">P = W/t = Fd/t = Fv</div>
+        <div class="eq-sub">
+          <span style="color:var(--amber)">W = F·d — work (joules)</span><br>
+          <span style="color:var(--purple)">P — power (watts, W)</span><br>
+          <span style="color:var(--blue)">v — velocity (m/s)</span><br>
+          <span style="color:var(--text-dim)">1 W = 1 J/s = 1 N·m/s</span>
+        </div>
+      </div>
+
+      <!-- Work readout -->
+      <div style="border-radius:8px;padding:12px 14px;margin-bottom:10px;background:var(--amber-dim,#3a2a0a);border:1px solid var(--amber);">
+        <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin-bottom:3px;">Work</div>
+        <div id="val-W-big" style="font-family:var(--font-serif);font-size:28px;font-style:italic;color:var(--amber);">— J</div>
+        <div id="val-W-sub" style="font-size:11px;font-family:var(--font-mono);color:var(--amber);opacity:0.7;margin-top:3px;">W = F × d</div>
+      </div>
+
+      <!-- Power readout -->
+      <div class="p-readout">
+        <div class="p-label">Power</div>
+        <div class="p-value" id="val-P">— W</div>
+        <div class="p-sub" id="val-P-sub">P = F × v</div>
+        <div class="p-bar-track"><div class="p-bar-fill" id="bar-P" style="width:0%"></div></div>
+        <div class="p-bar-scale"><span>0</span><span id="bar-P-max">— W max</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">F · applied force</span><span class="slider-value" id="lbl-F">50 N</span></div>
+        <input type="range" id="sl-F" min="1" max="500" step="1" value="50" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">v · speed</span><span class="slider-value" id="lbl-v">5.0 m/s</span></div>
+        <input type="range" id="sl-v" min="0.1" max="30" step="0.1" value="5" oninput="update()">
+        <div style="display:flex;justify-content:space-between;margin-top:5px;">
+          <span style="font-size:11px;font-family:var(--font-mono);color:var(--text-dim);">d = v × t</span>
+          <span style="font-size:12px;font-family:var(--font-mono);color:var(--amber);font-weight:500;" id="lbl-d-inline">— m</span>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">t · elapsed time</span><span class="slider-value" id="lbl-t">3.0 s</span></div>
+        <input type="range" id="sl-t" min="0.5" max="20" step="0.5" value="3" oninput="update()">
+      </div>
+
+
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">θ · ramp angle</span><span class="slider-value" id="lbl-theta">30°</span></div>
+        <input type="range" id="sl-theta" min="0" max="60" step="1" value="30" oninput="update()">
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="result-row"><span class="result-label">d = v × t</span><span class="result-val" style="color:var(--amber)" id="val-d">— m</span></div>
+      <div class="result-row"><span class="result-label">W = F × d</span><span class="result-val" style="color:var(--amber)" id="val-W">— J</span></div>
+      <div class="result-row"><span class="result-label">P = W / t</span><span class="result-val" style="color:var(--purple)" id="val-Pwt">— W</span></div>
+      <div class="result-row"><span class="result-label">P = F × v</span><span class="result-val" style="color:var(--purple)" id="val-Pfv">— W</span></div>
+
+      <div class="ctrl-divider"></div>
+
+      <div style="font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">double v effect</div>
+      <div class="result-row"><span class="result-label">P at 2v</span><span class="result-val" style="color:var(--purple)" id="val-P2v">— W (×2)</span></div>
+      <div class="result-row"><span class="result-label">P at ½t (same W)</span><span class="result-val" style="color:var(--purple)" id="val-Pht">— W (×2)</span></div>
+
+      <div class="ctrl-note">
+        same work, half the time = ×2 power<br>
+        double speed = ×2 power<br>
+        1 horsepower ≈ 746 W
+      </div>
+    </div>
+
+    <div class="canvas-area">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab1" onclick="setTab(1)">① Work<br><span style="font-size:10px;opacity:0.6">W = F·d</span></button>
+        <button class="tab-btn" id="tab2" onclick="setTab(2)">② Power<br><span style="font-size:10px;opacity:0.6">P = W/t = Fv</span></button>
+        <button class="tab-btn" id="tab3" onclick="setTab(3)">③ Real World Work<br><span style="font-size:10px;opacity:0.6">where does W fit?</span></button>
+        <button class="tab-btn" id="tab4" onclick="setTab(4)">④ Real World Power<br><span style="font-size:10px;opacity:0.6">where does P fit?</span></button>
+        <button class="tab-btn" id="tab5" onclick="setTab(5)">⑤ Computational Graph<br><span style="font-size:10px;opacity:0.6">v → d → W → P</span></button>
+      </div>
+      <!-- Graph equation selector — shown only on tab 5 -->
+    <div id="graph-selector" style="display:none; padding:10px 20px; background:var(--surface2); border-bottom:1px solid var(--border); flex-shrink:0; gap:24px; align-items:center;">
+      <span style="font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;">Highlight:</span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-family:var(--font-mono);">
+        <input type="radio" name="graph-eq" value="distance" checked onchange="setGraphEq('distance')" style="accent-color:var(--teal);">
+        <span style="color:var(--teal)">d = v × t</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-family:var(--font-mono);">
+        <input type="radio" name="graph-eq" value="work" onchange="setGraphEq('work')" style="accent-color:var(--blue);">
+        <span style="color:var(--blue)">W = F × d</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-family:var(--font-mono);">
+        <input type="radio" name="graph-eq" value="powerWt" onchange="setGraphEq('powerWt')" style="accent-color:var(--red);">
+        <span style="color:var(--red)">P = W / t</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-family:var(--font-mono);">
+        <input type="radio" name="graph-eq" value="powerFv" onchange="setGraphEq('powerFv')" style="accent-color:var(--red);">
+        <span style="color:var(--red)">P = F × v</span>
+      </label>
+    </div>
+    <div class="canvas-wrap"><canvas id="c"></canvas></div>
+      <div class="step-desc" id="step-desc">
+        <span class="hl">P = W/t:</span> work is force × distance. Power is how fast that work is done. Drag <span style="color:var(--amber)">F</span>, <span style="color:var(--blue)">v</span>, and <span style="color:var(--text)">t</span> to see how each affects power.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const G = 9.8;
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let currentTab = 1;
+
+function W2() { return canvas.width/(window.devicePixelRatio||1); }
+function H()  { return canvas.height/(window.devicePixelRatio||1); }
+function setupCanvas() {
+  const wrap=canvas.parentElement, dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr; canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px'; canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+const getF     = () => parseFloat(document.getElementById('sl-F').value);
+const getV     = () => parseFloat(document.getElementById('sl-v').value);
+const getT     = () => parseFloat(document.getElementById('sl-t').value);
+const getTheta = () => parseFloat(document.getElementById('sl-theta').value);
+
+function arrow(x1,y1,x2,y2,color,lw=2.5,hs=9) {
+  const dx=x2-x1,dy=y2-y1;
+  if(Math.hypot(dx,dy)<4)return;
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);
+  ctx.save();ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-hs,hs*0.38);ctx.lineTo(-hs,-hs*0.38);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+
+function lbl(text,x,y,color,align='center',size=12,italic=false) {
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align;ctx.fillText(text,x,y);
+}
+
+let graphEq = 'distance';
+
+function setGraphEq(eq) {
+  graphEq = eq;
+  update();
+}
+
+function setTab(n) {
+  currentTab=n;
+  [1,2,3,4,5].forEach(i=>document.getElementById('tab'+i).classList.toggle('active',i===n));
+  document.getElementById('graph-selector').style.display = n===5 ? 'flex' : 'none';
+  const descs = {
+    1: '<span class="hl">P = W/t:</span> work = F×d accumulates as the block moves. Power = total work ÷ elapsed time. Same work in less time = more power.',
+    2: '<span class="hl">P = Fv:</span> instantaneous power — no time interval needed. Force × velocity at any instant. Drag <span style="color:var(--blue)">v</span> and watch power change immediately.',
+    3: '<span class="hl">Real World Work:</span> where does your W = F·d fit on the scale of familiar energies? Drag <span style="color:var(--amber)">F</span>, <span style="color:var(--blue)">v</span>, and <span style="color:var(--teal)">t</span> to match.',
+    4: '<span class="hl">Real World Power:</span> where does your P = F×v fit on the scale of real power sources? Drag <span style="color:var(--blue)">F</span> and <span style="color:var(--blue)">v</span> to match a cyclist, a car, or a locomotive.',
+    5: '<span class="hl">Computational Graph:</span> follow every step from v to P. Each node is a quantity, each edge is an operation. Drag any slider and watch the whole graph update live.'
+  };
+  document.getElementById('step-desc').innerHTML = descs[n];
+  update();
+}
+
+function update() {
+  const F=getF(), v=getV(), t=getT(), theta=getTheta();
+  const d   = v * t;
+  const W3  = F * d;
+  const P   = F * v;
+  const Pmax= 500 * 30;  // max F × max v
+
+  document.getElementById('lbl-F').textContent     = F.toFixed(0)+' N';
+  document.getElementById('lbl-v').textContent     = v.toFixed(1)+' m/s';
+  document.getElementById('lbl-theta').textContent = theta.toFixed(0)+'°';
+  document.getElementById('lbl-t').textContent     = t.toFixed(1)+' s';
+  document.getElementById('val-d').textContent     = d.toFixed(1)+' m';
+  document.getElementById('lbl-d-inline').textContent = d.toFixed(1)+' m';
+  document.getElementById('val-W').textContent     = W3.toFixed(1)+' J';
+  document.getElementById('val-Pwt').textContent   = P.toFixed(1)+' W';
+  document.getElementById('val-Pfv').textContent   = P.toFixed(1)+' W';
+  document.getElementById('val-P2v').textContent   = (F*2*v).toFixed(1)+' W (×2)';
+  document.getElementById('val-Pht').textContent   = (W3/(t/2)).toFixed(1)+' W (×2)';
+  document.getElementById('val-P').textContent     = P.toFixed(1)+' W';
+  document.getElementById('val-W-big').textContent = W3.toFixed(1)+' J';
+  document.getElementById('val-W-sub').textContent = 'W = '+F.toFixed(0)+'N × '+d.toFixed(1)+'m';
+  document.getElementById('val-P-sub').textContent = 'P = '+F.toFixed(0)+'N × '+v.toFixed(1)+'m/s';
+
+  // Power bar
+  const pct = Math.min(P/Pmax*100, 100).toFixed(1);
+  document.getElementById('bar-P').style.width = pct+'%';
+  document.getElementById('bar-P-max').textContent = Pmax.toFixed(0)+' W max';
+
+  // Color power bar by magnitude
+  const barEl = document.getElementById('bar-P');
+  if (P > 5000) barEl.style.background = 'var(--red)';
+  else if (P > 1000) barEl.style.background = 'var(--amber)';
+  else barEl.style.background = 'var(--purple)';
+
+  if(!ctx||W2()===0)return;
+  ctx.clearRect(0,0,W2(),H());
+  if(currentTab===1) drawTab1(F,v,t,theta);
+  else if(currentTab===2) drawTab2(F,v,t,theta);
+  else if(currentTab===3) drawTab5Work(F,v,t);
+  else if(currentTab===4) drawTab3(F,v,t,theta);
+  else drawTab4Chain(F,v,t);
+}
+
+// ── Shared ramp geometry ──────────────────
+function getRampGeom(theta_deg, w, h) {
+  const theta   = theta_deg * Math.PI / 180;
+  const rampLen = Math.min(w,h) * 0.55;
+  const baseX   = w * 0.15;
+  const baseY   = h * 0.78;
+  const topX    = baseX + rampLen * Math.cos(theta);
+  const topY    = baseY - rampLen * Math.sin(theta);
+  const rSx     =  Math.cos(theta);
+  const rSy     = -Math.sin(theta);
+  const nX      = -Math.sin(theta);
+  const nY      = -Math.cos(theta);
+  return { theta, rampLen, baseX, baseY, topX, topY, rSx, rSy, nX, nY };
+}
+
+function drawRampBase(g, w, h) {
+  const { baseX, baseY, topX, topY } = g;
+  const rightX = topX, rightY = baseY;
+
+  // Ground
+  ctx.strokeStyle='#3a3b45'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(baseX-30,baseY); ctx.lineTo(rightX+30,baseY); ctx.stroke();
+  ctx.strokeStyle='#2a2b33'; ctx.lineWidth=1;
+  for(let gx=baseX-30;gx<=rightX+30;gx+=14){
+    ctx.beginPath();ctx.moveTo(gx,baseY);ctx.lineTo(gx-8,baseY+9);ctx.stroke();
+  }
+
+  // Ramp
+  ctx.fillStyle='#13141a';
+  ctx.beginPath();ctx.moveTo(baseX,baseY);ctx.lineTo(topX,topY);ctx.lineTo(rightX,rightY);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#4a4b6a'; ctx.lineWidth=2.5; ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(baseX,baseY);ctx.lineTo(topX,topY);ctx.lineTo(rightX,rightY);ctx.stroke();
+
+  // θ arc
+  if(g.theta>0.01){
+    ctx.strokeStyle='#f5a62366'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(baseX,baseY,42,-g.theta,0); ctx.stroke();
+    lbl('θ', baseX+56*Math.cos(-g.theta/2), baseY+56*Math.sin(-g.theta/2)+4, '#f5a62388','center',12,true);
+  }
+}
+
+function drawBlock(bx, by, theta) {
+  const bs=18;
+  ctx.save(); ctx.translate(bx,by); ctx.rotate(-theta);
+  ctx.fillStyle='#2a2b3a'; ctx.strokeStyle='#5a5b8a'; ctx.lineWidth=1.5;
+  ctx.fillRect(-bs/2,-bs,bs,bs); ctx.strokeRect(-bs/2,-bs,bs,bs);
+  ctx.restore();
+}
+
+// ── Tab 1: P = W/t ────────────────────────
+function drawTab1(F, v, t, theta_deg) {
+  const w=W2(), h=H();
+  const g = getRampGeom(theta_deg, w, h);
+  const { rampLen, baseX, baseY, rSx, rSy, nX, nY } = g;
+
+  drawRampBase(g, w, h);
+
+  // ── Title ──
+  lbl('How much Work got done?', w*0.5, h*0.06, '#f5a623', 'center', 20, true);
+  lbl('The energy transferred by a force that moves something in the direction of that force.',
+      w*0.35, h*0.09, '#e8e9ef', 'center', 11);
+
+  // Block position — fraction along ramp based on t
+  const d       = v * t;
+  const maxD    = rampLen * 0.85;
+  const frac    = Math.min(d / (v * 20), 0.85);  // normalized 0-1 along ramp
+  const bx      = baseX + rampLen*frac*rSx;
+  const by      = baseY + rampLen*frac*rSy;
+
+  // Work done shading — along ramp surface from start to block
+  ctx.fillStyle = '#b98aff18';
+  ctx.beginPath();
+  ctx.moveTo(baseX, baseY);
+  ctx.lineTo(baseX + nX*20, baseY + nY*20);
+  ctx.lineTo(bx + nX*20, by + nY*20);
+  ctx.lineTo(bx, by);
+  ctx.closePath(); ctx.fill();
+
+  // Distance label
+  const midX = baseX + rampLen*frac*0.5*rSx;
+  const midY = baseY + rampLen*frac*0.5*rSy;
+  lbl('d = '+d.toFixed(1)+'m', midX+nX*32, midY+nY*32, '#b98aff88','center',10,true);
+
+
+
+  // Force arrow — up the ramp
+  const fScale = Math.min(F*0.4, 80);
+  arrow(bx, by, bx+rSx*fScale, by+rSy*fScale, '#b98aff', 3, 9);
+  lbl('F='+F.toFixed(0)+'N', bx+rSx*fScale+nX*16, by+rSy*fScale+nY*16, '#b98aff','center',11,true);
+
+  // Velocity arrow
+  const vScale = Math.min(v*4, 70);
+  arrow(bx, by, bx+rSx*vScale*0.6, by+rSy*vScale*0.6, '#f5a623', 2.5, 8);
+  lbl('v', bx+rSx*vScale*0.6+nX*(-16), by+rSy*vScale*0.6+nY*(-16), '#f5a623','center',10,true);
+
+  drawBlock(bx, by, g.theta);
+
+  // Results box
+  const W3 = F * d, P = F * v;
+  const bx2=w*0.58, by2=h*0.12, bw=w*0.36, bh=100;
+  ctx.fillStyle='#13141a'; ctx.strokeStyle='#2a2b33'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(bx2,by2,bw,bh,6); ctx.fill(); ctx.stroke();
+  lbl('WORK',         bx2+bw/2, by2+16, '#f5a623','center',11);
+  lbl('W = F·d',     bx2+bw/2, by2+32, '#f5a623','center',13,true);
+  lbl('= '+W3.toFixed(1)+' J', bx2+bw/2, by2+52, '#f5a623','center',16,true);
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(bx2+12,by2+62);ctx.lineTo(bx2+bw-12,by2+62);ctx.stroke();
+  lbl('W ÷ t = '+W3.toFixed(1)+'J ÷ '+t.toFixed(1)+'s = P = '+(P).toFixed(1)+' W', bx2+bw/2, by2+80, '#e8e9ef','center',11);
+}
+
+// ── Tab 2: P = Fv ─────────────────────────
+function drawTab2(F, v, t, theta_deg) {
+  const w=W2(), h=H();
+  const g = getRampGeom(theta_deg, w, h);
+  const { rampLen, baseX, baseY, rSx, rSy, nX, nY } = g;
+
+  drawRampBase(g, w, h);
+
+  // ── Title ──
+  lbl('How fast was the Work done?', w*0.5, h*0.06, '#b98aff', 'center', 20, true);
+  lbl('Power is the rate at which work is done — energy transferred per second.',
+      w*0.35, h*0.09, '#e8e9ef', 'center', 11);
+
+  // Block at midpoint
+  const frac = 0.45;
+  const bx = baseX + rampLen*frac*rSx;
+  const by = baseY + rampLen*frac*rSy;
+
+  // Force arrow — scales with F
+  const fScale = Math.min(F*0.4, 90);
+  arrow(bx, by, bx+rSx*fScale, by+rSy*fScale, '#b98aff', 3, 10);
+  lbl('F='+F.toFixed(0)+'N', bx+rSx*(fScale+14)+nX*4, by+rSy*(fScale+14)+nY*4, '#b98aff','center',11,true);
+
+  // Velocity arrow — scales with v
+  const vScale = Math.min(v*4, 90);
+  arrow(bx, by, bx+rSx*vScale*0.7, by+rSy*vScale*0.7, '#4a9eff', 3, 10);
+  lbl('v='+v.toFixed(1)+'m/s', bx+rSx*vScale*0.7+nX*(-18), by+rSy*vScale*0.7+nY*(-18), '#4a9eff','center',11,true);
+
+  drawBlock(bx, by, g.theta);
+
+  // P = F×v visual — two bars side by side showing product
+  const P = F * v;
+  const barY = h * 0.18;
+  const barX = w * 0.55;
+  const barW = w * 0.38;
+
+  // F bar
+  const fPct = F / 500;
+  const vPct = v / 30;
+  const fBarW = fPct * barW * 0.45;
+  const vBarW = vPct * barW * 0.45;
+
+  ctx.fillStyle='#13141a'; ctx.strokeStyle='#2a2b33'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(barX, barY, barW, 130, 6); ctx.fill(); ctx.stroke();
+
+  lbl('P = F × v', barX+barW/2, barY+18, '#b98aff','center',13,true);
+
+  // F bar
+  ctx.fillStyle='#b98aff33'; ctx.fillRect(barX+12, barY+30, fBarW, 20);
+  ctx.strokeStyle='#b98aff'; ctx.lineWidth=1; ctx.strokeRect(barX+12, barY+30, fBarW, 20);
+  lbl('F='+F.toFixed(0)+'N', barX+12+fBarW+6, barY+44, '#b98aff','left',10);
+
+  // × symbol
+  lbl('×', barX+barW/2, barY+68, '#4a4d5e','center',14,true);
+
+  // v bar
+  ctx.fillStyle='#4a9eff33'; ctx.fillRect(barX+12, barY+76, vBarW, 20);
+  ctx.strokeStyle='#4a9eff'; ctx.lineWidth=1; ctx.strokeRect(barX+12, barY+76, vBarW, 20);
+  lbl('v='+v.toFixed(1)+'m/s', barX+12+vBarW+6, barY+90, '#4a9eff','left',10);
+
+  // = P
+  lbl('= '+P.toFixed(1)+' W', barX+barW/2, barY+118, '#b98aff','center',14,true);
+}
+
+// ── Tab 3: Real World Power ──────────────
+function drawTab3(F, v, t, theta) {
+  const w=W2(), h=H();
+  const P = F * v;
+
+  // Real world sources — [label, emoji, watts]
+  const sources = [
+    ['Phone charger', '📱',     5],
+    ['Candle',        '🕯',    50],
+    ['Human walking', '🚶',    80],
+    ['Light bulb',    '💡',   100],
+    ['Cyclist',       '🚲',   250],
+    ['Sprinter',      '🏃',  1000],
+    ['Hair dryer',    '💨',  1500],
+    ['Lawn mower',    '🌿',  3000],
+    ['Car engine',    '🚗',  150000],
+    ['Locomotive',    '🚂',  3000000],
+    ['Rocket engine', '🚀',  10000000],
+    ['Jet engine',    '✈️',  100000000],
+  ];
+
+  // Sort by watts
+  sources.sort((a,b) => a[2]-b[2]);
+
+  // Log scale: min=10W, max=1e9W
+  const logMin = Math.log10(10);
+  const logMax = Math.log10(1e9);
+  const logP   = Math.log10(Math.max(P, 10));
+
+  const margin  = 60;
+  const barTop  = h * 0.14;
+  const barBot  = h * 0.88;
+  const barH    = barBot - barTop;
+  const barX    = w * 0.18;
+  const labelX  = w * 0.08;
+  const valueX  = w * 0.52;
+
+  // Background
+  ctx.fillStyle = '#13141a';
+  ctx.beginPath(); ctx.roundRect(barX - 10, barTop - 10, w*0.65, barH + 20, 8);
+  ctx.fill();
+
+  // Scale bar
+  ctx.fillStyle = '#1e2028';
+  ctx.fillRect(barX, barTop, 20, barH);
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, barTop, 0, barBot);
+  grad.addColorStop(0,   '#ff5f6d33');
+  grad.addColorStop(0.5, '#f5a62333');
+  grad.addColorStop(1,   '#2dd4a033');
+  ctx.fillStyle = grad;
+  ctx.fillRect(barX, barTop, 20, barH);
+  ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 1;
+  ctx.strokeRect(barX, barTop, 20, barH);
+
+  // Draw each source — emoji + name + value all on right side of bar
+  sources.forEach(([name, emoji, watts]) => {
+    const logW = Math.log10(watts);
+    const frac = (logW - logMin) / (logMax - logMin);
+    const y    = barBot - frac * barH;
+
+    // Tick mark
+    ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(barX + 16, y); ctx.lineTo(barX + 28, y); ctx.stroke();
+
+    // Emoji + name on right of bar
+    ctx.font = '20px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
+    ctx.fillText(emoji, barX + 32, y + 6);
+    ctx.font = '11px "DM Mono",monospace'; ctx.fillStyle = '#7a7d8e';
+    ctx.fillText(name, barX + 58, y + 4);
+
+    // Value on far right
+    const wStr = watts >= 1e6 ? (watts/1e6).toFixed(0)+' MW' :
+                 watts >= 1e3 ? (watts/1e3).toFixed(0)+' kW' : watts+' W';
+    ctx.fillStyle = '#3a3b45'; ctx.font = '10px "DM Mono",monospace'; ctx.textAlign = 'right';
+    ctx.fillText(wStr, w*0.72, y + 4);
+  });
+
+  // ── Your power marker — on LEFT side of bar ──
+  const fracP  = (logP - logMin) / (logMax - logMin);
+  const yourY  = barBot - fracP * barH;
+  const markerColor = P < 100 ? '#2dd4a0' : P < 10000 ? '#f5a623' : '#ff5f6d';
+
+  // Line across full width
+  ctx.strokeStyle = markerColor; ctx.lineWidth = 2;
+  ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(barX-2, yourY); ctx.lineTo(w*0.74, yourY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Your P label box on LEFT of bar
+  const pStr = P >= 1e6 ? (P/1e6).toFixed(2)+' MW' : P >= 1e3 ? (P/1e3).toFixed(1)+' kW' : P.toFixed(1)+' W';
+  const lblW = 140, lblH = 26;
+  const lblX = barX - lblW - 12;
+  ctx.fillStyle = markerColor+'33'; ctx.strokeStyle = markerColor; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(lblX, yourY - lblH/2, lblW, lblH, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = markerColor; ctx.font = 'italic 12px "DM Serif Display",serif'; ctx.textAlign = 'center';
+  ctx.fillText('Your P = ' + pStr, lblX + lblW/2, yourY + 4);
+
+  // Nearest source
+  const nearest = sources.reduce((best, s) =>
+    Math.abs(Math.log10(s[2]) - logP) < Math.abs(Math.log10(best[2]) - logP) ? s : best
+  );
+  lbl('≈ ' + nearest[1] + ' ' + nearest[0], lblX + lblW/2, yourY + lblH/2 + 14, markerColor+'88', 'center', 10);
+
+  // Title
+  lbl('Real World Power Scale (log)', w*0.42, barTop - 22, '#4a4d5e', 'center', 11);
+  lbl('drag F and v to match a source ↑', w*0.42, h - 10, '#3a3b45', 'center', 10);
+}
+
+// ── Tab 5: Computational Graph ──────────────
+function drawTab4Chain(F, v, t) {
+  const w=W2(), h=H();
+  const d  = v * t;
+  const W3 = F * d;
+  const P  = F * v;
+
+  // ── Colors ──
+  const cVel  = '#f5a623';   // amber  — velocity
+  const cTime = '#c8a26a';   // brown  — time
+  const cDist = '#2dd4a0';   // green  — distance
+
+  // ── Box dimensions — all same height ──
+  const bw = 160, bh = 64;
+
+  // Which nodes are emphasized for current equation
+  const emphMap = {
+    distance: ['velocity','time','distance'],
+    work:     ['force','distance','work'],
+    powerWt:  ['work','time','power'],
+    powerFv:  ['force','velocity','power'],
+  };
+  const emphSet = new Set(emphMap[graphEq] || []);
+
+  // ── Box drawing helper ──
+  function flowBox(x, y, label, value, color) {
+    const nodeKey = label.toLowerCase();
+    const emphasized = emphSet.has(nodeKey);
+
+    // Outer margin boundary
+    ctx.strokeStyle = emphasized ? color + 'cc' : color + '28';
+    ctx.lineWidth   = emphasized ? 10 : 8;
+    ctx.beginPath(); ctx.roundRect(x - bw/2 - 6, y - bh/2 - 6, bw + 12, bh + 12, 10);
+    ctx.stroke();
+
+    // Inner box
+    ctx.fillStyle   = emphasized ? color + '44' : color + '22';
+    ctx.strokeStyle = emphasized ? color        : color + '88';
+    ctx.lineWidth   = emphasized ? 2.5          : 1.5;
+    ctx.beginPath(); ctx.roundRect(x - bw/2, y - bh/2, bw, bh, 6);
+    ctx.fill(); ctx.stroke();
+
+    // Label ALL CAPS
+    ctx.fillStyle = emphasized ? color : color + '88';
+    ctx.font = emphasized ? 'bold 14px "DM Mono", monospace' : 'bold 12px "DM Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(label.toUpperCase(), x, y - 8);
+
+    // Value
+    ctx.font = emphasized ? 'italic 22px "DM Serif Display", serif' : 'italic 18px "DM Serif Display", serif';
+    ctx.fillStyle = emphasized ? color : color + '88';
+    ctx.fillText(value, x, y + 14);
+  }
+
+  // ── Operator helper ──
+  function op(sym, x, y) {
+    ctx.fillStyle = '#7a7d8e';
+    ctx.font = 'bold 22px "DM Serif Display", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(sym, x, y + 8);
+  }
+
+  // ── Row 1: Velocity * Time = Distance ──
+  // Space nodes 20% wider, operators centered exactly in each gap
+  const r1y    = h * 0.40;
+  const gap    = bw * 0.5;   // gap = 50% of box width, evenly split around operator
+  const nBoxes = 3;
+  const totalW = bw * nBoxes + gap * (nBoxes - 1);
+  const startX = w/2 - totalW/2 + bw/2;
+
+  const velX  = startX;
+  const timeX = startX + bw + gap;
+  const distX = startX + (bw + gap) * 2;
+
+  // Operator x positions — exactly centered in each gap
+  const op1x = velX  + bw/2 + gap/2;
+  const op2x = timeX + bw/2 + gap/2;
+
+  flowBox(velX,  r1y, 'Velocity', v.toFixed(1)+' m/s', cVel);
+  op('×', op1x, r1y);
+  flowBox(timeX, r1y, 'Time',     t.toFixed(1)+' s',   cTime);
+  op('=', op2x, r1y);
+  flowBox(distX, r1y, 'Distance', d.toFixed(1)+' m',   cDist);
+
+  // ── Row 2: Power (col2), Work (col3) ──
+  const cPower = '#ff5f6d';   // red   — power
+  const cWork  = '#4a9eff';   // blue  — work
+  const rowGap = bh * 2.2;   // vertical gap between rows
+  const r2y    = r1y + rowGap;
+
+  const pStr = P >= 1000 ? (P/1000).toFixed(1)+' kW' : P.toFixed(1)+' W';
+  const wStr = W3 >= 1000 ? (W3/1000).toFixed(1)+' kJ' : W3.toFixed(1)+' J';
+
+  flowBox(timeX, r2y, 'Power', pStr, cPower);
+  flowBox(distX, r2y, 'Work',  wStr, cWork);
+
+  // ── Row 3: Force (col3) ──
+  const cForce = '#4dbb6e';   // dark green — force
+  const r3y    = r2y + rowGap;
+
+  flowBox(distX, r3y, 'Force', F.toFixed(0)+' N', cForce);
+
+  // ── Equation description ──
+  const eqDesc = {
+    distance: "Velocity × Time = Distance. The faster you go or the longer you go, the more ground you cover. Think of Velocity as a bucket with some number of distance cubes — you get the total cubes once you know how many buckets you have.",
+    work:     "Work doesn't care how long it took — only how far the force was applied. A slow push and a fast push over the same distance do identical work.",
+    powerWt:  "Power is the rate of doing work. A backhoe and a person with a shovel can dig the same amount of dirt — the backhoe is more powerful and can move a day's worth of dirt in a couple scoops. It does it faster because it has more Power. More work in less time = more power.",
+    powerFv:  "Power is instantaneous — no time interval needed. At any moment, force times velocity gives you the power being delivered right now. A car engine at highway speed: the force is small (just fighting drag) but the velocity is large. Their product — F × v — is the engine's power output. We do not need to know the distance or the time it takes — just force and velocity at this instant.",
+  };
+  const desc = eqDesc[graphEq] || '';
+  if (desc) {
+    ctx.fillStyle = '#4a9eff';
+    ctx.font = 'italic 16px "DM Serif Display", serif';
+    ctx.textAlign = 'center';
+    // Word wrap
+    const words = desc.split(' ');
+    const maxW  = w * 0.6;
+    let line = '', lines = [];
+    words.forEach(word => {
+      const test = line + (line ? ' ' : '') + word;
+      if (ctx.measureText(test).width > maxW) { lines.push(line); line = word; }
+      else line = test;
+    });
+    if (line) lines.push(line);
+    lines.forEach((l, i) => ctx.fillText(l, w/2, h*0.17 + i*22));
+  }
+
+  // ── Flow arrows based on selected equation ──
+  function flowArrowCurved(x1, y1, x2, y2, color) {
+    // Draw a curved arrow from (x1,y1) to (x2,y2)
+    const mx = (x1+x2)/2, my = (y1+y2)/2 - 30;
+    ctx.strokeStyle = color+'cc'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.quadraticCurveTo(mx, my, x2, y2);
+    ctx.stroke();
+    // Arrowhead
+    const angle = Math.atan2(y2 - my, x2 - mx);
+    ctx.fillStyle = color+'cc';
+    ctx.save(); ctx.translate(x2, y2); ctx.rotate(angle);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10,4); ctx.lineTo(-10,-4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  // Box edge points
+  const velR  = velX  + bw/2,  velB  = r1y  + bh/2;
+  const timeR = timeX + bw/2,  timeB = r1y  + bh/2;
+  const distL = distX - bw/2,  distB = r1y  + bh/2;
+  const workL = distX - bw/2,  workT = r2y  - bh/2, workB = r2y + bh/2;
+  const powL  = timeX - bw/2,  powT  = r2y  - bh/2;
+  const forceT = distX,        forceB2 = r3y - bh/2;
+
+  if (graphEq === 'work') {
+    // Distance → Work: straight down
+    ctx.strokeStyle = '#2dd4a0cc'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(distX, r1y+bh/2+16); ctx.lineTo(distX, r2y-bh/2-16); ctx.stroke();
+    ctx.fillStyle = '#2dd4a0cc';
+    ctx.save(); ctx.translate(distX, r2y-bh/2-16); ctx.rotate(Math.PI/2);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10,4); ctx.lineTo(-10,-4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // Force → Work: from r3y up to r2y
+    ctx.strokeStyle = '#4dbb6ecc'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(distX, r3y-bh/2-16); ctx.lineTo(distX, r2y+bh/2+16); ctx.stroke();
+    ctx.fillStyle = '#4dbb6ecc';
+    ctx.save(); ctx.translate(distX, r2y+bh/2+16); ctx.rotate(-Math.PI/2);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10,4); ctx.lineTo(-10,-4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+  } else if (graphEq === 'powerWt') {
+    // Work → Power (straight horizontal, right to left, row 2)
+    ctx.strokeStyle = '#ff5f6dcc'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(distX - bw/2 - 16, r2y); ctx.lineTo(timeX + bw/2 + 16, r2y); ctx.stroke();
+    ctx.fillStyle = '#ff5f6dcc';
+    ctx.save(); ctx.translate(timeX + bw/2 + 16, r2y); ctx.rotate(Math.PI);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10,4); ctx.lineTo(-10,-4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // Time → Power (down from row 1 time to row 2 power)
+    ctx.strokeStyle = '#c8a26acc'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(timeX, r1y+bh/2+16); ctx.lineTo(timeX, r2y-bh/2-16); ctx.stroke();
+    ctx.fillStyle = '#c8a26acc';
+    ctx.save(); ctx.translate(timeX, r2y-bh/2-16); ctx.rotate(Math.PI/2);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10,4); ctx.lineTo(-10,-4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+  } else if (graphEq === 'powerFv') {
+    // Power is at (timeX, r2y), Velocity at (velX, r1y), Force at (distX, r3y)
+    // Power box center for entry points
+    const pCx = timeX, pCy = r2y;
+
+    // ── v → P: counter-clockwise quarter circle ──
+    // Start: bottom of Velocity (velX, r1y+bh/2)
+    // End: left side of Power (timeX-bw/2, r2y)
+    // Control point: bottom-left corner (velX, r2y) — makes a clean CCW quarter circle
+    ctx.strokeStyle = '#f5a623cc'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(velX, r1y + bh/2 + 16);
+    ctx.quadraticCurveTo(velX, r2y, timeX - bw/2 - 16, r2y);
+    ctx.stroke();
+    ctx.fillStyle = '#f5a623cc';
+    ctx.save(); ctx.translate(timeX - bw/2 - 16, r2y); ctx.rotate(0);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10,4); ctx.lineTo(-10,-4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    // ── F → P: clockwise quarter circle ──
+    // From left side of Force (distX-bw/2, r3y) curving CW to bottom of Power (timeX, r2y+bh/2)
+    // Control point: bottom-left corner of the arc (timeX, r3y)
+    ctx.strokeStyle = '#4dbb6ecc'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(distX - bw/2 - 16, r3y);
+    ctx.quadraticCurveTo(timeX, r3y, timeX, r2y + bh/2 + 16);
+    ctx.stroke();
+    ctx.fillStyle = '#4dbb6ecc';
+    ctx.save(); ctx.translate(timeX, r2y + bh/2 + 16); ctx.rotate(-Math.PI/2);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10,4); ctx.lineTo(-10,-4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  // Title
+  lbl('Computational Graph  ·  drag any slider', w/2, h*0.06, '#4a4d5e', 'center', 11);
+}
+
+
+window.addEventListener('resize',()=>{setupCanvas();update();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();update();}));
+</script>
+</body>
+</html>

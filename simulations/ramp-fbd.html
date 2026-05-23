@@ -492,9 +492,6 @@ function drawTab4(g) {
   // Right angle mark between N and F∥
   sqMark(g.bCx,g.bCy,g.nX,g.nY,-g.rSx,-g.rSy,'#4a4d6e',9);
 
-  // θ at block — just the two relevant ones, clean
-  arcAngle(g.bCx,g.bCy,28,Math.atan2(-g.rSy,-g.rSx),Math.PI/2,'#f5a62366',1.5);
-  lbl('θ',g.bCx-20,g.bCy+30,'#f5a623aa','center',12,true);
 
   lbl('vectors in physical position — FBD complete',W()/2,H()-16,'#3a3b5a','center',11);
 }
