@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projectile Motion — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1014;--surface:#17181d;--surface2:#1e2028;
+  --border:#2a2b33;--border2:#3a3b45;
+  --text:#e8e9ef;--text-muted:#7a7d8e;--text-dim:#4a4d5e;
+  --blue:#4a9eff;--blue-dim:#1a3a6a;
+  --teal:#2dd4a0;--teal-dim:#0a3a2a;
+  --amber:#f5a623;--red:#ff5f6d;--purple:#b98aff;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --font-serif:'DM Serif Display',serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;}
+.site-header{display:flex;align-items:center;gap:16px;padding:0 24px;height:52px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.site-logo{font-family:var(--font-serif);font-size:18px;color:var(--text);text-decoration:none;}
+.site-logo span{color:var(--blue);}
+.site-tagline{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);}
+.header-back{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--text-muted);text-decoration:none;}
+.header-back:hover{color:var(--text);}
+.sim-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.sim-layout{display:flex;flex:1;overflow:hidden;}
+.ctrl-panel{width:280px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;overflow-y:auto;}
+.ctrl-divider{height:1px;background:var(--border);margin:12px 0;}
+.eq-block{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+.eq-main{font-family:var(--font-serif);font-size:16px;font-style:italic;color:var(--text);margin-bottom:3px;}
+.eq-sub{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);line-height:1.9;}
+.slider-group{margin-bottom:12px;}
+.slider-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+.slider-label{font-size:13px;color:var(--text-muted);font-style:italic;font-family:var(--font-serif);}
+.slider-value{font-size:13px;font-family:var(--font-mono);color:var(--text);font-weight:500;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;background:var(--border2);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--text);border:2px solid var(--border2);cursor:grab;}
+.result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.result-label{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);}
+.result-val{font-size:13px;font-family:var(--font-mono);font-weight:500;}
+.section-head{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+.nudge-btn{width:22px;height:22px;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:3px;color:var(--text-muted);font-size:11px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;
+  transition:all 0.1s;}
+.nudge-btn:hover{border-color:var(--blue);color:var(--blue);}
+.nudge-btns{display:flex;flex-direction:column;gap:2px;}
+.num-input{width:72px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;
+  color:var(--text);font-family:var(--font-mono);font-size:12px;padding:3px 6px;text-align:right;}
+.num-input:focus{outline:none;border-color:var(--blue);}
+.slider-row{display:flex;align-items:center;gap:8px;}
+.slider-row input[type=range]{flex:1;}
+.ctrl-note{margin-top:auto;padding-top:12px;font-size:10px;color:var(--text-dim);font-family:var(--font-mono);border-top:1px solid var(--border);line-height:1.8;}
+.canvas-wrap{flex:1;position:relative;overflow:hidden;}
+canvas{display:block;}
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">1.5b · projectile motion</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-main">x = v₀cosθ · t</div>
+        <div class="eq-main">y = y₀ + v₀sinθ · t − ½gt²</div>
+        <div class="eq-sub">
+          <span style="color:var(--blue)">v_x = v₀cosθ — constant</span><br>
+          <span style="color:var(--teal)">v_y = v₀sinθ − gt — changing</span><br>
+          <span style="color:var(--amber)">g = 9.8 m/s² — always down</span>
+        </div>
+      </div>
+
+      <div class="section-head">Inputs</div>
+
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">v₀ · initial speed</span><span class="slider-value" id="lbl-v0">20.000 m/s</span></div>
+        <div class="slider-row">
+          <input type="range" id="sl-v0" min="0.01" max="50" step="0.01" value="20" oninput="syncInput('v0',this.value);update()">
+          <input type="text" id="in-v0" class="num-input" value="20.000" onchange="syncSlider('v0',this.value);update()" onfocus="activeParam='v0'">
+          <div class="nudge-btns">
+            <button class="nudge-btn" onclick="nudge('v0',1)" title="increase">&#8963;</button>
+            <button class="nudge-btn" onclick="nudge('v0',-1)" title="decrease">&#8964;</button>
+          </div>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">θ · launch angle</span><span class="slider-value" id="lbl-theta">45°</span></div>
+        <div class="slider-row">
+          <input type="range" id="sl-theta" min="1" max="89" step="1" value="45" oninput="syncInput('theta',this.value);update()">
+          <input type="text" id="in-theta" class="num-input" value="45" onchange="syncSlider('theta',this.value);update()" onfocus="activeParam='theta'">
+          <div class="nudge-btns">
+            <button class="nudge-btn" onclick="nudge('theta',1)" title="increase">&#8963;</button>
+            <button class="nudge-btn" onclick="nudge('theta',-1)" title="decrease">&#8964;</button>
+          </div>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">y₀ · launch height</span><span class="slider-value" id="lbl-y0">0.000 m</span></div>
+        <div class="slider-row">
+          <input type="range" id="sl-y0" min="0" max="50" step="0.001" value="0" oninput="syncInput('y0',this.value);update()">
+          <input type="text" id="in-y0" class="num-input" value="0.000" onchange="syncSlider('y0',this.value);update()" onfocus="activeParam='y0'">
+          <div class="nudge-btns">
+            <button class="nudge-btn" onclick="nudge('y0',1)" title="increase">&#8963;</button>
+            <button class="nudge-btn" onclick="nudge('y0',-1)" title="decrease">&#8964;</button>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="autoscaleAxes();"
+        style="width:100%;margin-bottom:10px;padding:8px 12px;background:var(--teal-dim);
+               border:1px solid var(--teal);border-radius:6px;color:var(--teal);
+               font-family:var(--font-mono);font-size:11px;cursor:pointer;text-align:center;
+               transition:all 0.15s;font-weight:500;"
+        onmouseover="this.style.background='#0d5a3a'"
+        onmouseout="this.style.background='var(--teal-dim)'">
+        ⟳ Autoscale to trajectory
+      </button>
+
+      <div class="ctrl-divider"></div>
+      <div class="section-head">Components</div>
+
+      <div class="result-row">
+        <span class="result-label">v_x = v₀cosθ</span>
+        <span class="result-val" style="color:var(--blue)" id="val-vx">— m/s</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">v_y₀ = v₀sinθ</span>
+        <span class="result-val" style="color:var(--teal)" id="val-vy0">— m/s</span>
+      </div>
+
+      <div class="ctrl-divider"></div>
+      <div class="section-head">Outputs</div>
+
+      <div class="result-row">
+        <span class="result-label">t_flight</span>
+        <span class="result-val" style="color:var(--text)" id="val-tf">— s</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">t_peak</span>
+        <span class="result-val" style="color:var(--text)" id="val-tp">— s</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">max height</span>
+        <span class="result-val" style="color:var(--purple)" id="val-hmax">— m</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">range</span>
+        <span class="result-val" style="color:var(--amber)" id="val-range">— m</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">v at landing</span>
+        <span class="result-val" style="color:var(--red)" id="val-vlanding">— m/s</span>
+      </div>
+
+      <div class="ctrl-note">
+        v_x constant throughout<br>
+        v_y = 0 at peak<br>
+        max range at θ = 45°<br>
+        symmetric when y₀ = 0
+      </div>
+    </div>
+
+    <div class="canvas-wrap"><canvas id="c"></canvas></div>
+  </div>
+</div>
+
+<script>
+const G = 9.8;
+// Persistent axis scale — only updated by Autoscale button
+let SCALE_XMAX = 30;
+let SCALE_YMAX = 15;
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+function W(){return canvas.width/(window.devicePixelRatio||1);}
+function H(){return canvas.height/(window.devicePixelRatio||1);}
+function setupCanvas(){
+  const wrap=canvas.parentElement, dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr;
+  canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px';
+  canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+const getV0    = ()=>parseFloat(document.getElementById('in-v0').value)||0.1;
+const getTheta2= ()=>parseFloat(document.getElementById('in-theta').value)*Math.PI/180||0;
+const getY02   = ()=>parseFloat(document.getElementById('in-y0').value)||0;
+
+function autoscaleAxes(){
+  const v0=getV0(), theta=getTheta(), y0=getY0();
+  const {tf,hmax,range} = solve(v0,theta,y0);
+  SCALE_XMAX = Math.max(range * 1.25, 0.1);
+  SCALE_YMAX = Math.max(hmax * 1.35, y0 * 1.5, range * 0.3, 0.1);
+  update();
+}
+
+function syncInput(id, val){
+  const el = document.getElementById('in-'+id);
+  const decimals = id==='theta' ? 1 : 3;
+  el.value = parseFloat(val).toFixed(decimals);
+}
+function nudge(id, dir){
+  activeParam = id;
+  const sl  = document.getElementById('sl-'+id);
+  const inp = document.getElementById('in-'+id);
+  const step = parseFloat(sl.step) || 0.1;
+  const cur  = parseFloat(inp.value) || 0;
+  const next = Math.max(parseFloat(sl.min), Math.min(parseFloat(sl.max), cur + dir*step));
+  const decimals = id==='theta' ? 1 : 3;
+  inp.value = next.toFixed(decimals);
+  sl.value  = next;
+  update();
+}
+
+function syncSlider(id, val){
+  const sl = document.getElementById('sl-'+id);
+  const v = parseFloat(val);
+  if(isNaN(v))return;
+  sl.value = Math.max(parseFloat(sl.min), Math.min(parseFloat(sl.max), v));
+}
+const getTheta = ()=>parseFloat(document.getElementById('in-theta').value||document.getElementById('sl-theta').value)*Math.PI/180;
+
+function updateThetaMin(){
+  const sl = document.getElementById('sl-theta');
+  const y0 = parseFloat(document.getElementById('sl-y0').value);
+  sl.min = y0 > 0 ? '0' : '1';
+  if(parseFloat(sl.value) < parseFloat(sl.min)) sl.value = sl.min;
+}
+const getY0    = ()=>parseFloat(document.getElementById('in-y0').value||document.getElementById('sl-y0').value)||0;
+
+function lbl(text,x,y,color,align='center',size=11,italic=false){
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align;ctx.fillText(text,x,y);
+}
+function arrow(x1,y1,x2,y2,color,lw=2,hs=7){
+  const dx=x2-x1,dy=y2-y1;
+  if(Math.hypot(dx,dy)<4)return;
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);
+  ctx.save();ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-hs,hs*0.38);ctx.lineTo(-hs,-hs*0.38);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+
+function solve(v0, theta, y0){
+  const vx  = v0*Math.cos(theta);
+  const vy0 = v0*Math.sin(theta);
+  // y = y0 + vy0*t - 0.5*G*t² = 0  →  quadratic
+  const a=-0.5*G, b=vy0, c=y0;
+  const disc=b*b-4*a*c;
+  const tf = disc<0 ? 0 : (-b - Math.sqrt(disc))/(2*a);
+  const tp = vy0/G;
+  const hmax= y0 + vy0*tp - 0.5*G*tp*tp;
+  const range= vx*tf;
+  const vyLand = vy0 - G*tf;
+  const vLand  = Math.hypot(vx, vyLand);
+  return {vx, vy0, tf, tp, hmax, range, vLand, vyLand};
+}
+
+function update(){
+  const v0=getV0(), theta=getTheta(), y0=getY0();
+  const {vx,vy0,tf,tp,hmax,range,vLand} = solve(v0,theta,y0);
+  const thetaDeg = Math.round(theta*180/Math.PI);
+
+  updateThetaMin();
+  document.getElementById('lbl-v0').textContent    = parseFloat(v0).toFixed(3)+' m/s';
+  document.getElementById('lbl-theta').textContent = thetaDeg+'°';
+  document.getElementById('lbl-y0').textContent    = parseFloat(y0).toFixed(3)+' m';
+  document.getElementById('val-vx').textContent    = vx.toFixed(1)+' m/s';
+  document.getElementById('val-vy0').textContent   = vy0.toFixed(1)+' m/s';
+  document.getElementById('val-tf').textContent    = tf.toFixed(2)+' s';
+  document.getElementById('val-tp').textContent    = tp.toFixed(2)+' s';
+  document.getElementById('val-hmax').textContent  = hmax.toFixed(1)+' m';
+  document.getElementById('val-range').textContent = range.toFixed(3)+' m';
+  document.getElementById('val-vlanding').textContent = vLand.toFixed(1)+' m/s';
+
+  if(!ctx||W()===0)return;
+  ctx.clearRect(0,0,W(),H());
+  draw(v0,theta,y0,vx,vy0,tf,tp,hmax,range);
+}
+
+function draw(v0,theta,y0,vx,vy0,tf,tp,hmax,range){
+  const w=W(), h=H();
+
+  // ── Coordinate mapping ──
+  // World: x: 0 to range*1.15, y: 0 to hmax*1.3 (or y0*1.2 if flat)
+  // Use persistent scale — only updated by Autoscale button
+  const xMax = SCALE_XMAX;
+  const yMax = SCALE_YMAX;
+
+  const margin = {l:60, r:30, t:40, b:60};
+  const gw = w - margin.l - margin.r;
+  const gh = h - margin.t - margin.b;
+
+  const toSx = (wx) => margin.l + (wx/xMax)*gw;
+  const toSy = (wy) => margin.t + gh - (wy/yMax)*gh;
+
+  // ── Background / axes ──
+  // Ground line
+  ctx.fillStyle='#13141a';
+  ctx.fillRect(margin.l, margin.t, gw, gh);
+
+  // Grid
+  ctx.strokeStyle='#1a1b22'; ctx.lineWidth=0.5;
+  for(let i=0;i<=5;i++){
+    const gx=margin.l+i*gw/5;
+    ctx.beginPath();ctx.moveTo(gx,margin.t);ctx.lineTo(gx,margin.t+gh);ctx.stroke();
+    const gy=margin.t+i*gh/5;
+    ctx.beginPath();ctx.moveTo(margin.l,gy);ctx.lineTo(margin.l+gw,gy);ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle='#3a3b45'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(margin.l,margin.t);ctx.lineTo(margin.l,margin.t+gh);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(margin.l,margin.t+gh);ctx.lineTo(margin.l+gw,margin.t+gh);ctx.stroke();
+
+  // Ground fill
+  ctx.fillStyle='#1a1b1a';
+  ctx.fillRect(margin.l, toSy(0), gw, margin.t+gh-toSy(0));
+  ctx.strokeStyle='#2dd4a033'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(margin.l,toSy(0));ctx.lineTo(margin.l+gw,toSy(0));ctx.stroke();
+
+  // Axis labels
+  lbl('y (m)', margin.l-10, margin.t-12, '#4a4d5e', 'center', 10);
+  lbl('x (m)', margin.l+gw+10, margin.t+gh+4, '#4a4d5e', 'left', 10);
+
+  // Tick labels
+  for(let i=0;i<=4;i++){
+    const xv=(xMax*i/4).toFixed(0);
+    const yv=(yMax*i/4).toFixed(0);
+    lbl(xv, margin.l+(i/4)*gw, margin.t+gh+14, '#3a3b45','center',9);
+    lbl(yv, margin.l-6, toSy(yMax*i/4)+3, '#3a3b45','right',9);
+  }
+
+  // ── Launch height indicator ──
+  if(y0>0){
+    ctx.strokeStyle='#f5a62344'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(margin.l,toSy(y0));ctx.lineTo(margin.l+gw*0.15,toSy(y0));ctx.stroke();
+    ctx.setLineDash([]);
+    lbl('y₀='+y0+'m', margin.l+4, toSy(y0)-6, '#f5a62388','left',9);
+  }
+
+  // ── Degenerate check ──
+  if(range < 0.0001 && y0 < 0.001){
+    lbl('Set v₀ and/or y₀ to see a trajectory', w/2, h/2, '#4a4d5e','center',14,true);
+    lbl('then press ⟳ Autoscale', w/2, h/2+24, '#3a3b45','center',11);
+    return;
+  }
+
+  // ── Trajectory arc ──
+  const steps=200;
+  ctx.strokeStyle='#4a9eff'; ctx.lineWidth=2.5; ctx.lineJoin='round';
+  ctx.beginPath();
+  let first=true;
+  for(let i=0;i<=steps;i++){
+    const t=tf*i/steps;
+    const px=vx*t;
+    const py=y0+vy0*t-0.5*G*t*t;
+    if(py<-0.01)break;
+    const sx=toSx(px), sy=toSy(py);
+    if(first){ctx.moveTo(sx,sy);first=false;}
+    else ctx.lineTo(sx,sy);
+  }
+  ctx.stroke();
+
+  // ── Peak marker ──
+  const px_peak=vx*tp, py_peak=hmax;
+  const sx_peak=toSx(px_peak), sy_peak=toSy(py_peak);
+  // Dashed vertical to peak
+  ctx.strokeStyle='#b98aff44'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(sx_peak,toSy(0));ctx.lineTo(sx_peak,sy_peak);ctx.stroke();
+  ctx.setLineDash([]);
+  // Dashed horizontal to axis
+  ctx.strokeStyle='#b98aff33'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(margin.l,sy_peak);ctx.lineTo(sx_peak,sy_peak);ctx.stroke();
+  ctx.setLineDash([]);
+  // Peak dot
+  ctx.beginPath();ctx.arc(sx_peak,sy_peak,5,0,Math.PI*2);
+  ctx.fillStyle='#b98aff'; ctx.fill();
+  lbl('h='+hmax.toFixed(1)+'m', sx_peak+8, sy_peak-6, '#b98aff','left',10,true);
+
+  // ── Range marker ──
+  const sx_land=toSx(range), sy_land=toSy(0);
+  ctx.beginPath();ctx.arc(sx_land,sy_land,5,0,Math.PI*2);
+  ctx.fillStyle='#f5a623'; ctx.fill();
+  // Range arrow along ground
+  ctx.strokeStyle='#f5a62366'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(margin.l,sy_land+18);ctx.lineTo(sx_land,sy_land+18);ctx.stroke();
+  lbl('R='+range.toFixed(1)+'m', (margin.l+sx_land)/2, sy_land+30, '#f5a623','center',10,true);
+
+  // ── Launch point ──
+  const sx0=toSx(0), sy0=toSy(y0);
+  ctx.beginPath();ctx.arc(sx0,sy0,6,0,Math.PI*2);
+  ctx.fillStyle='#2dd4a0'; ctx.fill();
+
+  // ── Launch velocity vector ──
+  const vscale=gw/(xMax*2);
+  arrow(sx0,sy0, sx0+vx*vscale, sy0-vy0*vscale, '#e8e9ef',2,8);
+  lbl('v₀='+v0+' m/s', sx0+vx*vscale+8, sy0-vy0*vscale-6, '#e8e9efaa','left',10,true);
+
+  // v_x component
+  arrow(sx0,sy0+28, sx0+vx*vscale,sy0+28, '#4a9eff',1.5,6);
+  lbl('v_x='+vx.toFixed(1), sx0+vx*vscale/2, sy0+22, '#4a9eff88','center',9);
+
+  // v_y component
+  arrow(sx0-20,sy0, sx0-20,sy0-vy0*vscale, '#2dd4a0',1.5,6);
+  lbl('v_y₀='+vy0.toFixed(1), sx0-24, sy0-vy0*vscale/2, '#2dd4a088','right',9);
+
+  // ── Angle arc ──
+  const arcR=40;
+  ctx.strokeStyle='#f5a62388'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(sx0,sy0,arcR,0,-theta,true);ctx.stroke();
+  lbl('θ='+Math.round(theta*180/Math.PI)+'°',
+      sx0+arcR*Math.cos(-theta/2)*1.3, sy0+arcR*Math.sin(-theta/2)*1.3+4,
+      '#f5a623','center',10,true);
+
+  // ── Info box ──
+  const bx=w-220, by=margin.t+4, bw=190, bh=100;
+  ctx.fillStyle='#13141a'; ctx.strokeStyle='#2a2b33'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,6);ctx.fill();ctx.stroke();
+  lbl('t_flight = '+tf.toFixed(2)+' s',  bx+bw/2, by+18,  '#e8e9ef','center',11,true);
+  lbl('t_peak   = '+tp.toFixed(2)+' s',  bx+bw/2, by+34,  '#7a7d8e','center',10);
+  lbl('h_max    = '+hmax.toFixed(1)+' m',bx+bw/2, by+52,  '#b98aff','center',11,true);
+  lbl('Range    = '+range.toFixed(1)+' m',bx+bw/2,by+68,  '#f5a623','center',11,true);
+  lbl('v_land   = '+vLand().toFixed(1)+' m/s',bx+bw/2,by+86,'#ff5f6d','center',10);
+
+  function vLand(){
+    const vyL=vy0-G*tf;
+    return Math.hypot(vx,vyL);
+  }
+}
+
+// ── Arrow key fine-tuning ──
+let activeParam = null;  // 'v0', 'theta', 'y0'
+
+// focus tracking handled by onfocus on text inputs and nudge buttons
+
+document.addEventListener('keydown', e => {
+  if(!activeParam) return;
+  if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault();
+
+  const sl  = document.getElementById('sl-'+activeParam);
+  const inp = document.getElementById('in-'+activeParam);
+  const step = parseFloat(sl.step) || 0.1;
+  const dir  = e.key === 'ArrowRight' ? 1 : -1;
+  const cur  = parseFloat(inp.value) || 0;
+  const next = Math.max(parseFloat(sl.min), Math.min(parseFloat(sl.max), cur + dir*step));
+
+  const decimals = activeParam==='theta' ? 1 : 3;
+  inp.value = next.toFixed(decimals);
+  sl.value  = next;
+  update();
+});
+
+window.addEventListener('resize',()=>{setupCanvas();update();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();update();}));
+</script>
+</body>
+</html>

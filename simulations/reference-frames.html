@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reference Frames — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0f1014; --surface:#17181d; --surface2:#1e2028; --border:#2a2b33; --border2:#3a3b45;
+  --text:#e8e9ef; --text-muted:#7a7d8e; --text-dim:#4a4d5e;
+  --blue:#4a9eff; --blue-dim:#1a3a6a; --teal:#2dd4a0; --teal-dim:#0a3a2a;
+  --amber:#f5a623; --red:#ff5f6d; --purple:#b98aff;
+  --font-body:'DM Sans',sans-serif; --font-mono:'DM Mono',monospace; --font-serif:'DM Serif Display',serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;}
+.site-header{display:flex;align-items:center;gap:16px;padding:0 24px;height:52px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.site-logo{font-family:var(--font-serif);font-size:18px;color:var(--text);text-decoration:none;}
+.site-logo span{color:var(--blue);}
+.site-tagline{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);}
+.header-back{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--text-muted);text-decoration:none;}
+.header-back:hover{color:var(--text);}
+.sim-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.sim-layout{display:flex;flex:1;overflow:hidden;}
+.ctrl-panel{width:280px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;overflow-y:auto;}
+.ctrl-divider{height:1px;background:var(--border);margin:12px 0;}
+.eq-block{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+.eq-main{font-family:var(--font-serif);font-size:18px;font-style:italic;color:var(--text);margin-bottom:4px;}
+.eq-sub{font-size:11px;font-family:var(--font-mono);color:var(--text-dim);line-height:1.9;}
+.readout{border-radius:8px;padding:10px 14px;margin-bottom:10px;border:1px solid var(--border);background:var(--surface2);}
+.readout-label{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.08em;}
+.readout-val{font-family:var(--font-serif);font-size:22px;font-style:italic;}
+.slider-group{margin-bottom:12px;}
+.slider-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+.slider-label{font-size:13px;color:var(--text-muted);font-style:italic;font-family:var(--font-serif);}
+.slider-value{font-size:13px;font-family:var(--font-mono);color:var(--text);font-weight:500;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;background:var(--border2);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--text);border:2px solid var(--border2);cursor:grab;}
+.result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.result-label{font-size:12px;color:var(--text-muted);font-family:var(--font-mono);}
+.result-val{font-size:13px;font-family:var(--font-mono);font-weight:500;}
+.ctrl-note{margin-top:auto;padding-top:12px;font-size:11px;color:var(--text-dim);font-family:var(--font-mono);border-top:1px solid var(--border);line-height:1.7;}
+.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.tab-btn{flex:1;padding:10px 8px;font-size:12px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all 0.15s;text-align:center;line-height:1.3;}
+.tab-btn:hover{color:var(--text-muted);}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.canvas-wrap{flex:1;position:relative;overflow:hidden;}
+canvas{display:block;}
+.step-desc{padding:10px 20px;background:var(--surface);border-top:1px solid var(--border);font-size:12px;font-family:var(--font-mono);color:var(--text-muted);flex-shrink:0;line-height:1.5;min-height:44px;}
+.step-desc .hl{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">1.4 · reference frames & relative motion</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-main">v_A/C = v_A/B + v_B/C</div>
+        <div class="eq-sub">
+          <span style="color:var(--teal)">v_A/C — A relative to C</span><br>
+          <span style="color:var(--blue)">v_A/B — A relative to B</span><br>
+          <span style="color:var(--amber)">v_B/C — B relative to C</span><br>
+          <span style="color:var(--text-dim)">all motion is relative</span>
+        </div>
+      </div>
+
+      <!-- Readouts -->
+      <div class="readout" style="border-color:var(--amber)">
+        <div class="readout-label">Train speed (re: ground)</div>
+        <div class="readout-val" id="val-vtrain" style="color:var(--amber)">0.0 m/s</div>
+      </div>
+      <div class="readout" style="border-color:var(--blue)">
+        <div class="readout-label">Passenger speed (re: train)</div>
+        <div class="readout-val" id="val-vpax" style="color:var(--blue)">0.0 m/s</div>
+      </div>
+      <div class="readout" style="border-color:var(--teal)">
+        <div class="readout-label">Passenger speed (re: ground)</div>
+        <div class="readout-val" id="val-vground" style="color:var(--teal)">0.0 m/s</div>
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">v_train · train speed</span><span class="slider-value" id="lbl-vtrain">20 m/s</span></div>
+        <input type="range" id="sl-vtrain" min="0" max="50" step="1" value="20" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">v_pax · passenger (re: train)</span><span class="slider-value" id="lbl-vpax">5 m/s</span></div>
+        <input type="range" id="sl-vpax" min="-20" max="20" step="1" value="5" oninput="update()">
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="result-row"><span class="result-label">v_pax re: ground</span><span class="result-val" style="color:var(--teal)" id="res-vground">25 m/s</span></div>
+      <div class="result-row"><span class="result-label">v_pax re: train</span><span class="result-val" style="color:var(--blue)" id="res-vpax">5 m/s</span></div>
+      <div class="result-row"><span class="result-label">v_train re: ground</span><span class="result-val" style="color:var(--amber)" id="res-vtrain">20 m/s</span></div>
+
+      <div class="ctrl-note">
+        v_A/C = v_A/B + v_B/C<br>
+        all motion is relative<br>
+        no absolute rest frame<br>
+        laws of physics same in all<br>
+        inertial frames (Galileo)
+      </div>
+    </div>
+
+    <div class="canvas-area">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab1" onclick="setTab(1)">① Reference Frame<br><span style="font-size:10px;opacity:0.6">what is it?</span></button>
+        <button class="tab-btn" id="tab2" onclick="setTab(2)">② Relative Velocity<br><span style="font-size:10px;opacity:0.6">v_A/C = v_A/B + v_B/C</span></button>
+        <button class="tab-btn" id="tab3" onclick="setTab(3)">③ Same Physics<br><span style="font-size:10px;opacity:0.6">laws hold, numbers shift</span></button>
+      </div>
+      <div class="canvas-wrap"><canvas id="c"></canvas></div>
+      <div class="step-desc" id="step-desc">
+        <span class="hl">Reference frames:</span> all motion is measured relative to an observer. The passenger walking on the train is at rest relative to the train — but moving fast relative to the ground. Both descriptions are equally correct.
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+let currentTab=1;
+function W(){return canvas.width/(window.devicePixelRatio||1);}
+function H(){return canvas.height/(window.devicePixelRatio||1);}
+function setupCanvas(){
+  const wrap=canvas.parentElement,dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr;canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px';canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+const getVtrain=()=>parseFloat(document.getElementById('sl-vtrain').value);
+const getVpax=()=>parseFloat(document.getElementById('sl-vpax').value);
+
+function arrow(x1,y1,x2,y2,color,lw=2.5,hs=9){
+  const dx=x2-x1,dy=y2-y1;if(Math.hypot(dx,dy)<4)return;
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);
+  ctx.save();ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-hs,hs*0.38);ctx.lineTo(-hs,-hs*0.38);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+function lbl(text,x,y,color,align='center',size=12,italic=false){
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align;ctx.fillText(text,x,y);
+}
+function box(x,y,w2,h2,fill,stroke,r=6){
+  ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(x,y,w2,h2,r);ctx.fill();ctx.stroke();
+}
+
+function setTab(n){
+  currentTab=n;
+  [1,2,3].forEach(i=>document.getElementById('tab'+i).classList.toggle('active',i===n));
+  const descs={
+    1:'<span class="hl">Reference frame:</span> your coordinate system for measuring motion. The train passenger is still relative to the train, moving relative to the ground. Drag both sliders and watch how each observer sees different velocities.',
+    2:'<span class="hl">Relative velocity:</span> v_A/C = v_A/B + v_B/C. The passenger\'s speed relative to the ground is their speed relative to the train plus the train\'s speed relative to the ground. Drag v_pax negative to walk backward.',
+    3:'<span class="hl">Same physics, different numbers:</span> Newton\'s laws hold in every inertial frame. F=ma is the same for both observers. But velocity, KE, and momentum are all frame-dependent — they shift with the observer.'
+  };
+  document.getElementById('step-desc').innerHTML=descs[n];
+  update();
+}
+
+function update(){
+  const vt=getVtrain(), vp=getVpax(), vg=vt+vp;
+
+  document.getElementById('lbl-vtrain').textContent=vt+' m/s';
+  document.getElementById('lbl-vpax').textContent=vp+' m/s';
+  document.getElementById('val-vtrain').textContent=vt.toFixed(1)+' m/s';
+  document.getElementById('val-vpax').textContent=vp.toFixed(1)+' m/s';
+  document.getElementById('val-vground').textContent=vg.toFixed(1)+' m/s';
+  document.getElementById('res-vground').textContent=vg.toFixed(1)+' m/s';
+  document.getElementById('res-vpax').textContent=vp.toFixed(1)+' m/s';
+  document.getElementById('res-vtrain').textContent=vt.toFixed(1)+' m/s';
+
+  if(!ctx||W()===0)return;
+  ctx.clearRect(0,0,W(),H());
+  if(currentTab===1)drawTab1(vt,vp,vg);
+  else if(currentTab===2)drawTab2(vt,vp,vg);
+  else drawTab3(vt,vp,vg);
+}
+
+// ── Shared: draw train ────────────────────
+function drawTrain(cx, cy, w2, trainColor, label) {
+  // Train body
+  box(cx-w2/2, cy-30, w2, 50, '#1a1b22', trainColor);
+  // Windows
+  for(let i=0;i<3;i++){
+    const wx=cx-w2/2+20+i*(w2-40)/3;
+    box(wx,cy-22,22,18,'#0f1014',trainColor+'66',3);
+  }
+  // Wheels
+  [cx-w2/2+20, cx+w2/2-20].forEach(wx=>{
+    ctx.beginPath();ctx.arc(wx,cy+22,10,0,Math.PI*2);
+    ctx.fillStyle='#2a2b3a';ctx.strokeStyle=trainColor;ctx.lineWidth=1.5;
+    ctx.fill();ctx.stroke();
+  });
+  lbl(label, cx, cy+42, trainColor+'88', 'center', 10);
+}
+
+// ── Tab 1: Reference Frame ─────────────────
+function drawTab1(vt,vp,vg){
+  const w=W(),h=H();
+
+  lbl('All motion is relative — it depends on the observer', w/2, h*0.07, '#4a9eff', 'center', 15, true);
+
+  const groundY=h*0.72;
+
+  // Ground
+  ctx.strokeStyle='#3a3b45';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(w,groundY);ctx.stroke();
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  for(let gx=0;gx<=w;gx+=20){
+    ctx.beginPath();ctx.moveTo(gx,groundY);ctx.lineTo(gx-10,groundY+10);ctx.stroke();
+  }
+  lbl('ground frame', w*0.08, groundY+22, '#3a3b45', 'left', 10);
+
+  // Train
+  const trainCx=w*0.50, trainCy=groundY-40;
+  drawTrain(trainCx, trainCy, 220, '#f5a623', 'train frame');
+
+  // Passenger inside train
+  const pax={x:trainCx+20, y:trainCy-8};
+  ctx.beginPath();ctx.arc(pax.x,pax.y,10,0,Math.PI*2);
+  ctx.fillStyle='#4a9eff33';ctx.strokeStyle='#4a9eff';ctx.lineWidth=1.5;
+  ctx.fill();ctx.stroke();
+  lbl('👤',pax.x,pax.y+4,'#4a9eff','center',13);
+
+  // Train velocity arrow (re: ground)
+  if(vt>0){
+    const tScale=Math.min(vt*4,140);
+    arrow(trainCx+110,trainCy-15,trainCx+110+tScale,trainCy-15,'#f5a623',3,10);
+    lbl('v_train='+vt+' m/s',trainCx+110+tScale/2,trainCy-32,'#f5a623','center',11,true);
+  }
+
+  // Passenger velocity arrows
+  // Re: train
+  if(Math.abs(vp)>0){
+    const pScale=Math.min(Math.abs(vp)*5,80);
+    const pDir=vp>0?1:-1;
+    arrow(pax.x,pax.y-24,pax.x+pDir*pScale,pax.y-24,'#4a9eff',2.5,8);
+    lbl('re: train: '+vp+' m/s',pax.x+pDir*pScale/2,pax.y-38,'#4a9eff','center',10,true);
+  }
+
+  // Re: ground
+  if(Math.abs(vg)>0.1){
+    const gScale=Math.min(Math.abs(vg)*3.5,160);
+    const gDir=vg>0?1:-1;
+    arrow(pax.x,groundY-10,pax.x+gDir*gScale,groundY-10,'#2dd4a0',2.5,8);
+    lbl('re: ground: '+vg.toFixed(1)+' m/s',pax.x+gDir*gScale/2,groundY-24,'#2dd4a0','center',10,true);
+  }
+
+  // Observer on ground
+  const obs={x:w*0.12,y:groundY-14};
+  ctx.beginPath();ctx.arc(obs.x,obs.y,12,0,Math.PI*2);
+  ctx.fillStyle='#2dd4a033';ctx.strokeStyle='#2dd4a0';ctx.lineWidth=1.5;
+  ctx.fill();ctx.stroke();
+  lbl('👁',obs.x,obs.y+4,'#2dd4a0','center',14);
+  lbl('ground',obs.x,obs.y+28,'#2dd4a088','center',9);
+  lbl('observer',obs.x,obs.y+40,'#2dd4a088','center',9);
+
+  // Summary box
+  const noteY=h*0.82;
+  box(w*0.06,noteY,w*0.88,52,'#13141a','#2a2b33');
+  lbl('Passenger: at rest relative to train · moving at '+vg.toFixed(1)+' m/s relative to ground',w/2,noteY+18,'#e8e9ef','center',12,true);
+  lbl('Both descriptions are equally valid. There is no preferred "true" frame.',w/2,noteY+36,'#7a7d8e','center',11);
+}
+
+// ── Tab 2: Relative Velocity ───────────────
+function drawTab2(vt,vp,vg){
+  const w=W(),h=H();
+
+  lbl('v_passenger/ground = v_passenger/train + v_train/ground', w/2, h*0.07, '#2dd4a0', 'center', 14, true);
+  lbl('velocities add when frames are stacked', w/2, h*0.12, '#e8e9ef', 'center', 11);
+
+  // Vector addition diagram
+  const cy=h*0.42, startX=w*0.08, scale=6;
+  const maxLen=w*0.84;
+
+  // Train vector
+  const tLen=Math.min(Math.abs(vt)*scale, maxLen*0.4);
+  const tDir=vt>=0?1:-1;
+  arrow(startX,cy,startX+tDir*tLen,cy,'#f5a623',4,12);
+  lbl('v_train='+vt+' m/s',startX+tDir*tLen/2,cy-20,'#f5a623','center',12,true);
+
+  // Passenger vector (starts where train ends)
+  const pLen=Math.min(Math.abs(vp)*scale, maxLen*0.3);
+  const pDir=vp>=0?1:-1;
+  const pStart=startX+tDir*tLen;
+  arrow(pStart,cy,pStart+pDir*pLen,cy,'#4a9eff',4,12);
+  lbl('v_pax/train='+vp+' m/s',pStart+pDir*pLen/2,cy+24,'#4a9eff','center',12,true);
+
+  // Result vector
+  const rEnd=pStart+pDir*pLen;
+  const rLen=Math.abs(rEnd-startX);
+  const rDir=vg>=0?1:-1;
+  ctx.strokeStyle='#2dd4a044';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(startX,cy+60);ctx.lineTo(rEnd,cy+60);ctx.stroke();
+  ctx.setLineDash([]);
+  arrow(startX,cy+60,rEnd,cy+60,'#2dd4a0',3.5,11);
+  lbl('v_pax/ground='+vg.toFixed(1)+' m/s',(startX+rEnd)/2,cy+82,'#2dd4a0','center',13,true);
+
+  // Equation box
+  const eqY=h*0.65;
+  box(w*0.15,eqY,w*0.70,66,'#13141a','#2dd4a044');
+  lbl('v_pax/ground = v_pax/train + v_train/ground',w/2,eqY+22,'#e8e9ef','center',13,true);
+  lbl('= '+vp+' + '+vt+' = '+vg.toFixed(1)+' m/s',w/2,eqY+46,'#2dd4a0','center',16,true);
+
+  // Note about walking backward
+  if(vp<0){
+    lbl('Walking backward on the train — passenger subtracts from train speed',w/2,h*0.85,'#4a9eff88','center',11,true);
+  } else if(vp===0){
+    lbl('Passenger at rest on train — moves exactly with the train',w/2,h*0.85,'#4a9eff88','center',11,true);
+  } else {
+    lbl('Walking forward — passenger adds to train speed relative to ground',w/2,h*0.85,'#4a9eff88','center',11,true);
+  }
+}
+
+// ── Tab 3: Same Physics ────────────────────
+function drawTab3(vt,vp,vg){
+  const w=W(),h=H();
+  const m=70; // passenger mass kg
+
+  lbl('Same physics — different numbers', w/2, h*0.07, '#b98aff', 'center', 15, true);
+  lbl('F = ma holds in every inertial frame. KE and momentum depend on the frame.', w/2, h*0.12, '#e8e9ef', 'center', 11);
+
+  // Two observer panels
+  const panW=w*0.40, panH=h*0.48, panY=h*0.18;
+  const pan1X=w*0.04, pan2X=w*0.54;
+
+  // Panel 1 — Ground observer
+  box(pan1X,panY,panW,panH,'#13141a','#2dd4a0');
+  lbl('👁 Ground Observer',pan1X+panW/2,panY+20,'#2dd4a0','center',12);
+  lbl('sees passenger at '+vg.toFixed(1)+' m/s',pan1X+panW/2,panY+38,'#2dd4a088','center',10);
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pan1X+16,panY+46);ctx.lineTo(pan1X+panW-16,panY+46);ctx.stroke();
+
+  const KE1=0.5*m*vg*vg;
+  const p1=m*vg;
+  lbl('v = '+vg.toFixed(1)+' m/s',pan1X+panW/2,panY+68,'#e8e9ef','center',12,true);
+  lbl('KE = ½×'+m+'×'+vg.toFixed(1)+'²',pan1X+panW/2,panY+88,'#2dd4a088','center',10);
+  lbl('= '+KE1.toFixed(0)+' J',pan1X+panW/2,panY+110,'#2dd4a0','center',18,true);
+  lbl('p = mv = '+p1.toFixed(1)+' kg·m/s',pan1X+panW/2,panY+132,'#2dd4a088','center',10);
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pan1X+16,panY+146);ctx.lineTo(pan1X+panW-16,panY+146);ctx.stroke();
+  lbl('F = ma · same formula',pan1X+panW/2,panY+164,'#2dd4a044','center',11,true);
+  lbl('laws of physics unchanged',pan1X+panW/2,panY+180,'#2dd4a033','center',10);
+
+  // Panel 2 — Train observer
+  box(pan2X,panY,panW,panH,'#13141a','#f5a623');
+  lbl('👁 Train Observer',pan2X+panW/2,panY+20,'#f5a623','center',12);
+  lbl('sees passenger at '+vp.toFixed(1)+' m/s',pan2X+panW/2,panY+38,'#f5a62388','center',10);
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pan2X+16,panY+46);ctx.lineTo(pan2X+panW-16,panY+46);ctx.stroke();
+
+  const KE2=0.5*m*vp*vp;
+  const p2=m*vp;
+  lbl('v = '+vp.toFixed(1)+' m/s',pan2X+panW/2,panY+68,'#e8e9ef','center',12,true);
+  lbl('KE = ½×'+m+'×'+vp.toFixed(1)+'²',pan2X+panW/2,panY+88,'#f5a62388','center',10);
+  lbl('= '+KE2.toFixed(0)+' J',pan2X+panW/2,panY+110,'#f5a623','center',18,true);
+  lbl('p = mv = '+p2.toFixed(1)+' kg·m/s',pan2X+panW/2,panY+132,'#f5a62388','center',10);
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pan2X+16,panY+146);ctx.lineTo(pan2X+panW-16,panY+146);ctx.stroke();
+  lbl('F = ma · same formula',pan2X+panW/2,panY+164,'#f5a62344','center',11,true);
+  lbl('laws of physics unchanged',pan2X+panW/2,panY+180,'#f5a62333','center',10);
+
+  // vs divider
+  lbl('vs',w/2,panY+panH/2,'#3a3b45','center',14,true);
+
+  // Bottom note
+  const noteY=panY+panH+18;
+  box(w*0.06,noteY,w*0.88,52,'#13141a','#2a2b33');
+  lbl('KE and momentum are frame-dependent — they change with the observer.',w/2,noteY+18,'#e8e9ef','center',12,true);
+  lbl('F = ma and all laws of physics are frame-independent — Galilean relativity.',w/2,noteY+36,'#7a7d8e','center',11);
+}
+
+window.addEventListener('resize',()=>{setupCanvas();update();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();update();}));
+</script>
+</body>
+</html>

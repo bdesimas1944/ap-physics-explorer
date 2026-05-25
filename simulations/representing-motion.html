@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Representing Motion — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#0f1014; --surface:#17181d; --surface2:#1e2028;
+  --border:#2a2b33; --border2:#3a3b45;
+  --text:#e8e9ef; --text-muted:#7a7d8e; --text-dim:#4a4d5e;
+  --blue:#4a9eff; --blue-dim:#1a3a6a;
+  --teal:#2dd4a0; --teal-dim:#0a3a2a;
+  --amber:#f5a623; --red:#ff5f6d; --purple:#b98aff;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --font-serif:'DM Serif Display',serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;}
+.site-header{display:flex;align-items:center;gap:16px;padding:0 24px;height:52px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.site-logo{font-family:var(--font-serif);font-size:18px;color:var(--text);text-decoration:none;}
+.site-logo span{color:var(--blue);}
+.site-tagline{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);}
+.header-back{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--text-muted);text-decoration:none;}
+.header-back:hover{color:var(--text);}
+.sim-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.sim-layout{display:flex;flex:1;overflow:hidden;}
+.ctrl-panel{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;overflow-y:auto;}
+.ctrl-divider{height:1px;background:var(--border);margin:10px 0;}
+.eq-block{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;margin-bottom:12px;}
+.eq-row{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;}
+.eq-sym{font-family:var(--font-serif);font-size:16px;font-style:italic;}
+.eq-def{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);}
+.slider-group{margin-bottom:10px;}
+.slider-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+.slider-label{font-size:12px;color:var(--text-muted);font-style:italic;font-family:var(--font-serif);}
+.slider-value{font-size:12px;font-family:var(--font-mono);color:var(--text);font-weight:500;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;background:var(--border2);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--text);border:2px solid var(--border2);cursor:grab;}
+.result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.result-label{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);}
+.result-val{font-size:12px;font-family:var(--font-mono);font-weight:500;}
+.ctrl-note{margin-top:auto;padding-top:10px;font-size:10px;color:var(--text-dim);font-family:var(--font-mono);border-top:1px solid var(--border);line-height:1.8;}
+.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.tab-btn{flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all 0.15s;text-align:center;line-height:1.3;}
+.tab-btn:hover{color:var(--text-muted);}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.canvas-wrap{flex:1;position:relative;overflow:hidden;}
+canvas{display:block;}
+.step-desc{padding:9px 18px;background:var(--surface);border-top:1px solid var(--border);font-size:11px;font-family:var(--font-mono);color:var(--text-muted);flex-shrink:0;line-height:1.5;min-height:40px;}
+.step-desc .hl{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">1.3 · representing motion</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-row"><span class="eq-sym" style="color:var(--teal)">x-t</span><span class="eq-def">slope = velocity</span></div>
+        <div class="eq-row"><span class="eq-sym" style="color:var(--blue)">v-t</span><span class="eq-def">slope = acceleration · area = Δx</span></div>
+        <div class="eq-row"><span class="eq-sym" style="color:var(--amber)">a-t</span><span class="eq-def">area = Δv · flat = constant a</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">x₀ · initial position</span><span class="slider-value" id="lbl-x0">0 m</span></div>
+        <input type="range" id="sl-x0" min="-50" max="50" step="1" value="0" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">v₀ · initial velocity</span><span class="slider-value" id="lbl-v0">5 m/s</span></div>
+        <input type="range" id="sl-v0" min="-100" max="100" step="1" value="5" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">a · acceleration</span><span class="slider-value" id="lbl-a">0.0 m/s²</span></div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input type="range" id="sl-a" min="-20" max="20" step="0.1" value="0" style="-webkit-appearance:none;appearance:none;flex:1;height:5px;border-radius:3px;background:var(--border2);outline:none;cursor:pointer;" oninput="syncAInput(this.value);update()">
+          <input type="text" id="in-a" value="0.0"
+            style="width:64px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:var(--font-mono);font-size:12px;padding:3px 6px;text-align:right;"
+            onchange="syncASlider(this.value);update()"
+            onfocus="activeA=true" onblur="activeA=false">
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <button onclick="nudgeA(1)"  style="width:22px;height:22px;background:var(--surface2);border:1px solid var(--border2);border-radius:3px;color:var(--text-muted);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-muted)'">&#8963;</button>
+            <button onclick="nudgeA(-1)" style="width:22px;height:22px;background:var(--surface2);border:1px solid var(--border2);border-radius:3px;color:var(--text-muted);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-muted)'">&#8964;</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <button onclick="autoscale();"
+          style="flex:1;padding:8px 10px;background:var(--surface2);border:1px solid var(--border2);
+                 border-radius:6px;color:var(--text-muted);font-family:var(--font-mono);font-size:11px;
+                 cursor:pointer;text-align:center;transition:all 0.15s;"
+          onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
+          onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-muted)'">
+          ⟳ Autoscale
+        </button>
+        <button onclick="resetAxes();"
+          style="flex:1;padding:8px 10px;background:var(--surface2);border:1px solid var(--border2);
+                 border-radius:6px;color:var(--text-muted);font-family:var(--font-mono);font-size:11px;
+                 cursor:pointer;text-align:center;transition:all 0.15s;"
+          onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber)'"
+          onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-muted)'">
+          ↺ Reset
+        </button>
+      </div>
+
+
+      <div class="ctrl-divider"></div>
+
+      <!-- Time scrubber -->
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label" style="color:var(--red)">Duration = Δt</span><span class="slider-value" id="lbl-t" style="color:var(--red)">0.0 s</span></div>
+        <input type="range" id="sl-t" min="1" max="10" step="0.5" value="5" oninput="update()">
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="result-row"><span class="result-label">x_final = x(Δt)</span><span class="result-val" style="color:var(--teal)" id="val-x">— m</span></div>
+      <div class="result-row"><span class="result-label">v_final = v(Δt)</span><span class="result-val" style="color:var(--blue)" id="val-v">— m/s</span></div>
+      <div class="result-row"><span class="result-label">Δx = x_final − x₀</span><span class="result-val" style="color:var(--red)" id="val-dx">— m</span></div>
+
+      <div class="ctrl-note">
+        drag t cursor → red line<br>
+        moves through all 3 graphs<br>
+        ─────────────────<br>
+        x-t slope = v-t height<br>
+        v-t slope = a-t height<br>
+        v-t area = Δx
+      </div>
+    </div>
+
+    <div class="canvas-area">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab1" onclick="setTab(1)">① Motion Graphs<br><span style="font-size:9px;opacity:0.6">linked · same story</span></button>
+<button class="tab-btn" id="tabBwd" onclick="setTab('bwd')" style="display:none">② Areas<br><span style="font-size:9px;opacity:0.6">v-t + a-t shaded</span></button>
+
+      </div>
+      <div class="canvas-wrap"><canvas id="c"></canvas></div>
+      <div class="step-desc" id="step-desc">
+        <span class="hl">Three graphs · one story.</span> Drag the red time cursor and watch the dot travel all three graphs simultaneously. They are not three separate things — they are three views of the same motion.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+let currentTab=1;
+
+
+function W(){return canvas.width/(window.devicePixelRatio||1);}
+function H(){return canvas.height/(window.devicePixelRatio||1);}
+function setupCanvas(){
+  const wrap=canvas.parentElement,dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr;canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px';canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+const getX0=()=>parseFloat(document.getElementById('sl-x0').value);
+const getV0=()=>parseFloat(document.getElementById('sl-v0').value);
+const getA =()=>parseFloat(document.getElementById('in-a').value)||0;
+let activeA = false;
+
+function syncAInput(val){
+  document.getElementById('in-a').value = parseFloat(val).toFixed(1);
+}
+function syncASlider(val){
+  const v=parseFloat(val);
+  if(isNaN(v))return;
+  document.getElementById('sl-a').value = Math.max(-20,Math.min(20,v));
+}
+function nudgeA(dir){
+  const cur = parseFloat(document.getElementById('in-a').value)||0;
+  const next = Math.max(-20,Math.min(20, Math.round((cur+dir*0.1)*10)/10));
+  document.getElementById('in-a').value = next.toFixed(1);
+  document.getElementById('sl-a').value = next;
+  update();
+}
+const getT =()=>parseFloat(document.getElementById('sl-t').value);
+
+function xAt(t){return getX0()+getV0()*t+0.5*getA()*t*t;}
+function vAt(t){return getV0()+getA()*t;}
+function aAt(t){return getA();}
+
+function lbl(text,x,y,color,align='center',size=11,italic=false){
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align;ctx.fillText(text,x,y);
+}
+
+// ── Graph helper ──────────────────────────
+function drawGraph(gx,gy,gw,gh, tMax, yMin,yMax, color, label, yLabel, fn, tCursor, showArea=false, areaColor='') {
+  // Background
+  ctx.fillStyle='#13141a';
+  ctx.beginPath();ctx.roundRect(gx,gy,gw,gh,4);ctx.fill();
+
+  // Grid lines
+  ctx.strokeStyle='#1a1b22';ctx.lineWidth=0.5;
+  for(let i=0;i<=4;i++){
+    const ty=gy+i*gh/4;
+    ctx.beginPath();ctx.moveTo(gx,ty);ctx.lineTo(gx+gw,ty);ctx.stroke();
+  }
+
+  // Zero line
+  const yZ=gy+gh-(-yMin/(yMax-yMin))*gh;
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(gx,yZ);ctx.lineTo(gx+gw,yZ);ctx.stroke();
+
+  // Axes
+  ctx.strokeStyle='#3a3b45';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx,gy+gh);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(gx,gy+gh);ctx.lineTo(gx+gw,gy+gh);ctx.stroke();
+
+  // Map helpers
+  const toX=(t)=>gx+(t/tMax)*gw;
+  const toY=(y)=>gy+gh-((y-yMin)/(yMax-yMin))*gh;
+
+  // Area shading under curve (v-t → displacement)
+  if(showArea && tCursor>0){
+    ctx.fillStyle=areaColor+'22';
+    ctx.beginPath();
+    ctx.moveTo(toX(0),toY(0));
+    for(let ti=0;ti<=tCursor;ti+=0.05){
+      ctx.lineTo(toX(ti),toY(fn(ti)));
+    }
+    ctx.lineTo(toX(tCursor),toY(0));
+    ctx.closePath();ctx.fill();
+  }
+
+  // Curve
+  ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.lineJoin='round';
+  ctx.beginPath();
+  let first=true;
+  for(let ti=0;ti<=tMax;ti+=0.05){
+    const py=fn(ti);
+    if(py<yMin*2||py>yMax*2){first=true;continue;}
+    const cx2=toX(ti),cy2=toY(Math.max(yMin,Math.min(yMax,py)));
+    if(first){ctx.moveTo(cx2,cy2);first=false;}
+    else ctx.lineTo(cx2,cy2);
+  }
+  ctx.stroke();
+
+  // Time cursor — red vertical line
+  if(tCursor>=0&&tCursor<=tMax){
+    const cx2=toX(tCursor);
+    ctx.strokeStyle='#ff5f6d';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(cx2,gy);ctx.lineTo(cx2,gy+gh);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Dot on curve
+    const py=fn(tCursor);
+    if(py>=yMin&&py<=yMax){
+      ctx.beginPath();ctx.arc(cx2,toY(py),6,0,Math.PI*2);
+      ctx.fillStyle=color;ctx.fill();
+      ctx.strokeStyle='#0f1014';ctx.lineWidth=2;ctx.stroke();
+    }
+  }
+
+  // Labels
+  lbl(label,gx+8,gy+16,color,'left',14,true);
+  lbl(yLabel,gx-4,gy+8,color+'88','right',11);
+  lbl('t (s)',gx+gw,gy+gh+16,color+'66','right',11);
+  lbl('0',gx-4,gy+gh,color+'44','right',10);
+  lbl(tMax,gx+gw,gy+gh+16,color+'44','center',10);
+}
+
+// ── Factory defaults — source of truth ──
+const FACTORY = { X_MIN:-50, X_MAX:150, V_MIN:-20, V_MAX:20, A_ABS:6 };
+
+// Manual mode axis ranges — updated by autoscale() or reset()
+let X_MIN=FACTORY.X_MIN, X_MAX=FACTORY.X_MAX;
+let V_MIN=FACTORY.V_MIN, V_MAX=FACTORY.V_MAX;
+let A_ABS=FACTORY.A_ABS;
+
+function resetAxes(){
+  // Reset axes to factory
+  X_MIN=FACTORY.X_MIN; X_MAX=FACTORY.X_MAX;
+  V_MIN=FACTORY.V_MIN; V_MAX=FACTORY.V_MAX;
+  A_ABS=FACTORY.A_ABS;
+  // Reset all sliders to defaults
+  document.getElementById('sl-x0').value = 0;
+  document.getElementById('sl-v0').value = 5;
+  document.getElementById('sl-a').value  = 0;
+  document.getElementById('sl-t').value  = 0;
+  // Stay on current tab, redraw
+  update();
+}
+
+function autoscale(){
+  const v0=getV0(), a=getA(), x0=getX0(), t=getT();
+  // Compute full range over t=0 to duration
+  const xVals=[...Array(201)].map((_,i)=>xAt(i*t/200));
+  const vVals=[...Array(201)].map((_,i)=>vAt(i*t/200));
+  const xPad=(Math.max(...xVals)-Math.min(...xVals))*0.15||10;
+  const vPad=(Math.max(...vVals)-Math.min(...vVals))*0.15||3;
+  X_MIN=Math.min(...xVals)-xPad;
+  X_MAX=Math.max(...xVals)+xPad;
+  V_MIN=Math.min(...vVals)-vPad;
+  V_MAX=Math.max(...vVals)+vPad;
+  A_ABS=Math.max(Math.abs(a)*1.3,1.5);
+  update();
+}
+
+function setTab(n){
+  currentTab=n;
+  ['1','bwd'].forEach(i=>document.getElementById('tab'+i).classList.toggle('active',String(i)===String(n)));
+  const descs={
+    0:'<span class="hl">Motion Graphs:</span> new design — work in progress.',
+    1:'<span class="hl">Three graphs · one story.</span> Drag the <span style="color:#ff5f6d">red time cursor</span> — the dot travels all three simultaneously. Drag v₀ or a and all three graphs reshape together. They are linked.',
+    'bwd':'<span class="hl">Areas:</span> the shaded area under v-t = displacement. Blue rectangle = v₀t, teal triangle = ½at². Together they build the kinematic equation from geometry.',
+    '2old':'<span class="hl">Slope connection:</span> the slope of the x-t graph at any instant equals the height of the v-t graph at that same instant. Steep x-t → high v-t. Flat x-t → v-t = 0. Set a≠0 and watch both curves change together.',
+    3:'<span class="hl">Area connection:</span> the shaded area under the v-t graph equals the displacement shown in the x-t graph. More area → more displacement. Negative area (below zero) → negative displacement — moving back.',
+    4:'<span class="hl">Motion diagram:</span> each dot marks the position at equal time intervals. Equal spacing = constant velocity. Growing spacing = accelerating. Shrinking spacing = decelerating. The dot pattern IS the v-t graph made physical.'
+  };
+  document.getElementById('step-desc').innerHTML=descs[n];
+  setTimeout(update, 10);
+}
+
+function update(){
+  const x0=getX0(),v0=getV0(),a=getA(),t=getT();
+  const x=xAt(t),v=vAt(t);
+
+  document.getElementById('lbl-x0').textContent=x0+' m';
+  document.getElementById('lbl-v0').textContent=v0+' m/s';
+  document.getElementById('lbl-a').textContent=parseFloat(a).toFixed(1)+' m/s²';
+  document.getElementById('lbl-t').textContent=t.toFixed(1)+' s';
+  const xFinal = xAt(t), vFinal = vAt(t), dx = xFinal - x0;
+  document.getElementById('val-x').textContent  = xFinal.toFixed(1)+' m';
+  document.getElementById('val-v').textContent  = vFinal.toFixed(1)+' m/s';
+  document.getElementById('val-dx').textContent = dx.toFixed(1)+' m';
+
+  if(!ctx||W()===0)return;
+  ctx.clearRect(0,0,W(),H());
+
+  if(currentTab===1)drawTab0(t);
+  else drawTabBwd(t);
+}
+
+// ── Tab 0: Motion Graphs (new design) ───────
+function drawTab0(t){
+  const w=W(),h=H();
+  const v0=getV0(),a=getA(),x0=getX0();
+
+  // ── MANUAL MODE — axes fixed until Autoscale pressed ──
+  const xMin=X_MIN, xMax=X_MAX;
+  const vMin=V_MIN, vMax=V_MAX;
+  const aAbs=A_ABS;
+
+  // Three graphs side by side in a single row
+  const pad=w*0.02;
+  const gw=(w - pad*4) / 3;
+  const gy=h*0.08, gh=h*0.82;
+
+  const gx1=pad;
+  const gx2=pad*2 + gw;
+  const gx3=pad*3 + gw*2;
+
+  drawGraph(gx1,gy,gw,gh, t, xMin,xMax,  '#2dd4a0','x-t  position',   'x(m)',    xAt, -1);
+  drawGraph(gx2,gy,gw,gh, t, vMin,vMax,  '#4a9eff','v-t  velocity',   'v(m/s)',  vAt, -1);
+  drawGraph(gx3,gy,gw,gh, t, -aAbs,aAbs, '#f5a623','a-t  acceleration','a(m/s²)', aAt, -1);
+
+  // Connection arrows between graphs
+  const arrowY=gy+gh*0.12;
+  ctx.strokeStyle='#3a3b45'; ctx.lineWidth=1; ctx.fillStyle='#3a3b45';
+  // x-t → v-t
+  const ax1=gx1+gw+2, ax2=gx2-2;
+  ctx.beginPath();ctx.moveTo(ax1,arrowY);ctx.lineTo(ax2,arrowY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ax2,arrowY);ctx.lineTo(ax2-6,arrowY-3);ctx.lineTo(ax2-6,arrowY+3);ctx.closePath();ctx.fill();
+  lbl('slope',( ax1+ax2)/2,arrowY-6,'#3a3b45','center',8);
+  // v-t → a-t
+  const bx1=gx2+gw+2, bx2=gx3-2;
+  ctx.beginPath();ctx.moveTo(bx1,arrowY);ctx.lineTo(bx2,arrowY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(bx2,arrowY);ctx.lineTo(bx2-6,arrowY-3);ctx.lineTo(bx2-6,arrowY+3);ctx.closePath();ctx.fill();
+  lbl('slope',( bx1+bx2)/2,arrowY-6,'#3a3b45','center',8);
+}
+
+
+// ── Tab 3: Back Propagation ──────────────
+function drawTabBwd(t){
+  const w=W(), h=H();
+  const v0=getV0(), a=getA(), x0=getX0();
+
+  // ── Ranges ──
+  const vMin=V_MIN, vMax=V_MAX;
+  const aAbs=A_ABS;
+
+  // ── Layout: two graphs side by side — v-t and a-t only ──
+  const pad=w*0.04;
+  const gw=(w-pad*3)/2;
+  const gy=h*0.10, gh=h*0.72;
+  const gx2=pad, gx3=pad*2+gw;
+
+  // Draw v-t and a-t only (no x-t — displacement is a result, shown as label)
+  drawGraph(gx2,gy,gw,gh, t, vMin,vMax,  '#4a9eff','v-t  velocity',   'v(m/s)',  vAt, -1);
+  drawGraph(gx3,gy,gw,gh, t, -aAbs,aAbs, '#f5a623','a-t  acceleration','a(m/s²)', aAt, -1);
+
+  if(t < 0.05) {
+    lbl('Drag the t cursor to see accumulation →', w/2, gy+gh/2, '#3a3b45','center',13,true);
+    return;
+  }
+
+  const toCanX=(gx,ti)=>gx+(ti/T_MAX)*gw;
+  const toCanY=(yVal,yMin2,yMax2)=>gy+gh-((yVal-yMin2)/(yMax2-yMin2))*gh;
+
+  // ── v-t graph: trapezoid decomposition ──
+  const vCur = vAt(t);
+  const y0_vt = toCanY(0,   vMin,vMax);  // zero line
+  const yV0   = toCanY(v0,  vMin,vMax);  // v0 height
+  const yVt   = toCanY(vCur,vMin,vMax);  // v(t) height
+  const xt0   = toCanX(gx2, 0);
+  const xtt   = toCanX(gx2, t);
+
+  // Rectangle — v0 × t (blue)
+  ctx.fillStyle='#4a9eff33';
+  ctx.fillRect(xt0, Math.min(yV0,y0_vt), xtt-xt0, Math.abs(y0_vt-yV0));
+  ctx.strokeStyle='#4a9eff88'; ctx.lineWidth=1.5;
+  ctx.strokeRect(xt0, Math.min(yV0,y0_vt), xtt-xt0, Math.abs(y0_vt-yV0));
+
+  // Triangle — ½at² on top of rectangle (teal)
+  if(Math.abs(a) > 0.01){
+    ctx.fillStyle='#2dd4a033';
+    ctx.beginPath();
+    ctx.moveTo(xt0, yV0);      // top-left of rectangle
+    ctx.lineTo(xtt, yV0);      // top-right of rectangle
+    ctx.lineTo(xtt, yVt);      // actual v(t) point
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#2dd4a088'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.moveTo(xt0, yV0);
+    ctx.lineTo(xtt, yVt);
+    ctx.stroke();
+  }
+
+  // Full trapezoid outline
+  ctx.strokeStyle='#4a9effcc'; ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(xt0, y0_vt);
+  ctx.lineTo(xt0, yV0);
+  ctx.lineTo(xtt, yVt);
+  ctx.lineTo(xtt, y0_vt);
+  ctx.closePath(); ctx.stroke();
+
+  // Labels on v-t
+  const rectArea = v0 * t;
+  const triArea  = 0.5 * a * t * t;
+  const totalArea= rectArea + triArea;  // = xAt(t) - x0
+
+  const midX_vt=(xt0+xtt)/2;
+  if(Math.abs(v0)>0.5)
+    lbl('v₀t='+rectArea.toFixed(1)+'m', midX_vt, (yV0+y0_vt)/2+4, '#4a9eff','center',10,true);
+  if(Math.abs(a)>0.05 && Math.abs(triArea)>0.5)
+    lbl('½at²='+triArea.toFixed(1)+'m', midX_vt, (yVt+yV0)/2+4, '#2dd4a0','center',10,true);
+
+  // Δx result shown as label on v-t graph
+  const dx_actual = xAt(t) - x0;
+
+  // ── a-t: show constant a rectangle accumulating Δv ──
+  const xt0_at = toCanX(gx3,0);
+  const xtt_at = toCanX(gx3,t);
+  const ya0_at = toCanY(0,   -aAbs,aAbs);
+  const yat_at = toCanY(a,   -aAbs,aAbs);
+
+  ctx.fillStyle='#f5a62322';
+  ctx.fillRect(xt0_at, Math.min(ya0_at,yat_at), xtt_at-xt0_at, Math.abs(ya0_at-yat_at));
+  ctx.strokeStyle='#f5a62366'; ctx.lineWidth=1.5;
+  ctx.strokeRect(xt0_at, Math.min(ya0_at,yat_at), xtt_at-xt0_at, Math.abs(ya0_at-yat_at));
+  const dv_actual = vAt(t) - v0;
+  if(Math.abs(a)>0.05)
+    lbl('area=Δv='+dv_actual.toFixed(1)+'m/s',
+        (xt0_at+xtt_at)/2, (ya0_at+yat_at)/2+4, '#f5a623','center',10,true);
+
+  // ── Bottom equation box ──
+  const noteY=gy+gh+16;
+  ctx.fillStyle='#13141a'; ctx.strokeStyle='#2a2b33'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(w*0.04,noteY,w*0.92,52,4);ctx.fill();ctx.stroke();
+
+  lbl('v-t area = trapezoid = rectangle + triangle  =  v₀t  +  ½at²  =  Δx',
+      w/2, noteY+16, '#e8e9ef','center',12,true);
+  lbl('Blue rectangle = v₀t  (constant velocity part)     Teal triangle = ½at²  (acceleration part)',
+      w/2, noteY+30, '#7a7d8e','center',10);
+  lbl('This is exact — not an approximation — because v-t is always linear under constant acceleration',
+      w/2, noteY+44, '#4a4d5e','center',10);
+}
+
+
+window.addEventListener('resize',()=>{setupCanvas();update();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();update();}));
+</script>
+</body>
+</html>
