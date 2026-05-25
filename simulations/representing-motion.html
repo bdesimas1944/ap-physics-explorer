@@ -208,10 +208,15 @@ function drawGraph(gx,gy,gw,gh, tMax, yMin,yMax, color, label, yLabel, fn, tCurs
     ctx.beginPath();ctx.moveTo(gx,ty);ctx.lineTo(gx+gw,ty);ctx.stroke();
   }
 
-  // Zero line
-  const yZ=gy+gh-(-yMin/(yMax-yMin))*gh;
-  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(gx,yZ);ctx.lineTo(gx+gw,yZ);ctx.stroke();
+  // Zero line — only draw when 0 is within the axis range
+  if(yMin <= 0 && yMax >= 0){
+    const yZ=gy+gh-(-yMin/(yMax-yMin))*gh;
+    ctx.strokeStyle='#6a6b7a';ctx.lineWidth=1.5;
+    ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(gx,yZ);ctx.lineTo(gx+gw,yZ);ctx.stroke();
+    ctx.setLineDash([]);
+    lbl('0',gx-4,yZ+4,'#9a9db0','right',11);
+  }
 
   // Axes
   ctx.strokeStyle='#3a3b45';ctx.lineWidth=1;
@@ -234,18 +239,20 @@ function drawGraph(gx,gy,gw,gh, tMax, yMin,yMax, color, label, yLabel, fn, tCurs
     ctx.closePath();ctx.fill();
   }
 
-  // Curve
+  // Curve — clipped to graph panel
+  ctx.save();
+  ctx.beginPath();ctx.rect(gx,gy,gw,gh);ctx.clip();
   ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.lineJoin='round';
   ctx.beginPath();
   let first=true;
   for(let ti=0;ti<=tMax;ti+=0.05){
     const py=fn(ti);
-    if(py<yMin*2||py>yMax*2){first=true;continue;}
     const cx2=toX(ti),cy2=toY(Math.max(yMin,Math.min(yMax,py)));
     if(first){ctx.moveTo(cx2,cy2);first=false;}
     else ctx.lineTo(cx2,cy2);
   }
   ctx.stroke();
+  ctx.restore();
 
   // Time cursor — red vertical line
   if(tCursor>=0&&tCursor<=tMax){
@@ -264,11 +271,11 @@ function drawGraph(gx,gy,gw,gh, tMax, yMin,yMax, color, label, yLabel, fn, tCurs
   }
 
   // Labels
-  lbl(label,gx+8,gy+16,color,'left',14,true);
-  lbl(yLabel,gx-4,gy+8,color+'88','right',11);
-  lbl('t (s)',gx+gw,gy+gh+16,color+'66','right',11);
-  lbl('0',gx-4,gy+gh,color+'44','right',10);
-  lbl(tMax,gx+gw,gy+gh+16,color+'44','center',10);
+  lbl(label,gx+8,gy+18,color,'left',15,true);
+  lbl(yLabel,gx-4,gy+8,'#e8e9ef','right',12);
+  lbl('t (s)',gx+gw-4,gy+gh+18,'#e8e9ef','right',12);
+  lbl('0',gx-4,gy+gh,'#9a9db0','right',11);
+  lbl(tMax.toFixed?tMax.toFixed(1):tMax,gx+gw,gy+gh+18,'#9a9db0','center',11);
 }
 
 // ── Factory defaults — source of truth ──
@@ -305,7 +312,11 @@ function autoscale(){
   V_MIN=Math.min(...vVals)-vPad;
   V_MAX=Math.max(...vVals)+vPad;
   A_ABS=Math.max(Math.abs(a)*1.3,1.5);
-  update();
+  // Debug
+  console.log('Autoscale: V_MIN='+V_MIN+' V_MAX='+V_MAX+' X_MIN='+X_MIN+' X_MAX='+X_MAX);
+  // Force immediate redraw — bypass setTimeout
+  ctx.clearRect(0,0,W(),H());
+  drawTab0(t);
 }
 
 function setTab(n){
