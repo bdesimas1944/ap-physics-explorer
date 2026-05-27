@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Center of Mass — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1014;--surface:#17181d;--surface2:#1e2028;
+  --border:#2a2b33;--border2:#3a3b45;
+  --text:#e8e9ef;--text-muted:#7a7d8e;--text-dim:#4a4d5e;
+  --blue:#4a9eff;--teal:#2dd4a0;--amber:#f5a623;
+  --red:#ff5f6d;--purple:#b98aff;--green:#4dbb6e;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --font-serif:'DM Serif Display',serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;}
+.site-header{display:flex;align-items:center;gap:16px;padding:0 24px;height:52px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.site-logo{font-family:var(--font-serif);font-size:18px;color:var(--text);text-decoration:none;}
+.site-logo span{color:var(--blue);}
+.site-tagline{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);}
+.header-back{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--text-muted);text-decoration:none;}
+.header-back:hover{color:var(--text);}
+.sim-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.sim-layout{display:flex;flex:1;overflow:hidden;}
+.ctrl-panel{width:280px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;overflow-y:auto;}
+.ctrl-divider{height:1px;background:var(--border);margin:10px 0;}
+.eq-block{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;margin-bottom:12px;}
+.eq-main{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text);margin-bottom:3px;}
+.eq-sub{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);line-height:1.9;}
+.section-head{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;margin-top:4px;}
+.slider-group{margin-bottom:10px;}
+.slider-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+.slider-label{font-size:12px;color:var(--text-muted);font-style:italic;font-family:var(--font-serif);}
+.slider-value{font-size:12px;font-family:var(--font-mono);color:var(--text);font-weight:500;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;background:var(--border2);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--text);border:2px solid var(--border2);cursor:grab;}
+.result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.result-label{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);}
+.result-val{font-size:12px;font-family:var(--font-mono);font-weight:500;}
+.play-btn{width:100%;padding:10px;border-radius:6px;font-family:var(--font-mono);font-size:12px;cursor:pointer;border:1px solid;transition:all 0.15s;margin-bottom:8px;}
+.ctrl-note{margin-top:auto;padding-top:10px;font-size:10px;color:var(--text-dim);font-family:var(--font-mono);border-top:1px solid var(--border);line-height:1.8;}
+.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.tab-btn{flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all 0.15s;text-align:center;line-height:1.3;}
+.tab-btn:hover{color:var(--text-muted);}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.canvas-wrap{flex:1;position:relative;overflow:hidden;}
+canvas{display:block;}
+.step-desc{padding:9px 18px;background:var(--surface);border-top:1px solid var(--border);font-size:11px;font-family:var(--font-mono);color:var(--text-muted);flex-shrink:0;line-height:1.5;min-height:40px;}
+.step-desc .hl{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">2.1 · center of mass</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-main">x_cm = Σmᵢxᵢ / Σmᵢ</div>
+        <div class="eq-sub">
+          <span style="color:var(--amber)">weighted average position</span><br>
+          <span style="color:var(--text-dim)">heavier mass pulls CoM toward it</span>
+        </div>
+      </div>
+
+      <!-- Tab 1 controls -->
+      <div id="ctrl-tab1">
+        <div class="section-head">Mass 1</div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">m₁ · mass</span><span class="slider-value" id="lbl-m1">3 kg</span></div>
+          <input type="range" id="sl-m1" min="1" max="10" step="0.5" value="3" oninput="update()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">x₁ · position</span><span class="slider-value" id="lbl-x1">-4 m</span></div>
+          <input type="range" id="sl-x1" min="-10" max="10" step="0.5" value="-4" oninput="update()">
+        </div>
+        <div class="section-head">Mass 2</div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">m₂ · mass</span><span class="slider-value" id="lbl-m2">1 kg</span></div>
+          <input type="range" id="sl-m2" min="1" max="10" step="0.5" value="1" oninput="update()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">x₂ · position</span><span class="slider-value" id="lbl-x2">4 m</span></div>
+          <input type="range" id="sl-x2" min="-10" max="10" step="0.5" value="4" oninput="update()">
+        </div>
+        <div class="ctrl-divider"></div>
+        <div class="result-row"><span class="result-label">x_cm</span><span class="result-val" style="color:var(--amber)" id="val-xcm1">— m</span></div>
+        <div class="result-row"><span class="result-label">total mass</span><span class="result-val" style="color:var(--text)" id="val-mtot1">— kg</span></div>
+      </div>
+
+      <!-- Tab 2 controls -->
+      <div id="ctrl-tab2" style="display:none">
+        <div class="section-head">Three masses (2D)</div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">m₁ (top)</span><span class="slider-value" id="lbl-2m1">2 kg</span></div>
+          <input type="range" id="sl-2m1" min="1" max="10" step="0.5" value="2" oninput="update()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">m₂ (bottom-left)</span><span class="slider-value" id="lbl-2m2">2 kg</span></div>
+          <input type="range" id="sl-2m2" min="1" max="10" step="0.5" value="2" oninput="update()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">m₃ (bottom-right)</span><span class="slider-value" id="lbl-2m3">2 kg</span></div>
+          <input type="range" id="sl-2m3" min="1" max="10" step="0.5" value="2" oninput="update()">
+        </div>
+        <div class="ctrl-divider"></div>
+        <div class="result-row"><span class="result-label">x_cm</span><span class="result-val" style="color:var(--amber)" id="val-xcm2">— m</span></div>
+        <div class="result-row"><span class="result-label">y_cm</span><span class="result-val" style="color:var(--teal)" id="val-ycm2">— m</span></div>
+        <div class="result-row"><span class="result-label">total mass</span><span class="result-val" style="color:var(--text)" id="val-mtot2">— kg</span></div>
+      </div>
+
+      <!-- Tab 3 controls -->
+      <div id="ctrl-tab3" style="display:none">
+        <div class="section-head">Ball 1 (top)</div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">m₁ · mass</span><span class="slider-value" id="lbl-3m1">1 kg</span></div>
+          <input type="range" id="sl-3m1" min="1" max="10" step="0.5" value="1" oninput="updateBalls()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">v₁ · velocity</span><span class="slider-value" id="lbl-3v1">1 m/s</span></div>
+          <input type="range" id="sl-3v1" min="0.1" max="5" step="0.1" value="1" oninput="updateBalls()">
+        </div>
+        <div class="section-head">Ball 2 (bottom)</div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">m₂ · mass</span><span class="slider-value" id="lbl-3m2">1 kg</span></div>
+          <input type="range" id="sl-3m2" min="1" max="10" step="0.5" value="1" oninput="updateBalls()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">v₂ · velocity</span><span class="slider-value" id="lbl-3v2">1 m/s</span></div>
+          <input type="range" id="sl-3v2" min="0.1" max="5" step="0.1" value="1" oninput="updateBalls()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header"><span class="slider-label">gap · vertical spacing</span><span class="slider-value" id="lbl-gap">80 px</span></div>
+          <input type="range" id="sl-gap" min="20" max="200" step="10" value="80" oninput="updateBalls()">
+        </div>
+        <div class="ctrl-divider"></div>
+        <button class="play-btn" id="play-btn"
+          style="background:var(--teal-dim,#0a3a2a);border-color:var(--teal);color:var(--teal);"
+          onclick="togglePlay()">▶ Play</button>
+        <button class="play-btn"
+          style="background:var(--surface2);border-color:var(--border2);color:var(--text-muted);"
+          onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber)'"
+          onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-muted)'"
+          onclick="resetAnim()">↺ Reset</button>
+        <div class="ctrl-divider"></div>
+        <div class="result-row"><span class="result-label">v_cm</span><span class="result-val" style="color:var(--amber)" id="val-vcm">— m/s</span></div>
+        <div class="result-row"><span class="result-label">x_cm</span><span class="result-val" style="color:var(--amber)" id="val-xcm3">— m</span></div>
+      </div>
+
+      <div class="ctrl-note">
+        CoM = weighted average position<br>
+        heavier mass pulls CoM toward it<br>
+        CoM moves at constant v<br>
+        if no external forces act
+      </div>
+    </div>
+
+    <div class="canvas-area">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab1" onclick="setTab(1)">① 1D · Two Masses<br><span style="font-size:9px;opacity:0.6">x_cm on number line</span></button>
+        <button class="tab-btn" id="tab2" onclick="setTab(2)">② 2D · Triangle<br><span style="font-size:9px;opacity:0.6">x_cm y_cm crosshair</span></button>
+        <button class="tab-btn" id="tab3" onclick="setTab(3)">③ Motion · Two Balls<br><span style="font-size:9px;opacity:0.6">CoM tracks constant v</span></button>
+      </div>
+      <div class="canvas-wrap"><canvas id="c"></canvas></div>
+      <div class="step-desc" id="step-desc">
+        <span class="hl">Center of Mass:</span> x_cm = (m₁x₁ + m₂x₂) / (m₁ + m₂). Drag masses and positions — the CoM (amber marker) is always pulled toward the heavier mass.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+let currentTab=1, animRunning=false, animId=null;
+let ball1X=0, ball2X=0, animT=0;
+
+function W(){return canvas.width/(window.devicePixelRatio||1);}
+function H(){return canvas.height/(window.devicePixelRatio||1);}
+function setupCanvas(){
+  const wrap=canvas.parentElement, dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr; canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px'; canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function lbl(text,x,y,color,align='center',size=11,italic=false){
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align; ctx.fillText(text,x,y);
+}
+function circle(x,y,r,fill,stroke,lw=2){
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=fill; ctx.fill();
+  ctx.strokeStyle=stroke; ctx.lineWidth=lw; ctx.stroke();
+}
+function massToRadius(m){ return 10 + (m-1)/(10-1)*20; }
+
+function setTab(n){
+  currentTab=n;
+  [1,2,3].forEach(i=>document.getElementById('tab'+i).classList.toggle('active',i===n));
+  document.getElementById('ctrl-tab1').style.display = n===1?'block':'none';
+  document.getElementById('ctrl-tab2').style.display = n===2?'block':'none';
+  document.getElementById('ctrl-tab3').style.display = n===3?'block':'none';
+  ctx.clearRect(0,0,W(),H());
+  const descs={
+    1:'<span class="hl">1D Center of Mass:</span> drag mass values and positions. The amber CoM marker is always pulled toward the heavier mass. Equal masses → CoM exactly in the middle.',
+    2:'<span class="hl">2D Center of Mass:</span> three masses at the corners of a triangle. Change any mass and the crosshair shifts. Equal masses → CoM at the centroid, exactly center.',
+    3:'<span class="hl">CoM in Motion:</span> two balls moving horizontally. Each may have different mass and velocity. Press Play — the CoM (amber) moves at constant velocity regardless of how the balls move relative to each other.'
+  };
+  document.getElementById('step-desc').innerHTML=descs[n];
+  if(n!==3 && animRunning) stopAnim();
+  resetAnim();
+  update();
+}
+
+// ── Tab 1: 1D ─────────────────────────────
+function drawTab1(){
+  const w=W(), h=H();
+  const m1=parseFloat(document.getElementById('sl-m1').value);
+  const x1=parseFloat(document.getElementById('sl-x1').value);
+  const m2=parseFloat(document.getElementById('sl-m2').value);
+  const x2=parseFloat(document.getElementById('sl-x2').value);
+  const xcm=(m1*x1+m2*x2)/(m1+m2);
+  const mtot=m1+m2;
+
+  document.getElementById('lbl-m1').textContent=m1+' kg';
+  document.getElementById('lbl-x1').textContent=x1+' m';
+  document.getElementById('lbl-m2').textContent=m2+' kg';
+  document.getElementById('lbl-x2').textContent=x2+' m';
+  document.getElementById('val-xcm1').textContent=xcm.toFixed(2)+' m';
+  document.getElementById('val-mtot1').textContent=mtot.toFixed(1)+' kg';
+
+  const cy=h*0.45, axisY=cy+80;
+  const scale=w*0.04; // pixels per meter
+  const origin=w/2;
+  const toSx=(x)=>origin+x*scale;
+
+  // Number line
+  ctx.strokeStyle='#3a3b45'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(w*0.08,axisY); ctx.lineTo(w*0.92,axisY); ctx.stroke();
+  // Ticks
+  for(let i=-10;i<=10;i++){
+    const tx=toSx(i);
+    ctx.strokeStyle=i===0?'#5a5b7a':'#2a2b33'; ctx.lineWidth=i===0?2:1;
+    ctx.beginPath(); ctx.moveTo(tx,axisY-6); ctx.lineTo(tx,axisY+6); ctx.stroke();
+    if(i%2===0) lbl(i,tx,axisY+18,'#4a4d5e','center',9);
+  }
+  lbl('x (m)',w*0.92+10,axisY+4,'#4a4d5e','left',10);
+
+  // Mass 1
+  const r1=massToRadius(m1), sx1=toSx(x1);
+  circle(sx1,axisY-r1-2,r1,'#4a9eff33','#4a9eff');
+  lbl('m₁='+m1+'kg',sx1,axisY-r1*2-10,'#4a9eff','center',11,true);
+  ctx.strokeStyle='#4a9eff55'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(sx1,axisY-6); ctx.lineTo(sx1,axisY-2); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Mass 2
+  const r2=massToRadius(m2), sx2=toSx(x2);
+  circle(sx2,axisY-r2-2,r2,'#b98aff33','#b98aff');
+  lbl('m₂='+m2+'kg',sx2,axisY-r2*2-10,'#b98aff','center',11,true);
+
+  // CoM marker
+  const scm=toSx(xcm);
+  ctx.strokeStyle='#f5a623'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(scm,axisY-20); ctx.lineTo(scm,axisY+20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(scm-8,axisY-14); ctx.lineTo(scm,axisY); ctx.lineTo(scm+8,axisY-14); ctx.stroke();
+  lbl('x_cm='+xcm.toFixed(2)+'m',scm,axisY+32,'#f5a623','center',12,true);
+
+  // Formula box
+  const bx=w*0.30, by=h*0.08, bw=w*0.40, bh=64;
+  ctx.fillStyle='#13141a'; ctx.strokeStyle='#2a2b33'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,6); ctx.fill(); ctx.stroke();
+  lbl('x_cm = (m₁x₁ + m₂x₂) / (m₁ + m₂)',bx+bw/2,by+20,'#e8e9ef','center',12,true);
+  lbl('= ('+m1+'×'+x1+' + '+m2+'×'+x2+') / '+mtot.toFixed(1),bx+bw/2,by+38,'#f5a62388','center',11);
+  lbl('= '+xcm.toFixed(2)+' m',bx+bw/2,by+56,'#f5a623','center',14,true);
+}
+
+// ── Tab 2: 2D Triangle ────────────────────
+function drawTab2(){
+  const w=W(), h=H();
+  const m1=parseFloat(document.getElementById('sl-2m1').value);
+  const m2=parseFloat(document.getElementById('sl-2m2').value);
+  const m3=parseFloat(document.getElementById('sl-2m3').value);
+  const mtot=m1+m2+m3;
+
+  document.getElementById('lbl-2m1').textContent=m1+' kg';
+  document.getElementById('lbl-2m2').textContent=m2+' kg';
+  document.getElementById('lbl-2m3').textContent=m3+' kg';
+
+  // Equilateral triangle — fixed positions
+  const cx=w/2, cy=h/2;
+  const R=Math.min(w,h)*0.28;
+  const p1={x:cx, y:cy-R};                          // top
+  const p2={x:cx-R*Math.cos(Math.PI/6), y:cy+R/2}; // bottom-left
+  const p3={x:cx+R*Math.cos(Math.PI/6), y:cy+R/2}; // bottom-right
+
+  const xcm=(m1*p1.x+m2*p2.x+m3*p3.x)/mtot;
+  const ycm=(m1*p1.y+m2*p2.y+m3*p3.y)/mtot;
+
+  document.getElementById('val-xcm2').textContent=((xcm-cx)/40).toFixed(2)+' m';
+  document.getElementById('val-ycm2').textContent=(-(ycm-cy)/40).toFixed(2)+' m';
+  document.getElementById('val-mtot2').textContent=mtot.toFixed(1)+' kg';
+
+  // Grid
+  ctx.strokeStyle='#1a1b22'; ctx.lineWidth=0.5;
+  for(let gx2=0;gx2<w;gx2+=40){ ctx.beginPath();ctx.moveTo(gx2,0);ctx.lineTo(gx2,h);ctx.stroke(); }
+  for(let gy2=0;gy2<h;gy2+=40){ ctx.beginPath();ctx.moveTo(0,gy2);ctx.lineTo(w,gy2);ctx.stroke(); }
+
+  // Axes through center
+  ctx.strokeStyle='#2a2b33'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,h);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(w,cy);ctx.stroke();
+
+  // Triangle edges
+  ctx.strokeStyle='#3a3b45'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.lineTo(p3.x,p3.y); ctx.closePath(); ctx.stroke();
+
+  // Masses
+  const colors=['#4a9eff','#2dd4a0','#b98aff'];
+  const labels=['m₁','m₂','m₃'];
+  const masses=[m1,m2,m3];
+  const pts=[p1,p2,p3];
+  pts.forEach((p,i)=>{
+    const r=massToRadius(masses[i]);
+    circle(p.x,p.y,r,colors[i]+'33',colors[i]);
+    lbl(labels[i]+'='+masses[i]+'kg',p.x,p.y-r-8,colors[i],'center',11,true);
+  });
+
+  // CoM crosshair
+  const cLen=24;
+  ctx.strokeStyle='#f5a623'; ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(xcm-cLen,ycm);ctx.lineTo(xcm+cLen,ycm);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(xcm,ycm-cLen);ctx.lineTo(xcm,ycm+cLen);ctx.stroke();
+  circle(xcm,ycm,6,'#f5a623','#f5a62388',1);
+  lbl('CoM',xcm+16,ycm-10,'#f5a623','left',11,true);
+
+  // Lines from masses to CoM
+  pts.forEach((p,i)=>{
+    ctx.strokeStyle=colors[i]+'44'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(xcm,ycm);ctx.stroke();
+    ctx.setLineDash([]);
+  });
+}
+
+// ── Tab 3: Motion ─────────────────────────
+function updateBalls(){
+  const m1=parseFloat(document.getElementById('sl-3m1').value);
+  const v1=parseFloat(document.getElementById('sl-3v1').value);
+  const m2=parseFloat(document.getElementById('sl-3m2').value);
+  const v2=parseFloat(document.getElementById('sl-3v2').value);
+  const gap=parseFloat(document.getElementById('sl-gap').value);
+  document.getElementById('lbl-3m1').textContent=m1+' kg';
+  document.getElementById('lbl-3v1').textContent=v1.toFixed(1)+' m/s';
+  document.getElementById('lbl-3m2').textContent=m2+' kg';
+  document.getElementById('lbl-3v2').textContent=v2.toFixed(1)+' m/s';
+  document.getElementById('lbl-gap').textContent=gap+' px';
+  const vcm=(m1*v1+m2*v2)/(m1+m2);
+  document.getElementById('val-vcm').textContent=vcm.toFixed(2)+' m/s';
+  if(!animRunning){ ctx.clearRect(0,0,W(),H()); drawTab3(); }
+}
+
+function drawTab3(){
+  const w=W(), h=H();
+  ctx.clearRect(0,0,w,h);
+  const m1=parseFloat(document.getElementById('sl-3m1').value);
+  const v1=parseFloat(document.getElementById('sl-3v1').value);
+  const m2=parseFloat(document.getElementById('sl-3m2').value);
+  const v2=parseFloat(document.getElementById('sl-3v2').value);
+  const gap=parseFloat(document.getElementById('sl-gap').value);
+  const vcm=(m1*v1+m2*v2)/(m1+m2);
+
+  const cy=h/2;
+  const y1=cy-gap/2, y2=cy+gap/2;
+  const r1=massToRadius(m1), r2=massToRadius(m2);
+
+  // Tracks
+  ctx.strokeStyle='#1e2028'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,y1);ctx.lineTo(w,y1);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,y2);ctx.lineTo(w,y2);ctx.stroke();
+
+  // CoM track
+  ctx.strokeStyle='#f5a62322'; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(w,cy);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Ball positions
+  const x1pos=ball1X, x2pos=ball2X;
+  const xcm=(m1*x1pos+m2*x2pos)/(m1+m2);
+  document.getElementById('val-xcm3').textContent=((xcm-w*0.1)/50).toFixed(1)+' m';
+
+  // Ball trails
+  ctx.strokeStyle='#4a9eff22'; ctx.lineWidth=r1*2;
+  ctx.beginPath();ctx.moveTo(w*0.1,y1);ctx.lineTo(x1pos,y1);ctx.stroke();
+  ctx.strokeStyle='#2dd4a022'; ctx.lineWidth=r2*2;
+  ctx.beginPath();ctx.moveTo(w*0.1,y2);ctx.lineTo(x2pos,y2);ctx.stroke();
+
+  // Balls
+  circle(x1pos,y1,r1,'#4a9eff44','#4a9eff',2);
+  lbl('m₁='+m1+'kg',x1pos,y1-r1-8,'#4a9eff','center',10,true);
+  lbl('v₁='+v1.toFixed(1),x1pos,y1+r1+14,'#4a9eff66','center',9);
+
+  circle(x2pos,y2,r2,'#2dd4a044','#2dd4a0',2);
+  lbl('m₂='+m2+'kg',x2pos,y2+r2+8,'#2dd4a0','center',10,true);
+  lbl('v₂='+v2.toFixed(1),x2pos,y2-r2-14,'#2dd4a066','center',9);
+
+  // CoM marker
+  circle(xcm,cy,8,'#f5a623','#f5a62388',1.5);
+  lbl('CoM',xcm,cy-16,'#f5a623','center',11,true);
+  lbl('v_cm='+vcm.toFixed(2)+' m/s',xcm,cy+22,'#f5a62388','center',9);
+
+  // Connector line
+  ctx.strokeStyle='#3a3b4588'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(x1pos,y1);ctx.lineTo(xcm,cy);ctx.lineTo(x2pos,y2);ctx.stroke();
+
+  // Labels
+  lbl('← v₁='+v1.toFixed(1)+' m/s',w*0.08,y1-4,'#4a9eff44','center',9);
+  lbl('← v₂='+v2.toFixed(1)+' m/s',w*0.08,y2+12,'#2dd4a044','center',9);
+  lbl('v_cm = '+vcm.toFixed(2)+' m/s  (constant)',w/2,h*0.08,'#f5a623','center',13,true);
+  lbl('CoM moves at constant velocity — no external forces',w/2,h*0.13,'#e8e9ef','center',11);
+}
+
+// ── Animation ─────────────────────────────
+function resetAnim(){
+  if(animRunning) stopAnim();
+  ball1X=W()*0.10;
+  ball2X=W()*0.10;
+  animT=0;
+  ctx.clearRect(0,0,W(),H());
+  if(currentTab===3) drawTab3();
+}
+
+function togglePlay(){
+  if(animRunning) stopAnim(); else startAnim();
+}
+function startAnim(){
+  animRunning=true;
+  document.getElementById('play-btn').textContent='⏸ Pause';
+  document.getElementById('play-btn').style.borderColor='var(--amber)';
+  document.getElementById('play-btn').style.color='var(--amber)';
+  animate();
+}
+function stopAnim(){
+  animRunning=false;
+  if(animId) cancelAnimationFrame(animId);
+  document.getElementById('play-btn').textContent='▶ Play';
+  document.getElementById('play-btn').style.borderColor='var(--teal)';
+  document.getElementById('play-btn').style.color='var(--teal)';
+}
+function animate(){
+  if(!animRunning) return;
+  const v1=parseFloat(document.getElementById('sl-3v1').value);
+  const v2=parseFloat(document.getElementById('sl-3v2').value);
+  const spd=30; // pixels per frame unit
+  ball1X += v1*spd/60;
+  ball2X += v2*spd/60;
+  // Wrap around
+  if(ball1X > W()*0.95) { ball1X=W()*0.10; ball2X=W()*0.10; }
+  ctx.clearRect(0,0,W(),H());
+  drawTab3();
+  animId=requestAnimationFrame(animate);
+}
+
+function update(){
+  if(currentTab===3){ updateBalls(); return; }
+  ctx.clearRect(0,0,W(),H());
+  if(currentTab===1) drawTab1();
+  else drawTab2();
+}
+
+window.addEventListener('resize',()=>{setupCanvas();resetAnim();update();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();resetAnim();update();}));
+</script>
+</body>
+</html>
