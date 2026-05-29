@@ -90,7 +90,7 @@ canvas{display:block;}
       </div>
       </div>
 
-      <button onclick="setPreset('hammer')" style="width:100%;padding:8px 10px;margin-bottom:8px;background:var(--surface2);border:1px solid var(--amber);border-radius:6px;color:var(--amber);font-family:var(--font-mono);font-size:11px;cursor:pointer;" onmouseover="this.style.background='#2a1a00'" onmouseout="this.style.background='var(--surface2)'">ð¨ Hammer &amp; Nail preset</button>
+      <button id="hammer-preset" onclick="setPreset('hammer')" style="width:100%;padding:8px 10px;margin-bottom:8px;background:var(--surface2);border:1px solid var(--amber);border-radius:6px;color:var(--amber);font-family:var(--font-mono);font-size:11px;cursor:pointer;" onmouseover="this.style.background='#2a1a00'" onmouseout="this.style.background='var(--surface2)'">ð¨ Hammer &amp; Nail preset</button>
       <div class="ctrl-divider"></div>
 
       <div class="phase-indicator" id="phase-box" style="background:#13141a;color:var(--text-muted);">
@@ -119,7 +119,10 @@ canvas{display:block;}
     <div class="canvas-area">
       <div class="tab-bar" style="display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;">
         <button class="tab-btn active" id="tab1" onclick="setTab(1)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--blue);background:none;border:none;border-bottom:2px solid var(--blue);cursor:pointer;text-align:center;line-height:1.3;">① Hand on Wall<br><span style="font-size:9px;opacity:0.6">static force pair</span></button>
-        <button class="tab-btn" id="tab2" onclick="setTab(2)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;text-align:center;line-height:1.3;">② Elastic Collision<br><span style="font-size:9px;opacity:0.6">moving blocks</span></button>
+        <button class="tab-btn" id="tab2" onclick="setTab(2)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;text-align:center;line-height:1.3;">② Book: mg &amp; N<br><span style="font-size:9px;opacity:0.6">✗ one object</span></button>
+        <button class="tab-btn" id="tab3" onclick="setTab(3)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;text-align:center;line-height:1.3;">③ Table↔Book<br><span style="font-size:9px;opacity:0.6">✓ contact pair</span></button>
+        <button class="tab-btn" id="tab4" onclick="setTab(4)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;text-align:center;line-height:1.3;">④ Earth↔Book<br><span style="font-size:9px;opacity:0.6">✓ gravity pair</span></button>
+        <button class="tab-btn" id="tab5" onclick="setTab(5)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;text-align:center;line-height:1.3;">⑤ Elastic Collision<br><span style="font-size:9px;opacity:0.6">moving blocks</span></button>
       </div>
       <div class="canvas-wrap"><canvas id="c"></canvas></div>
       <div class="step-desc" id="step-desc">
@@ -473,18 +476,26 @@ function setTab(n){
   currentTab2 = n;
   document.getElementById('tab1').style.color = n===1?'var(--blue)':'var(--text-dim)';
   document.getElementById('tab1').style.borderBottomColor = n===1?'var(--blue)':'transparent';
-  document.getElementById('tab2').style.color = n===2?'var(--blue)':'var(--text-dim)';
-  document.getElementById('tab2').style.borderBottomColor = n===2?'var(--blue)':'transparent';
-  // Show/hide tab1-only controls
-  const tab2only = ['phase-box','play-btn','reset-btn-el','after-section','collision-controls'];
-const tab1only = [];
-  tab2only.forEach(id=>{
+  document.getElementById('tab2').style.color = n===2?'var(--red)':'var(--text-dim)';
+  document.getElementById('tab2').style.borderBottomColor = n===2?'var(--red)':'transparent';
+  document.getElementById('tab3').style.color = n===3?'var(--teal)':'var(--text-dim)';
+  document.getElementById('tab3').style.borderBottomColor = n===3?'var(--teal)':'transparent';
+  document.getElementById('tab4').style.color = n===4?'var(--purple)':'var(--text-dim)';
+  document.getElementById('tab4').style.borderBottomColor = n===4?'var(--purple)':'transparent';
+  document.getElementById('tab5').style.color = n===5?'var(--blue)':'var(--text-dim)';
+  document.getElementById('tab5').style.borderBottomColor = n===5?'var(--blue)':'transparent';
+  // Show/hide collision controls (tab5 only)
+  const tab4only = ['phase-box','play-btn','reset-btn-el','after-section','collision-controls','hammer-preset'];
+  tab4only.forEach(id=>{
     const el=document.getElementById(id);
-    if(el) el.style.display = n===2?'':'none';
+    if(el) el.style.display = n===5?'':'none';
   });
   if(running){running=false;if(animId)cancelAnimationFrame(animId);}
   ctx.clearRect(0,0,W(),H());
   if(n===1){ setTimeout(drawHandWall,10); }
+  else if(n===2){ setTimeout(drawBookBadFBD,10); }
+  else if(n===3){ setTimeout(drawTableBook,10); }
+  else if(n===4){ setTimeout(drawEarthBook,10); }
   else { setTimeout(resetAnim,10); }
 }
 
@@ -492,8 +503,8 @@ function drawHandWall(){
   const w=W(), h=H();
   const F = 30; // illustrative force
 
-  // Wall — right side
-  const wallX = w*0.72, wallY = h*0.30, wallW = 40, wallH = h*0.30;
+  // Wall — centered
+  const wallX = w*0.55, wallY = h*0.30, wallW = 40, wallH = h*0.30;
   ctx.fillStyle='#2a2b3a'; ctx.strokeStyle='#5a5b7a'; ctx.lineWidth=2;
   ctx.beginPath(); ctx.roundRect(wallX, wallY, wallW, wallH, 4); ctx.fill(); ctx.stroke();
   // Wall hatching
@@ -504,11 +515,11 @@ function drawHandWall(){
   lbl('WALL', wallX+wallW/2, wallY-14, '#e8e9ef','center',13,true);
 
   // Hand block only
-  const handW = 90, handH = 55, handY = h*0.42;
+  const handW = 90, handH = 110, handY = h*0.42;
   const handX = wallX - handW;  // hand touches wall
   ctx.fillStyle='#1e2028'; ctx.strokeStyle='#f5a623'; ctx.lineWidth=2;
   ctx.beginPath(); ctx.roundRect(handX, handY, handW, handH, 8); ctx.fill(); ctx.stroke();
-  lbl('HAND', handX+handW/2, handY+handH/2, '#f5a623','center',13,true);
+  lbl('HAND', handX+handW/2, handY+16, '#f5a623','center',13,true);
 
   // Surface
   const surfY2 = h*0.72;
@@ -520,16 +531,16 @@ function drawHandWall(){
 
   // Force arrows — from contact point
   const contactX = wallX, contactY = handY + handH/2;
-  const fscale = 110;
+  const fscale = 165;
 
-  // F hand on wall → (red, into wall)
-  arrow(contactX, contactY, contactX+fscale, contactY, '#ff5f6d', 3.5, 10);
-  lbl('F hand on wall →', contactX+fscale+8, contactY, '#ff5f6d','left',13,true);
+  // F hand on wall → (red, acts on wall — starts at right edge of wall)
+  arrow(wallX+wallW, contactY, wallX+wallW+fscale, contactY, '#ff5f6d', 3.5, 10);
+  lbl('Force hand on wall →', wallX+wallW+fscale+8, contactY, '#ff5f6d','left',13,true);
 
-  // F wall on hand ← (blue, back on hand)
-  const blueY = contactY - 36 - h*0.08;
-  arrow(contactX, blueY, contactX-fscale, blueY, '#4a9eff', 3.5, 10);
-  lbl('← F wall on hand', contactX-fscale-8, blueY, '#4a9eff','right',13,true);
+  // F wall on hand ← (blue, acts on hand — starts at left edge of hand)
+  const blueY = contactY;
+  arrow(handX, blueY, handX-fscale, blueY, '#4a9eff', 3.5, 10);
+  lbl('← Force wall on hand', handX-fscale-8, blueY, '#4a9eff','right',13,true);
 
   // Contact dot
 
@@ -550,7 +561,178 @@ function drawHandWall(){
       w/2, ib_y2+36, '#e8e9ef','center',12);
 }
 
-window.addEventListener('resize',()=>{setupCanvas();resetAnim();});
+function drawBookBadFBD(){
+  const w=W(), h=H();
+
+  // Title
+  lbl('Book on table — gravity and normal force on the book', w/2, h*0.08, '#e8e9ef','center',15,true);
+  lbl('Both forces act on ONE object. Only the book is the object the forces are acting on: (normal on book) and (gravity on book), this cannot be Newton\'s 3rd Law.', w/2, h*0.14, '#7a7d8e','center',11);
+
+  // Table surface
+  const tblY=h*0.55, tblX=w*0.28, tblW=w*0.44, tblH=28;
+  ctx.fillStyle='#2a2b3a'; ctx.strokeStyle='#5a5b7a'; ctx.lineWidth=1.5;
+  ctx.fillRect(tblX, tblY, tblW, tblH);
+  // Table legs
+  ctx.strokeStyle='#3a3b4a'; ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(tblX+22,tblY+tblH);ctx.lineTo(tblX+22,tblY+tblH+52);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(tblX+tblW-22,tblY+tblH);ctx.lineTo(tblX+tblW-22,tblY+tblH+52);ctx.stroke();
+
+  // Book
+  const bkW=90, bkH=50, bkX=w*0.5, bkY=tblY-bkH/2;
+  ctx.fillStyle='#1e2028'; ctx.strokeStyle='#f5a623'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(bkX-bkW/2, bkY-bkH/2, bkW, bkH, 5); ctx.fill(); ctx.stroke();
+  lbl('BOOK', bkX, bkY-6, '#f5a623','center',13,true);
+  lbl('m = 1 kg', bkX, bkY+10, '#e8e9ef88','center',10);
+
+  // mg arrow — down from book bottom
+  const fLen=80;
+  const botY=bkY+bkH/2, topY=bkY-bkH/2;
+  ctx.strokeStyle='#ff5f6d'; ctx.fillStyle='#ff5f6d'; ctx.lineWidth=2.5;
+  // arrow: from book center bottom, pointing down
+  const mgX=bkX+28;
+  ctx.beginPath();ctx.moveTo(mgX,botY);ctx.lineTo(mgX,botY+fLen);ctx.stroke();
+  ctx.save();ctx.translate(mgX,botY+fLen);ctx.rotate(Math.PI/2);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-8,8*0.4);ctx.lineTo(-8,-8*0.4);ctx.closePath();ctx.fill();ctx.restore();
+  lbl('mg ↓', mgX+10, botY+fLen/2, '#ff5f6d','left',12,true);
+  lbl('(gravity on book)', mgX+10, botY+fLen/2+16, '#e8e9ef','left',10);
+
+  // N arrow — up from book top
+  const nX=bkX-28;
+  ctx.strokeStyle='#4a9eff'; ctx.fillStyle='#4a9eff';
+  ctx.beginPath();ctx.moveTo(nX,topY);ctx.lineTo(nX,topY-fLen);ctx.stroke();
+  ctx.save();ctx.translate(nX,topY-fLen);ctx.rotate(-Math.PI/2);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-8,8*0.4);ctx.lineTo(-8,-8*0.4);ctx.closePath();ctx.fill();ctx.restore();
+  lbl('N ↑', nX-10, topY-fLen/2, '#4a9eff','right',12,true);
+  lbl('(normal on book)', nX-10, topY-fLen/2+16, '#e8e9ef','right',10);
+
+  // ΣF = 0 label — below table legs, clear of arrows
+  lbl('ΣF = 0  →  static equilibrium  →  Newton\'s 2nd Law (a = 0)', bkX, tblY+tblH+100, '#e8e9ef','center',11,true);
+
+  // Insight box
+  const ib_x=w*0.04, ib_y=h*0.76, ib_w=w*0.92, ib_h=78;
+  ctx.fillStyle='#1a0a0a'; ctx.strokeStyle='#ff5f6d'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect(ib_x,ib_y,ib_w,ib_h,6); ctx.fill(); ctx.stroke();
+  lbl('Both mg and N act on the BOOK — one object only. This is NOT a Third Law pair.',
+      w/2, ib_y+16, '#ff5f6d','center',13,true);
+  lbl('mg and N are equal and opposite because ΣF = 0 (equilibrium) — not because of Newton\'s 3rd.',
+      w/2, ib_y+34, '#e8e9ef','center',11);
+  lbl('Newton\'s 3rd always requires two objects. If you only have one, stop — it\'s Newton\'s 2nd.',
+      w/2, ib_y+52, '#7a7d8e','center',11);
+  lbl('The real Third Law pairs are hidden from this view. They involve the table and the Earth.',
+      w/2, ib_y+68, '#4a4d5e','center',10);
+}
+
+function drawTableBook(){
+  const w=W(), h=H();
+
+  lbl('Table ↔ Book — the contact pair', w/2, h*0.08, '#e8e9ef','center',15,true);
+  lbl('Two objects interacting. Each exerts a force on the other.', w/2, h*0.14, '#7a7d8e','center',12);
+
+  // Table
+  const tblY=h*0.54, tblX=w*0.26, tblW=w*0.48, tblH=28;
+  ctx.fillStyle='#2a2b3a'; ctx.strokeStyle='#5a5b7a'; ctx.lineWidth=1.5;
+  ctx.fillRect(tblX, tblY, tblW, tblH);
+  ctx.strokeStyle='#3a3b4a'; ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(tblX+22,tblY+tblH);ctx.lineTo(tblX+22,tblY+tblH+52);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(tblX+tblW-22,tblY+tblH);ctx.lineTo(tblX+tblW-22,tblY+tblH+52);ctx.stroke();
+  lbl('TABLE', w*0.5, tblY+tblH+34, '#5a5b7a','center',12,true);
+
+  // Book
+  const bkW=90, bkH=50, bkX=w*0.5, bkY=tblY-bkH/2;
+  ctx.fillStyle='#1e2028'; ctx.strokeStyle='#f5a623'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(bkX-bkW/2, bkY-bkH/2, bkW, bkH, 5); ctx.fill(); ctx.stroke();
+  lbl('BOOK', bkX, bkY, '#f5a623','center',13,true);
+
+  const fLen=90, botBook=bkY+bkH/2, topTbl=tblY;
+
+  // Table pushes book UP — arrow on book, starts at top of book pointing up
+  const topBook=bkY-bkH/2;
+  ctx.strokeStyle='#4a9eff'; ctx.fillStyle='#4a9eff'; ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(bkX-24,topBook);ctx.lineTo(bkX-24,topBook-fLen);ctx.stroke();
+  ctx.save();ctx.translate(bkX-24,topBook-fLen);ctx.rotate(-Math.PI/2);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-9,9*0.4);ctx.lineTo(-9,-9*0.4);ctx.closePath();ctx.fill();ctx.restore();
+  lbl('Force table on book', bkX-24-8, topBook-fLen/2, '#4a9eff','right',11,true);
+  lbl('(acts on book)', bkX-24-8, topBook-fLen/2+16, '#e8e9ef','right',9);
+
+  // Book pushes table DOWN — arrow on table, starts at bottom of table pointing down
+  const botTbl = tblY + tblH;
+  ctx.strokeStyle='#ff5f6d'; ctx.fillStyle='#ff5f6d';
+  ctx.beginPath();ctx.moveTo(bkX+24,botTbl);ctx.lineTo(bkX+24,botTbl+fLen);ctx.stroke();
+  ctx.save();ctx.translate(bkX+24,botTbl+fLen);ctx.rotate(Math.PI/2);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-9,9*0.4);ctx.lineTo(-9,-9*0.4);ctx.closePath();ctx.fill();ctx.restore();
+  lbl('Force book on table', bkX+24+8, botTbl+fLen/2, '#ff5f6d','left',11,true);
+  lbl('(acts on table)', bkX+24+8, botTbl+fLen/2+16, '#e8e9ef','left',9);
+
+  // Insight box
+  const ib_x=w*0.04, ib_y=h*0.76, ib_w=w*0.92, ib_h=78;
+  ctx.fillStyle='#0d1a0d'; ctx.strokeStyle='#2dd4a0'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect(ib_x,ib_y,ib_w,ib_h,6); ctx.fill(); ctx.stroke();
+  lbl('Two objects: TABLE and BOOK. One force on each — this IS Newton\'s 3rd Law. ✓',
+      w/2, ib_y+16, '#2dd4a0','center',13,true);
+  lbl('Blue acts on the book. Red acts on the table. Equal magnitude, opposite direction, different objects.',
+      w/2, ib_y+34, '#e8e9ef','center',11);
+  lbl('We normally draw only the blue arrow (N↑ on book) in FBD work. The red arrow is real but',
+      w/2, ib_y+52, '#7a7d8e','center',11);
+  lbl('irrelevant to the book\'s motion — so we ignore it. But it exists, and it is Newton\'s 3rd.',
+      w/2, ib_y+68, '#4a4d5e','center',10);
+}
+
+function drawEarthBook(){
+  const w=W(), h=H();
+
+  lbl('Earth ↔ Book — the gravitational pair', w/2, h*0.08, '#e8e9ef','center',15,true);
+  lbl('Two objects attracting each other. The mg on every FBD is only half the pair.', w/2, h*0.14, '#7a7d8e','center',12);
+
+  // Book — upper portion of canvas
+  const bkW=90, bkH=50, bkX=w*0.5, bkY=h*0.26;
+  ctx.fillStyle='#1e2028'; ctx.strokeStyle='#f5a623'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(bkX-bkW/2, bkY-bkH/2, bkW, bkH, 5); ctx.fill(); ctx.stroke();
+  lbl('BOOK', bkX, bkY-6, '#f5a623','center',13,true);
+  lbl('m', bkX, bkY+10, '#e8e9ef','center',10);
+
+  // Earth — large circle at bottom
+  const earthX=w*0.5, earthY=h*0.64, earthR=48;
+  ctx.beginPath(); ctx.arc(earthX, earthY, earthR, 0, Math.PI*2);
+  ctx.fillStyle='#0a1a2a'; ctx.strokeStyle='#4a9eff66'; ctx.lineWidth=2;
+  ctx.fill(); ctx.stroke();
+  lbl('EARTH', earthX, earthY-8, '#e8e9ef','center',12,true);
+  lbl('M', earthX, earthY+10, '#e8e9ef','center',11);
+
+  const fLen=85;
+  const botBook=bkY+bkH/2;
+  const topEarth=earthY-earthR;
+
+  // Earth pulls book DOWN — arrow on book, starts at bottom center of book rect
+  ctx.strokeStyle='#ff5f6d'; ctx.fillStyle='#ff5f6d'; ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(bkX,botBook);ctx.lineTo(bkX,botBook+fLen);ctx.stroke();
+  ctx.save();ctx.translate(bkX,botBook+fLen);ctx.rotate(Math.PI/2);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-9,9*0.4);ctx.lineTo(-9,-9*0.4);ctx.closePath();ctx.fill();ctx.restore();
+  lbl('Force Earth on book', bkX-8, botBook+fLen/2, '#ff5f6d','right',11,true);
+  lbl('(acts on book = mg)', bkX-8, botBook+fLen/2+16, '#e8e9ef','right',9);
+
+  // Book pulls Earth UP — arrow on Earth, starts at top center of Earth circle
+  ctx.strokeStyle='#4a9eff'; ctx.fillStyle='#4a9eff';
+  ctx.beginPath();ctx.moveTo(earthX,topEarth);ctx.lineTo(earthX,topEarth-fLen);ctx.stroke();
+  ctx.save();ctx.translate(earthX,topEarth-fLen);ctx.rotate(-Math.PI/2);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-9,9*0.4);ctx.lineTo(-9,-9*0.4);ctx.closePath();ctx.fill();ctx.restore();
+  lbl('Force book on Earth', earthX+8, topEarth-fLen/2, '#4a9eff','left',11,true);
+  lbl('(acts on Earth — negligible a)', earthX+8, topEarth-fLen/2+16, '#e8e9ef','left',9);
+
+  // Insight box
+  const ib_x=w*0.04, ib_y=h*0.76, ib_w=w*0.92, ib_h=78;
+  ctx.fillStyle='#0d0d1a'; ctx.strokeStyle='#b98aff'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect(ib_x,ib_y,ib_w,ib_h,6); ctx.fill(); ctx.stroke();
+  lbl('Two objects: EARTH and BOOK. One gravitational force on each — Newton\'s 3rd. ✓',
+      w/2, ib_y+16, '#b98aff','center',13,true);
+  lbl('The mg↓ on every FBD is the red arrow — Earth pulling the book. Its partner pulls Earth upward.',
+      w/2, ib_y+34, '#e8e9ef','center',11);
+  lbl('We never draw the blue arrow in FBD work because it acts on Earth, not the book.',
+      w/2, ib_y+52, '#7a7d8e','center',11);
+  lbl('Same pair governs free fall, projectiles, and orbits — not just books on tables.',
+      w/2, ib_y+68, '#4a4d5e','center',10);
+}
+
+window.addEventListener('resize',()=>{setupCanvas();setTab(currentTab2);});
 requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();setTab(1);}));
 </script>
 </body>

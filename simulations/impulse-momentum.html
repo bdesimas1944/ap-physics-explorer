@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impulse & Change in Momentum — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1014;--surface:#17181d;--surface2:#1e2028;
+  --border:#2a2b33;--border2:#3a3b45;
+  --text:#e8e9ef;--text-muted:#7a7d8e;--text-dim:#4a4d5e;
+  --blue:#4a9eff;--blue-dim:#1a3a6a;--teal:#2dd4a0;--teal-dim:#0a3a2a;
+  --amber:#f5a623;--amber-dim:#3a2a0a;--red:#ff5f6d;--red-dim:#3a1a1e;
+  --purple:#b98aff;--purple-dim:#2a1a4a;
+  --font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;--font-serif:'DM Serif Display',serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;}
+.site-header{display:flex;align-items:center;gap:16px;padding:0 24px;height:52px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.site-logo{font-family:var(--font-serif);font-size:18px;color:var(--text);text-decoration:none;}
+.site-logo span{color:var(--blue);}
+.site-tagline{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);}
+.header-back{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--text-muted);text-decoration:none;}
+.header-back:hover{color:var(--text);}
+.sim-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.sim-layout{display:flex;flex:1;overflow:hidden;}
+.ctrl-panel{width:280px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;overflow-y:auto;}
+.ctrl-divider{height:1px;background:var(--border);margin:12px 0;}
+.eq-block{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+.eq-main{font-family:var(--font-serif);font-size:18px;font-style:italic;color:var(--text);margin-bottom:4px;}
+.eq-sub{font-size:11px;font-family:var(--font-mono);color:var(--text-dim);line-height:1.9;}
+.readout{border-radius:8px;padding:12px 14px;margin-bottom:14px;background:var(--amber-dim);border:1px solid var(--amber);}
+.readout-label{font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin-bottom:3px;}
+.readout-value{font-family:var(--font-serif);font-size:28px;font-style:italic;color:var(--amber);}
+.readout-sub{font-size:11px;font-family:var(--font-mono);color:var(--amber);opacity:0.7;margin-top:3px;}
+.section-head{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;margin-top:4px;}
+.slider-group{margin-bottom:11px;}
+.slider-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+.slider-label{font-size:12px;color:var(--text-muted);font-style:italic;font-family:var(--font-serif);}
+.slider-value{font-size:12px;font-family:var(--font-mono);color:var(--text);font-weight:500;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;background:var(--border2);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--text);border:2px solid var(--border2);cursor:grab;}
+.result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.result-label{font-size:12px;color:var(--text-muted);font-family:var(--font-mono);}
+.result-val{font-size:13px;font-family:var(--font-mono);font-weight:500;}
+.ctrl-note{margin-top:auto;padding-top:12px;font-size:11px;color:var(--text-dim);font-family:var(--font-mono);border-top:1px solid var(--border);line-height:1.7;}
+.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.tab-btn{flex:1;padding:10px 8px;font-size:12px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all 0.15s;text-align:center;line-height:1.3;}
+.tab-btn:hover{color:var(--text-muted);}
+.tab-btn.active{color:var(--amber);border-bottom-color:var(--amber);}
+.canvas-wrap{flex:1;position:relative;overflow:hidden;}
+canvas{display:block;}
+.step-desc{padding:10px 20px;background:var(--surface);border-top:1px solid var(--border);font-size:12px;font-family:var(--font-mono);color:var(--text-muted);flex-shrink:0;line-height:1.5;min-height:44px;}
+.step-desc .hl{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">4.2 · impulse &amp; change in momentum</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-main">J = FΔt = Δp</div>
+        <div class="eq-sub">
+          <span style="color:var(--amber)">J — impulse (N·s)</span><br>
+          <span style="color:var(--red)">F — force (N)</span><br>
+          <span style="color:var(--teal)">Δt — contact time (s)</span><br>
+          <span style="color:var(--purple)">Δp = mv_f − mv_i</span>
+        </div>
+      </div>
+
+      <div class="readout">
+        <div class="readout-label">Impulse J = FΔt = Δp</div>
+        <div class="readout-value" id="val-J">0.0 N·s</div>
+        <div class="readout-sub" id="val-J-sub">= Δp</div>
+      </div>
+
+      <div class="section-head">Object</div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">m · mass</span><span class="slider-value" id="lbl-m">2.0 kg</span></div>
+        <input type="range" id="sl-m" min="0.5" max="10" step="0.5" value="2" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">vᵢ · initial velocity</span><span class="slider-value" id="lbl-vi">+3.0 m/s</span></div>
+        <input type="range" id="sl-vi" min="-10" max="10" step="0.5" value="3" oninput="update()">
+      </div>
+
+      <div class="section-head">Force Applied</div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">F · force</span><span class="slider-value" id="lbl-F">+10.0 N</span></div>
+        <input type="range" id="sl-F" min="-30" max="30" step="1" value="10" oninput="update()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">Δt · contact time</span><span class="slider-value" id="lbl-dt">0.50 s</span></div>
+        <input type="range" id="sl-dt" min="0.05" max="3" step="0.05" value="0.5" oninput="update()">
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="result-row"><span class="result-label">pᵢ = mvᵢ</span><span class="result-val" style="color:var(--purple)" id="val-pi">— kg·m/s</span></div>
+      <div class="result-row"><span class="result-label">Δp = FΔt</span><span class="result-val" style="color:var(--amber)" id="val-dp">— kg·m/s</span></div>
+      <div class="result-row"><span class="result-label">pf = pᵢ + Δp</span><span class="result-val" style="color:var(--teal)" id="val-pf">— kg·m/s</span></div>
+      <div class="result-row"><span class="result-label">vf = pf / m</span><span class="result-val" style="color:var(--blue)" id="val-vf">— m/s</span></div>
+
+      <div class="ctrl-note">
+        J = FΔt = Δp (impulse-momentum theorem)<br>
+        same J: large F short Δt, or small F long Δt<br>
+        airbags increase Δt → reduce F on driver<br>
+        direction of F determines sign of Δp
+      </div>
+    </div>
+
+    <div class="canvas-area">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab1" onclick="setTab(1)">① J = FΔt = Δp<br><span style="font-size:10px;opacity:0.6">the theorem</span></button>
+        <button class="tab-btn" id="tab2" onclick="setTab(2)">② Force-Time Graph<br><span style="font-size:10px;opacity:0.6">area = impulse</span></button>
+        <button class="tab-btn" id="tab3" onclick="setTab(3)">③ Same J, diff F<br><span style="font-size:10px;opacity:0.6">airbag effect</span></button>
+        <button class="tab-btn" id="tab4" onclick="setTab(4)">④ Bounce vs Stop<br><span style="font-size:10px;opacity:0.6">direction matters</span></button>
+      </div>
+      <div class="canvas-wrap"><canvas id="c"></canvas></div>
+      <div class="step-desc" id="step-desc">
+        <span class="hl">J = FΔt = Δp:</span> a force applied over time changes an object's momentum. The impulse equals the change in momentum. Adjust F and Δt and watch how the final velocity changes.
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+let currentTab=1;
+function W(){return canvas.width/(window.devicePixelRatio||1);}
+function H(){return canvas.height/(window.devicePixelRatio||1);}
+function setupCanvas(){
+  const wrap=canvas.parentElement,dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr;canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px';canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+const getM=()=>parseFloat(document.getElementById('sl-m').value);
+const getVi=()=>parseFloat(document.getElementById('sl-vi').value);
+const getF=()=>parseFloat(document.getElementById('sl-F').value);
+const getDt=()=>parseFloat(document.getElementById('sl-dt').value);
+
+function arrow(x1,y1,x2,y2,color,lw=2.5,hs=9){
+  const dx=x2-x1,dy=y2-y1;if(Math.hypot(dx,dy)<4)return;
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);
+  ctx.save();ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-hs,hs*0.38);ctx.lineTo(-hs,-hs*0.38);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+function lbl(text,x,y,color,align='center',size=12,italic=false){
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align;ctx.fillText(text,x,y);
+}
+function block(cx,cy,size,fillColor,strokeColor,label){
+  ctx.fillStyle=fillColor;ctx.strokeStyle=strokeColor;ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(cx-size/2,cy-size/2,size,size,4);ctx.fill();ctx.stroke();
+  if(label) lbl(label,cx,cy+4,'#e8e9ef88','center',10);
+}
+
+function setTab(n){
+  currentTab=n;
+  [1,2,3,4].forEach(i=>document.getElementById('tab'+i).classList.toggle('active',i===n));
+  const descs={
+    1:'<span class="hl">J = FΔt = Δp:</span> impulse equals force × time, and also equals the change in momentum. This is the impulse-momentum theorem. Adjust force and contact time and watch the final velocity respond.',
+    2:'<span class="hl">Force-Time graph:</span> the area under a F-t curve equals the impulse, which equals Δp. A large brief force and a small prolonged force can deliver the same impulse — and the same change in momentum.',
+    3:'<span class="hl">Same impulse, different force:</span> an airbag increases contact time Δt, which lowers the peak force F even though the total impulse (Δp) is the same. Longer contact time saves lives.',
+    4:'<span class="hl">Bounce vs Stop:</span> bouncing off a wall creates a larger Δp than stopping against it, even at the same speed. Reversing direction doubles the change in momentum.'
+  };
+  document.getElementById('step-desc').innerHTML=descs[n];
+  update();
+}
+
+function update(){
+  const m=getM(),vi=getVi(),F=getF(),dt=getDt();
+  const pi=m*vi, J=F*dt, dp=J, pf=pi+dp, vf=pf/m;
+  document.getElementById('lbl-m').textContent=m.toFixed(1)+' kg';
+  document.getElementById('lbl-vi').textContent=(vi>=0?'+':'')+vi.toFixed(1)+' m/s';
+  document.getElementById('lbl-F').textContent=(F>=0?'+':'')+F.toFixed(1)+' N';
+  document.getElementById('lbl-dt').textContent=dt.toFixed(2)+' s';
+  document.getElementById('val-J').textContent=(J>=0?'+':'')+J.toFixed(1)+' N·s';
+  document.getElementById('val-J-sub').textContent='= '+(F>=0?'+':'')+F.toFixed(1)+'×'+dt.toFixed(2)+' = Δp';
+  document.getElementById('val-pi').textContent=(pi>=0?'+':'')+pi.toFixed(1)+' kg·m/s';
+  document.getElementById('val-dp').textContent=(dp>=0?'+':'')+dp.toFixed(1)+' kg·m/s';
+  document.getElementById('val-pf').textContent=(pf>=0?'+':'')+pf.toFixed(1)+' kg·m/s';
+  document.getElementById('val-vf').textContent=(vf>=0?'+':'')+vf.toFixed(2)+' m/s';
+  if(!ctx||W()===0)return;
+  ctx.clearRect(0,0,W(),H());
+  if(currentTab===1)drawTab1(m,vi,F,dt,pi,J,pf,vf);
+  else if(currentTab===2)drawTab2(m,vi,F,dt,J);
+  else if(currentTab===3)drawTab3(m,vi,J);
+  else drawTab4(m,vi);
+}
+
+// ── Tab 1: The theorem ────────────────────
+function drawTab1(m,vi,F,dt,pi,J,pf,vf){
+  const w=W(),h=H();
+  const cy=h*0.44, groundY=cy+26, bsize=42, bx=w*0.5;
+
+  // Ground
+  ctx.strokeStyle='#3a3b45';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(w*0.05,groundY);ctx.lineTo(w*0.95,groundY);ctx.stroke();
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  for(let gx=w*0.05;gx<=w*0.95;gx+=14){
+    ctx.beginPath();ctx.moveTo(gx,groundY);ctx.lineTo(gx-8,groundY+9);ctx.stroke();
+  }
+
+  block(bx,cy-bsize/2,bsize,'#1e1f2e','#6060a0',m.toFixed(0)+' kg');
+
+  // Initial velocity arrow (left side)
+  const scale=8;
+  if(Math.abs(vi)>0.05){
+    const vLen=Math.min(Math.abs(vi)*scale+10,w*0.28);
+    const dir=vi>0?-1:1;// draw coming IN
+    const startX=bx-(bsize/2)*(vi>0?1:-1);
+    arrow(startX-vLen*(vi>0?-1:1),cy-bsize/2,startX,cy-bsize/2,'#b98aff',2.5,8);
+    lbl('vᵢ='+(vi>=0?'+':'')+vi.toFixed(1),startX-vLen*(vi>0?-1:1)/2,cy-bsize/2-16,'#b98aff','center',11,true);
+  }
+
+  // Force arrow (on top of block)
+  if(Math.abs(F)>0.1){
+    const fLen=Math.min(Math.abs(F)*2+10,w*0.22);
+    const fDir=F>0?1:-1;
+    arrow(bx,cy-bsize,bx+fLen*fDir,cy-bsize,'#f5a623',3,9);
+    lbl('F='+(F>=0?'+':'')+F.toFixed(0)+'N',bx+fLen*fDir/2,cy-bsize-18,'#f5a623','center',11,true);
+  }
+
+  // Final velocity arrow (right side)
+  if(Math.abs(vf)>0.05){
+    const vfLen=Math.min(Math.abs(vf)*scale+10,w*0.28);
+    const dir=vf>0?1:-1;
+    arrow(bx+bsize/2,cy-bsize/2,bx+bsize/2+vfLen*dir,cy-bsize/2,'#2dd4a0',2.5,8);
+    lbl('vf='+(vf>=0?'+':'')+vf.toFixed(2),bx+bsize/2+vfLen*dir/2,cy-bsize/2-16,'#2dd4a0','center',11,true);
+  }
+
+  // Equation box
+  const bx2=w*0.06,by2=h*0.09,bw2=w*0.40,bh2=118;
+  ctx.fillStyle='#13141a';ctx.strokeStyle='#f5a623';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(bx2,by2,bw2,bh2,6);ctx.fill();ctx.stroke();
+  lbl('Impulse-Momentum Theorem',bx2+bw2/2,by2+18,'#f5a623','center',11);
+  lbl('J = FΔt',bx2+bw2/2,by2+40,'#f5a623','center',16,true);
+  lbl('= Δp = m(vf − vᵢ)',bx2+bw2/2,by2+62,'#e8e9ef','center',13,true);
+  lbl('= '+m.toFixed(1)+'×('+vf.toFixed(2)+'−'+vi.toFixed(1)+')',bx2+bw2/2,by2+82,'#7a7d8e','center',11);
+  lbl('= '+J.toFixed(1)+' N·s',bx2+bw2/2,by2+102,'#f5a623','center',14,true);
+
+  const noteY=h*0.76;
+  ctx.fillStyle='#13141a';ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(w*0.06,noteY,w*0.88,52,6);ctx.fill();ctx.stroke();
+  lbl('pᵢ = '+pi.toFixed(1)+' kg·m/s   →   J = '+J.toFixed(1)+' N·s   →   pf = '+pf.toFixed(1)+' kg·m/s',w/2,noteY+18,'#e8e9ef','center',12,true);
+  lbl('vf = pf/m = '+pf.toFixed(1)+' / '+m.toFixed(1)+' = '+vf.toFixed(2)+' m/s',w/2,noteY+36,'#2dd4a0','center',11,true);
+}
+
+// ── Tab 2: F-t graph ─────────────────────
+function drawTab2(m,vi,F,dt,J){
+  const w=W(),h=H();
+  lbl('Area under F-t curve = Impulse = Δp',w/2,h*0.07,'#f5a623','center',16,true);
+
+  const gx=w*0.10,gy=h*0.16,gw=w*0.80,gh=h*0.50;
+  const tMax=3.5, Fmax=35;
+  const ox=gx,oy=gy+gh;
+  const tx=(t)=>ox+( t/tMax)*gw;
+  const fy=(f)=>oy-(f/Fmax)*gh;
+
+  // Axes
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(ox,gy);ctx.lineTo(ox,oy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+gw,oy);ctx.stroke();
+  lbl('F (N)',ox-6,gy+4,'#f5a623','right',11);
+  lbl('t (s)',ox+gw+6,oy,'#7a7d8e','left',11);
+
+  // Tick marks
+  [0,10,20,30].forEach(fv=>{
+    const ty=fy(fv);
+    ctx.strokeStyle='#2a2b33';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(ox,ty);ctx.lineTo(ox+gw,ty);ctx.stroke();
+    lbl(fv,ox-6,ty+4,'#4a4d5e','right',9);
+  });
+  [0,1,2,3].forEach(tv=>{
+    const txv=tx(tv);
+    ctx.strokeStyle='#2a2b33';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(txv,oy);ctx.lineTo(txv,oy+5);ctx.stroke();
+    lbl(tv,txv,oy+14,'#4a4d5e','center',9);
+  });
+
+  // Shaded area = impulse (the rectangle up to dt)
+  if(dt>0 && Math.abs(F)>0.1){
+    const absF=Math.abs(F);
+    const clampedF=Math.min(absF,Fmax);
+    ctx.fillStyle='#f5a62322';ctx.strokeStyle='#f5a623';ctx.lineWidth=2;
+    ctx.fillRect(tx(0),fy(clampedF),tx(dt)-tx(0),gy+gh-fy(clampedF));
+    ctx.strokeRect(tx(0),fy(clampedF),tx(dt)-tx(0),gy+gh-fy(clampedF));
+
+    // Area label
+    lbl('J = '+J.toFixed(1)+' N·s',(tx(0)+tx(dt))/2,(fy(clampedF)+oy)/2,'#f5a623','center',13,true);
+  }
+
+  // Axis labels
+  if(Math.abs(F)>0.1){
+    const clampedF=Math.min(Math.abs(F),Fmax);
+    ctx.strokeStyle='#f5a62366';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(ox,fy(clampedF));ctx.lineTo(tx(dt),fy(clampedF));ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tx(dt),oy);ctx.lineTo(tx(dt),fy(clampedF));ctx.stroke();
+    ctx.setLineDash([]);
+    lbl('F='+Math.abs(F).toFixed(0),ox-6,fy(clampedF)+4,'#f5a623','right',10,true);
+    lbl('Δt='+dt.toFixed(2),tx(dt),oy+14,'#2dd4a0','center',10,true);
+  }
+
+  const noteY=h*0.73;
+  ctx.fillStyle='#13141a';ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(w*0.06,noteY,w*0.88,66,6);ctx.fill();ctx.stroke();
+  lbl('The shaded rectangle has area = F × Δt = '+J.toFixed(1)+' N·s.',w/2,noteY+18,'#e8e9ef','center',12,true);
+  lbl('For non-constant forces the area under the curve still equals the impulse.',w/2,noteY+34,'#7a7d8e','center',11);
+  lbl('Δp = '+J.toFixed(1)+' kg·m/s  →  vf = vᵢ + Δp/m = '+(vi+J/m).toFixed(2)+' m/s',w/2,noteY+52,'#2dd4a0','center',11,true);
+}
+
+// ── Tab 3: Same J, diff F (airbag) ────────
+function drawTab3(m,vi,J){
+  const w=W(),h=H();
+  lbl('Same impulse — different force and contact time',w/2,h*0.07,'#2dd4a0','center',16,true);
+  lbl('J = FΔt = '+J.toFixed(1)+' N·s  (same Δp for both scenarios)',w/2,h*0.12,'#e8e9ef','center',11);
+
+  // Two scenarios: short Δt (no airbag) and long Δt (airbag)
+  const dt1=0.05, F1=J/dt1;   // No airbag — very short contact time
+  const dt2=0.40, F2=J/dt2;   // Airbag — longer contact time
+
+  const gx=w*0.10,gy=h*0.20,gw=w*0.80,gh=h*0.44;
+  const tMax=0.55, Fmax=Math.max(Math.abs(F1)*1.2,100);
+  const ox=gx,oy=gy+gh;
+  const tx=(t)=>ox+(t/tMax)*gw;
+  const fy=(f)=>oy-(Math.abs(f)/Fmax)*gh;
+
+  // Axes
+  ctx.strokeStyle='#2a2b33';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(ox,gy);ctx.lineTo(ox,oy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+gw,oy);ctx.stroke();
+
+  // Scenario 1 — no airbag (red, tall narrow)
+  const f1clamped=Math.min(Math.abs(F1),Fmax);
+  ctx.fillStyle='#ff5f6d33';ctx.strokeStyle='#ff5f6d';ctx.lineWidth=2;
+  ctx.fillRect(tx(0),fy(f1clamped),tx(dt1)-tx(0),gy+gh-fy(f1clamped));
+  ctx.strokeRect(tx(0),fy(f1clamped),tx(dt1)-tx(0),gy+gh-fy(f1clamped));
+  lbl('No airbag',tx(dt1/2),fy(f1clamped)-14,'#ff5f6d','center',11,true);
+  lbl('F='+F1.toFixed(0)+'N',tx(dt1/2),fy(f1clamped)+14,'#ff5f6d','center',10);
+  lbl('Δt='+dt1.toFixed(2)+'s',tx(dt1/2),gy+gh+14,'#ff5f6d','center',10);
+
+  // Scenario 2 — airbag (green, short wide)
+  const f2clamped=Math.min(Math.abs(F2),Fmax);
+  ctx.fillStyle='#2dd4a033';ctx.strokeStyle='#2dd4a0';ctx.lineWidth=2;
+  ctx.fillRect(tx(0),fy(f2clamped),tx(dt2)-tx(0),gy+gh-fy(f2clamped));
+  ctx.strokeRect(tx(0),fy(f2clamped),tx(dt2)-tx(0),gy+gh-fy(f2clamped));
+  lbl('Airbag',tx(dt2*0.6),fy(f2clamped)-14,'#2dd4a0','center',11,true);
+  lbl('F='+F2.toFixed(0)+'N',tx(dt2*0.6),fy(f2clamped)+14,'#2dd4a0','center',10);
+  lbl('Δt='+dt2.toFixed(2)+'s',tx(dt2*0.6),gy+gh+14,'#2dd4a0','center',10);
+
+  lbl('F (N)',ox-6,gy+4,'#7a7d8e','right',11);
+  lbl('t (s)',ox+gw+6,oy,'#7a7d8e','left',11);
+
+  // Equal area notation
+  lbl('equal areas = equal impulse = equal Δp',w/2,gy+gh+34,'#f5a62388','center',11,true);
+
+  const noteY=h*0.76;
+  ctx.fillStyle='#13141a';ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(w*0.06,noteY,w*0.88,54,6);ctx.fill();ctx.stroke();
+  lbl('Without airbag: F = '+F1.toFixed(0)+' N over '+dt1.toFixed(2)+' s — potentially fatal force.',w/2,noteY+18,'#ff5f6d','center',12,true);
+  lbl('With airbag: F = '+F2.toFixed(0)+' N over '+dt2.toFixed(2)+' s — same Δp, survivable force.',w/2,noteY+36,'#2dd4a0','center',12,true);
+}
+
+// ── Tab 4: Bounce vs Stop ─────────────────
+function drawTab4(m,vi){
+  const w=W(),h=H();
+  const speed=Math.abs(vi)||5;
+  lbl('Bounce vs Stop — direction changes momentum more',w/2,h*0.07,'#b98aff','center',16,true);
+
+  const cy1=h*0.30, cy2=h*0.58, groundY1=cy1+22, groundY2=cy2+22;
+  const bsize=38;
+
+  // === Scenario 1: STOP ===
+  lbl('Scenario A: Object STOPS (hits wall, sticks)',w/2,h*0.16,'#4a9eff','center',13,true);
+  const wall1x=w*0.72;
+  ctx.fillStyle='#2a2b33';ctx.fillRect(wall1x,cy1-50,16,80);
+  ctx.strokeStyle='#3a3b45';ctx.lineWidth=1;
+  for(let wy=cy1-50;wy<cy1+30;wy+=12){
+    ctx.beginPath();ctx.moveTo(wall1x,wy);ctx.lineTo(wall1x+12,wy+10);ctx.stroke();
+  }
+  // Before
+  block(w*0.32,cy1,bsize,'#1e1f2e','#4a9eff',m.toFixed(0)+'kg');
+  arrow(w*0.32+bsize/2,cy1,w*0.32+bsize/2+speed*7,cy1,'#4a9eff',2.5,8);
+  lbl('+'+speed.toFixed(1)+' m/s',w*0.32+bsize/2+speed*3.5,cy1-18,'#4a9eff','center',11,true);
+  // After
+  block(wall1x-bsize/2,cy1,bsize,'#1e1f2e','#4a4d5e',m.toFixed(0)+'kg');
+  lbl('0 m/s',wall1x-bsize/2,cy1-22,'#4a4d5e','center',11,true);
+  // Δp
+  const dp_stop=m*(0-speed);
+  lbl('Δp = m(vf−vᵢ) = '+m+'×(0−'+speed.toFixed(1)+') = '+dp_stop.toFixed(1)+' kg·m/s',w/2,cy1+34,'#4a9eff','center',11);
+
+  // === Scenario 2: BOUNCE ===
+  lbl('Scenario B: Object BOUNCES (same wall, same speed)',w/2,h*0.44,'#b98aff','center',13,true);
+  const wall2x=w*0.72;
+  ctx.fillStyle='#2a2b33';ctx.fillRect(wall2x,cy2-50,16,80);
+  ctx.strokeStyle='#3a3b45';ctx.lineWidth=1;
+  for(let wy=cy2-50;wy<cy2+30;wy+=12){
+    ctx.beginPath();ctx.moveTo(wall2x,wy);ctx.lineTo(wall2x+12,wy+10);ctx.stroke();
+  }
+  // Before
+  block(w*0.32,cy2,bsize,'#1e1f2e','#b98aff',m.toFixed(0)+'kg');
+  arrow(w*0.32+bsize/2,cy2,w*0.32+bsize/2+speed*7,cy2,'#b98aff',2.5,8);
+  lbl('+'+speed.toFixed(1)+' m/s',w*0.32+bsize/2+speed*3.5,cy2-18,'#b98aff','center',11,true);
+  // After (bounces back)
+  block(w*0.55,cy2,bsize,'#1e1f2e','#ff5f6d',m.toFixed(0)+'kg');
+  arrow(w*0.55-bsize/2,cy2,w*0.55-bsize/2-speed*7,cy2,'#ff5f6d',2.5,8);
+  lbl('−'+speed.toFixed(1)+' m/s',w*0.55-bsize/2-speed*3.5,cy2-18,'#ff5f6d','center',11,true);
+  const dp_bounce=m*(-speed-speed);
+  lbl('Δp = m(−vᵢ−vᵢ) = '+m+'×(−'+speed.toFixed(1)+'−'+speed.toFixed(1)+') = '+dp_bounce.toFixed(1)+' kg·m/s',w/2,cy2+34,'#b98aff','center',11);
+
+  const noteY=h*0.82;
+  ctx.fillStyle='#13141a';ctx.strokeStyle='#2a2b33';ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(w*0.06,noteY,w*0.88,54,6);ctx.fill();ctx.stroke();
+  lbl('Stop: |Δp| = '+Math.abs(dp_stop).toFixed(1)+' N·s    Bounce: |Δp| = '+Math.abs(dp_bounce).toFixed(1)+' N·s — the wall exerts twice the impulse.',w/2,noteY+18,'#e8e9ef','center',12,true);
+  lbl('Bouncing off a wall requires more impulse from the wall than simply stopping.',w/2,noteY+36,'#7a7d8e','center',11);
+}
+
+window.addEventListener('resize',()=>{setupCanvas();update();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();update();}));
+</script>
+</body>
+</html>
