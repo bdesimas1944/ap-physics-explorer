@@ -572,6 +572,117 @@ function drawTab3(F, v, t, theta) {
   lbl('drag F and v to match a source ↑', w*0.42, h - 10, '#3a3b45', 'center', 10);
 }
 
+// ── Tab 3: Real World Work ──────────────
+function drawTab5Work(F, v, t) {
+  const w=W2(), h=H();
+  const d = v * t;
+  const W3 = F * d;
+
+  // Real world energy/work values — [label, emoji, joules]
+  const sources = [
+    ['Ant lifting a crumb',      '🐜',     0.001],
+    ['Flicking a light switch',  '👆',     0.05],
+    ['Pushing a book across desk','📖',    1],
+    ['Tossing a tennis ball',    '🎾',     5],
+    ['Lifting a gallon of milk', '🥛',     20],
+    ['Push-up (one rep)',        '💪',     150],
+    ['Climbing one flight of stairs', '🪜', 1000],
+    ['Pushing a stalled car 10m','🚗',     5000],
+    ['Car at highway speed (KE)','🚙',     500000],
+    ['Energy in a candy bar',    '🍫',     1000000],
+    ['Lightning bolt',           '⚡',     1000000000],
+    ['Hiroshima bomb',           '💥',     6.3e13],
+  ];
+
+  // Sort by joules
+  sources.sort((a,b) => a[2]-b[2]);
+
+  // Log scale: min=1e-3 J, max=1e14 J
+  const logMin = Math.log10(1e-3);
+  const logMax = Math.log10(1e14);
+  const logW   = Math.log10(Math.max(W3, 1e-3));
+
+  const barTop  = h * 0.14;
+  const barBot  = h * 0.88;
+  const barH    = barBot - barTop;
+  const barX    = w * 0.18;
+
+  // Background
+  ctx.fillStyle = '#13141a';
+  ctx.beginPath(); ctx.roundRect(barX - 10, barTop - 10, w*0.65, barH + 20, 8);
+  ctx.fill();
+
+  // Scale bar
+  ctx.fillStyle = '#1e2028';
+  ctx.fillRect(barX, barTop, 20, barH);
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, barTop, 0, barBot);
+  grad.addColorStop(0,   '#ff5f6d33');
+  grad.addColorStop(0.5, '#f5a62333');
+  grad.addColorStop(1,   '#2dd4a033');
+  ctx.fillStyle = grad;
+  ctx.fillRect(barX, barTop, 20, barH);
+  ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 1;
+  ctx.strokeRect(barX, barTop, 20, barH);
+
+  // Draw each source — emoji + name + value all on right side of bar
+  sources.forEach(([name, emoji, joules]) => {
+    const logJ = Math.log10(joules);
+    const frac = (logJ - logMin) / (logMax - logMin);
+    const y    = barBot - frac * barH;
+
+    // Tick mark
+    ctx.strokeStyle = '#3a3b45'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(barX + 16, y); ctx.lineTo(barX + 28, y); ctx.stroke();
+
+    // Emoji + name on right of bar
+    ctx.font = '20px sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
+    ctx.fillText(emoji, barX + 32, y + 6);
+    ctx.font = '11px "DM Mono",monospace'; ctx.fillStyle = '#7a7d8e';
+    ctx.fillText(name, barX + 58, y + 4);
+
+    // Value on far right
+    const jStr = joules >= 1e9 ? (joules/1e9).toExponential(1)+' GJ' :
+                 joules >= 1e6 ? (joules/1e6).toFixed(1)+' MJ' :
+                 joules >= 1e3 ? (joules/1e3).toFixed(1)+' kJ' :
+                 joules >= 1   ? joules.toFixed(1)+' J' : joules.toExponential(1)+' J';
+    ctx.fillStyle = '#3a3b45'; ctx.font = '10px "DM Mono",monospace'; ctx.textAlign = 'right';
+    ctx.fillText(jStr, w*0.72, y + 4);
+  });
+
+  // ── Your work marker — on LEFT side of bar ──
+  const fracW  = (logW - logMin) / (logMax - logMin);
+  const yourY  = barBot - Math.max(0, Math.min(1, fracW)) * barH;
+  const markerColor = W3 < 10 ? '#2dd4a0' : W3 < 1000 ? '#f5a623' : '#ff5f6d';
+
+  // Line across full width
+  ctx.strokeStyle = markerColor; ctx.lineWidth = 2;
+  ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(barX-2, yourY); ctx.lineTo(w*0.74, yourY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Your W label box on LEFT of bar
+  const wStr = W3 >= 1e6 ? (W3/1e6).toFixed(2)+' MJ' : W3 >= 1e3 ? (W3/1e3).toFixed(1)+' kJ' : W3.toFixed(1)+' J';
+  const lblW = 140, lblH = 26;
+  const lblX = barX - lblW - 12;
+  ctx.fillStyle = markerColor+'33'; ctx.strokeStyle = markerColor; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(lblX, yourY - lblH/2, lblW, lblH, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = markerColor; ctx.font = 'italic 12px "DM Serif Display",serif'; ctx.textAlign = 'center';
+  ctx.fillText('Your W = ' + wStr, lblX + lblW/2, yourY + 4);
+
+  // Nearest source
+  const nearest = sources.reduce((best, s) =>
+    Math.abs(Math.log10(s[2]) - logW) < Math.abs(Math.log10(best[2]) - logW) ? s : best
+  );
+  lbl('≈ ' + nearest[1] + ' ' + nearest[0], lblX + lblW/2, yourY + lblH/2 + 14, markerColor+'88', 'center', 10);
+
+  // Title
+  lbl('Real World Work Scale (log)', w*0.42, barTop - 22, '#4a4d5e', 'center', 11);
+  lbl('drag F, v, and t to match a source ↑', w*0.42, h - 10, '#3a3b45', 'center', 10);
+  lbl('W = F·d = '+F.toFixed(0)+'N × '+d.toFixed(1)+'m', w*0.42, barTop - 8, '#4a4d5e', 'center', 10);
+}
+
 // ── Tab 5: Computational Graph ──────────────
 function drawTab4Chain(F, v, t) {
   const w=W2(), h=H();

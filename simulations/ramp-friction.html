@@ -120,6 +120,7 @@ canvas { display: block; }
           <button onclick="setAngle(60)" class="angle-btn">60°</button>
           <button onclick="setAngle(90)" class="angle-btn">90°</button>
         </div>
+        <button onclick="isSliding=false;update();" style="width:100%;margin-top:6px;padding:5px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;color:var(--text-muted);font-family:var(--font-mono);font-size:11px;cursor:pointer;" onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-muted)'">↺ reset to static</button>
       </div>
 
       <div class="slider-group">
@@ -218,6 +219,9 @@ const G = 9.8;
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 let currentTab = 1;
+let isSliding = false;  // persistent mode: false=static, true=kinetic
+let thetaBreak = 0;    // angle at which block broke loose (radians)
+const DELTA_THETA = 2 * Math.PI / 180;  // 2° tolerance band
 
 function W() { return canvas.width/(window.devicePixelRatio||1); }
 function H() { return canvas.height/(window.devicePixelRatio||1); }
@@ -263,13 +267,15 @@ function setAngle(deg) {
 
 function setPreset(type) {
   const presets = {
-    grippy:   { us: 1.80, uk: 1.40 },
-    medium:   { us: 1.00, uk: 0.75 },
+    grippy:   { us: 1.80, uk: 1.20 },
+    medium:   { us: 0.50, uk: 0.30 },
     slippery: { us: 0.20, uk: 0.10 },
   };
   const p = presets[type];
   document.getElementById('sl-us').value = p.us;
   document.getElementById('sl-uk').value = p.uk;
+  isSliding = false;
+  thetaBreak = 0;  // reset breakaway angle on surface change
   update();
 }
 
@@ -382,11 +388,34 @@ function update() {
   const mg = m * G;
   const N  = mg * Math.cos(theta);
   const Fp = mg * Math.sin(theta);
-  const us = getUs(), uk = getUk();
+  let us = getUs(), uk = getUk();
+
+  // Physics constraint: μ_k must always be less than μ_s
+  if (uk >= us) {
+    uk = us * 0.75;
+    document.getElementById('sl-uk').value = uk.toFixed(2);
+    document.getElementById('lbl-uk').textContent = uk.toFixed(2);
+  }
+
   const fsMax = us * N;
   const fk    = uk * N;
   const net   = Fp - fk;
-  const sliding = Fp > fsMax;
+
+  // Hysteresis with memory — Perplexity two-mode model
+  const thetaK = Math.atan(uk);  // kinetic angle = arctan(μ_k)
+  if (!isSliding) {
+    // Static mode: break loose only when F∥ > μ_s·N
+    if (Fp > fsMax) {
+      isSliding = true;
+      thetaBreak = theta;  // record breakaway angle
+    }
+  } else {
+    // Kinetic mode: re-stick only when angle drops below arctan(μ_k) - Δθ
+    if (theta < thetaK - DELTA_THETA) {
+      isSliding = false;
+    }
+  }
+  const sliding = isSliding;
 
   document.getElementById('lbl-theta').textContent = getTheta() + '°';
   document.getElementById('lbl-m').textContent     = m.toFixed(1) + ' kg';
@@ -409,15 +438,20 @@ function update() {
 
   // Status box
   const box = document.getElementById('status-box');
-  if (Fp < fsMax * 0.95) {
-    box.style.background='var(--teal-dim)'; box.style.borderColor='var(--teal)'; box.style.color='var(--teal)';
-    box.textContent = '● static — not sliding (F∥ = ' + Fp.toFixed(1) + ' N < f_s max = ' + fsMax.toFixed(1) + ' N)';
-  } else if (Fp < fsMax * 1.05) {
-    box.style.background='#3a2a0a'; box.style.borderColor='var(--amber)'; box.style.color='var(--amber)';
-    box.textContent = '⚠ about to slip! F∥ ≈ f_s max';
+  const slipAngle = (Math.atan(us)*180/Math.PI).toFixed(1);
+  const stopAngle = (Math.atan(uk)*180/Math.PI).toFixed(1);
+  if (!sliding) {
+    if (Fp < fsMax * 0.95) {
+      box.style.background='var(--teal-dim)'; box.style.borderColor='var(--teal)'; box.style.color='var(--teal)';
+      box.textContent = '● static · slips at ' + slipAngle + '° · re-sticks below ' + stopAngle + '°';
+    } else {
+      box.style.background='#3a2a0a'; box.style.borderColor='var(--amber)'; box.style.color='var(--amber)';
+      box.textContent = '⚠ about to slip! slip angle = ' + slipAngle + '°';
+    }
   } else {
+    const breakDeg = (thetaBreak*180/Math.PI).toFixed(1);
     box.style.background='var(--red-dim)'; box.style.borderColor='var(--red)'; box.style.color='var(--red)';
-    box.textContent = '● sliding — kinetic friction active (net = ' + net.toFixed(1) + ' N)';
+    box.textContent = '● sliding · broke loose at ' + breakDeg + '° · re-sticks below ' + stopAngle + '°';
   }
 
   if (!ctx || W() === 0) return;
@@ -710,11 +744,7 @@ function drawTabKinetic(g) {
         W()/2, H()-16, '#f5a62388','center',11);
   }
 }
-window.addEventListener('resize', () => { setupCanvas(); update(); });
-requestAnimationFrame(() => requestAnimationFrame(() => {
-  setupCanvas();
-  setAngle(45);
-}));
+// ── Tab 4: Combined Friction ──────────────────
 function drawTabFriction(g) {
   const { theta, bCx, bCy, rSx, rSy, nX, nY, scale, mgLen, NLen, FpLen } = g;
   const N      = NLen / scale;
