@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why This Works — AP Physics 1 Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:         #0f1014;
+    --surface:    #17181d;
+    --surface2:   #1e2028;
+    --border:     #2a2b33;
+    --border2:    #3a3b45;
+    --text:       #e8e9ef;
+    --text-muted: #7a7d8e;
+    --text-dim:   #4a4d5e;
+    --blue:       #4a9eff;
+    --teal:       #2dd4a0;
+    --amber:      #f5a623;
+    --red:        #ff5f6d;
+    --font-body:  'DM Sans', sans-serif;
+    --font-mono:  'DM Mono', monospace;
+    --font-serif: 'DM Serif Display', serif;
+  }
+
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; }
+
+  /* ── Header ── */
+  .site-header { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .site-logo { font-family: var(--font-serif); font-size: 18px; color: var(--text); text-decoration: none; }
+  .site-logo span { color: var(--blue); }
+  .site-nav { display: flex; gap: 24px; }
+  .site-nav a { font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); text-decoration: none; letter-spacing: 0.04em; transition: color 0.15s; }
+  .site-nav a:hover { color: var(--text); }
+  .site-nav a.active { color: var(--teal); }
+
+  /* ── Page layout ── */
+  .page-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 64px 48px 96px;
+  }
+
+  /* ── Typography ── */
+  .page-eyebrow {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: 42px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 32px;
+  }
+  .page-title span { color: var(--teal); }
+
+  .prose p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+  .prose p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .section-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 48px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Pull quote ── */
+  .pull-quote {
+    border-left: 2px solid var(--teal);
+    padding: 16px 24px;
+    margin: 36px 0;
+    background: var(--surface);
+    border-radius: 0 8px 8px 0;
+  }
+  .pull-quote p {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* ── Status legend ── */
+  .status-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 28px 0;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .status-icon {
+    font-size: 16px;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .status-icon.not-started { color: var(--blue); opacity: 0.35; }
+  .status-icon.in-progress { color: var(--blue); }
+  .status-icon.completed   { color: var(--teal); }
+  .status-icon.mastered    { color: var(--amber); }
+  .status-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .status-label strong { color: var(--text); font-weight: 500; }
+
+  /* ── Book callout ── */
+  .book-callout {
+    margin-top: 56px;
+    padding: 28px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .book-callout-label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .book-callout-title {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    color: var(--text);
+  }
+  .book-callout p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .book-callout a {
+    font-size: 13px;
+    font-family: var(--font-mono);
+    color: var(--teal);
+    text-decoration: none;
+    margin-top: 4px;
+    display: inline-block;
+  }
+  .book-callout a:hover { text-decoration: underline; }
+
+  footer { border-top: 1px solid var(--border); padding: 16px 48px; font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); display: flex; gap: 24px; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <nav class="site-nav">
+      <a href="index.html">Course Map</a>
+      <a href="why.html" class="active">Why This Works</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+  <div class="page-wrap">
+
+    <div class="page-eyebrow">The philosophy</div>
+    <h1 class="page-title">Why <span>this works</span></h1>
+
+    <div class="prose">
+      <p>Most physics tools give you content. This one gives you an environment. The difference is not cosmetic — it is the whole argument.</p>
+
+      <p>Content is something you receive. An environment is something you act inside. When you drag a mass up a ramp and watch the friction coefficients fight each other, you are not being shown friction — you are discovering it. The simulation does not explain what happens when static friction gives way to kinetic. It lets you find that moment yourself, break it, back up, find it again. <strong>That sequence — attempt, failure, correction, ownership — is how durable understanding is built.</strong> It has always been how durable understanding is built. This site is designed around that sequence, not around coverage.</p>
+    </div>
+
+    <div class="section-title">The problem with coverage</div>
+
+    <div class="prose">
+      <p>In 1963, John Carroll proved something that the research has confirmed dozens of times since: the variable that determines mastery is not aptitude. It is time. Given enough time and the right conditions, virtually any learner can reach mastery of virtually any material. The implication is uncomfortable: the standard classroom model — fixed time, variable mastery — is almost perfectly designed to prevent the outcome it claims to pursue.</p>
+
+      <p>Benjamin Bloom put numbers on this in 1968. Students receiving one-on-one tutoring outperformed 98% of classroom-taught students on the same material. Not because the tutor was smarter. Because the tutor could wait. Could back up. Could present the same concept three different ways until one of them landed. Could notice the moment understanding arrived and move forward exactly then, not at the end of the fifty-minute period.</p>
+
+      <p><strong>The constraint that made mastery-based learning a privilege of the few has been lifted.</strong> Not entirely — the human in the loop is still the determining variable. But the external scarcity that made individual pacing impossible — scarce knowledge, scarce teachers, fixed schedules — is no longer the limiting factor. These simulations do not replace a great teacher. They give every student the one thing a great teacher never had enough of: time to stay with something until it clicks.</p>
+    </div>
+
+    <div class="pull-quote">
+      <p>The joy is not a reward for learning. The joy is the mechanism. When it is present, the mind opens. When it is absent, the mind manages. Managing is not learning.</p>
+    </div>
+
+    <div class="section-title">What the simulations are actually doing</div>
+
+    <div class="prose">
+      <p>Every simulation on this site is built around a moment of surprise. Not a trick — a genuine consequence of physics that most students have never been given the conditions to discover on their own. The projectile motion simulator lets you hold launch angle constant and watch range become symmetric around 45°. The Newton's Third Law simulator separates force pairs from equilibrium cases — a distinction most textbooks blur so badly that students graduate unable to identify a true Third Law pair. The collision simulator lets you watch kinetic energy form a parabola with its minimum at the perfectly inelastic state.</p>
+
+      <p>These are not demonstrations of facts. They are environments for making contact with physics — for finding the behavior, breaking it intentionally, building a mental model from the wreckage. <strong>The simulation does not tell you what to conclude. It creates the conditions in which you cannot avoid concluding.</strong> That is a different kind of tool entirely.</p>
+
+      <p>The canvas-based design — no frameworks, no abstraction layers, plain JavaScript drawing directly to the screen — is a direct expression of this philosophy. The code does exactly what you see. Nothing is hidden behind a library. If you want to look at how the friction model works, open the file. The transparency is intentional: the site trusts the learner, and the learner can verify that trust.</p>
+    </div>
+
+    <div class="section-title">The progress system</div>
+
+    <div class="prose">
+      <p>The four-state tracker — not started, in progress, completed, mastered — is not a gamification layer bolted onto a content site. It is a commitment to a principle: <strong>learning has stages, and the stages are not the same thing.</strong> Having watched a simulation is not the same as having worked through it. Having worked through it is not the same as having owned it. Owning it is not the same as being able to teach from it.</p>
+
+      <p>In this version, progress is self-reported. That is intentional. The system trusts you to know where you are. The next version will earn the status transitions with you — the simulation will signal completion based on what you actually did, not what you clicked. The mastery tier, visible on every page but not yet available, requires something more: demonstrating the concept from a different angle, explaining it under conditions the simulator did not originally present. That layer is being built carefully, because the wrong version of it is worse than no version at all.</p>
+
+      <p>The progress persists in your browser. No account. No server. No one is watching. The tracking is for you — to see your own map develop as you move through the course, to notice where you stalled and where you moved fast, to carry a picture of your own learning arc.</p>
+    </div>
+
+    <div class="status-legend">
+      <div class="status-row">
+        <span class="status-icon not-started">○</span>
+        <span class="status-label"><strong>Not started</strong> — the simulation is waiting</span>
+      </div>
+      <div class="status-row">
+        <span class="status-icon in-progress">●</span>
+        <span class="status-label"><strong>In progress</strong> — you are actively working with this concept</span>
+      </div>
+      <div class="status-row">
+        <span class="status-icon completed">✓</span>
+        <span class="status-label"><strong>Completed</strong> — you have worked through the material</span>
+      </div>
+      <div class="status-row">
+        <span class="status-icon mastered">★</span>
+        <span class="status-label"><strong>Mastered</strong> — earned, not clicked. Coming in the next version.</span>
+      </div>
+    </div>
+
+    <div class="book-callout">
+      <div class="book-callout-label">The full argument</div>
+      <div class="book-callout-title">Learning With AI</div>
+      <p>The philosophy behind this site — the research, the case studies, the techniques — is developed at length in <em>Learning With AI: A Guide to Mastery, Curiosity, and the Art of Teaching Yourself</em>. The book makes the case that learning is not broken because we lack information or effort. It is broken because we severed the process from its natural form. This site is what restoring it looks like in practice.</p>
+      <a href="about.html">About this project →</a>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>AP Physics 1 Explorer</span>
+    <span>HTML · CSS · JavaScript · no login required</span>
+  </footer>
+
+</body>
+</html>

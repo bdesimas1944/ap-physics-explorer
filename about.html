@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — AP Physics 1 Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:         #0f1014;
+    --surface:    #17181d;
+    --surface2:   #1e2028;
+    --border:     #2a2b33;
+    --border2:    #3a3b45;
+    --text:       #e8e9ef;
+    --text-muted: #7a7d8e;
+    --text-dim:   #4a4d5e;
+    --blue:       #4a9eff;
+    --teal:       #2dd4a0;
+    --amber:      #f5a623;
+    --red:        #ff5f6d;
+    --purple:     #b98aff;
+    --font-body:  'DM Sans', sans-serif;
+    --font-mono:  'DM Mono', monospace;
+    --font-serif: 'DM Serif Display', serif;
+  }
+
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; }
+
+  /* ── Header ── */
+  .site-header { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .site-logo { font-family: var(--font-serif); font-size: 18px; color: var(--text); text-decoration: none; }
+  .site-logo span { color: var(--blue); }
+  .site-nav { display: flex; gap: 24px; }
+  .site-nav a { font-size: 12px; font-family: var(--font-mono); color: var(--text-muted); text-decoration: none; letter-spacing: 0.04em; transition: color 0.15s; }
+  .site-nav a:hover { color: var(--text); }
+  .site-nav a.active { color: var(--teal); }
+
+  /* ── Page layout ── */
+  .page-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 64px 48px 96px;
+  }
+
+  /* ── Typography ── */
+  .page-eyebrow {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: 42px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 32px;
+  }
+  .page-title span { color: var(--blue); }
+
+  .prose p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+  .prose p strong { color: var(--text); font-weight: 500; }
+  .prose p:last-child { margin-bottom: 0; }
+
+  .section-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 48px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Timeline / roadmap ── */
+  .roadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+  }
+  .roadmap-item {
+    display: flex;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    width: 32px;
+  }
+  .roadmap-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .roadmap-dot.live    { background: var(--teal); }
+  .roadmap-dot.next    { background: var(--blue); }
+  .roadmap-dot.future  { background: var(--border2); }
+  .roadmap-content {}
+  .roadmap-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .roadmap-label.live  { color: var(--teal); }
+  .roadmap-label.next  { color: var(--blue); }
+  .roadmap-title {
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .roadmap-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  /* ── Book card ── */
+  .book-card {
+    margin-top: 24px;
+    padding: 28px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .book-card-label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .book-card-title {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .book-card-subtitle {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-muted);
+    margin-top: -4px;
+  }
+  .book-card p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .book-card a {
+    font-size: 13px;
+    font-family: var(--font-mono);
+    color: var(--teal);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 4px;
+  }
+  .book-card a:hover { text-decoration: underline; }
+
+  /* ── Contact ── */
+  .contact-block {
+    margin-top: 56px;
+    padding: 24px 28px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface2);
+  }
+  .contact-block p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .contact-block p:last-child { margin-bottom: 0; }
+  .contact-block a { color: var(--blue); text-decoration: none; }
+  .contact-block a:hover { text-decoration: underline; }
+
+  footer { border-top: 1px solid var(--border); padding: 16px 48px; font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); display: flex; gap: 24px; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <nav class="site-nav">
+      <a href="index.html">Course Map</a>
+      <a href="why.html">Why This Works</a>
+      <a href="about.html" class="active">About</a>
+    </nav>
+  </header>
+
+  <div class="page-wrap">
+
+    <div class="page-eyebrow">The project</div>
+    <h1 class="page-title">About <span>this site</span></h1>
+
+    <div class="prose">
+      <p>This is a free, open AP Physics 1 learning environment. Twenty-four interactive simulations covering Units 1 through 4 of the College Board curriculum, with Units 5 through 8 in development. A local four-state progress tracker. No login, no account, no ads, no server. Built in plain HTML, CSS, and JavaScript because the learning is the point, not the platform.</p>
+
+      <p>It started as a focused tool for teaching AP Physics 1. The aim was to build something available in real-time — for the teacher and students to engage with during the lecture, go home and keep exploring, and learn more, and deeper, than ever before. I see this model as the way such a complex topic should be taught — from first principles, not from coverage. So I built simulations that forced the concepts to reveal themselves, rather than explaining them. Explaining, defining, and naming would follow. This is the equivalent of how children experience their first physics lessons with Hot Wheels and loop-the-loop tracks, or compete by clamping a lifted track to launch a car the greatest distance, or land on a continuation track. These were the games we played as kids — learning by doing, by playing, making up rules, with no parents or teachers to prevent discovery. Most importantly, we had fun.</p>
+
+      <p>I soon discovered I was building something else: a demonstration of a theory of learning I had been developing for years. The simulations are not just physics tools. They are environments designed around a specific set of ideas about how human beings acquire durable understanding — ideas I had been testing on myself, on students, and on soccer players as the <strong>Architect of Discovery</strong>. I now realize the best way to promote these ideas at scale is to build the ecosystem for many such Architects, and to provide a path for more Architects to emerge naturally. This is the future of education — a bottom-up revolution that is necessary and long overdue.</p>
+    </div>
+
+    <div class="section-title">Who built it</div>
+
+    <div class="prose">
+      <p>My name is Bruce DeSimas. I am a chemist, a software engineer, an entrepreneur, and a coach. Thirty-five years in FDA-regulated medical device and scientific instrumentation software — qPCR platforms, genomic analysis systems, regulatory frameworks for software as a medical device. Six U.S. patents. A BS in Chemistry, an MS in Computer Science. Twenty seasons of youth soccer coaching. A grandfather who still pulls out the whiteboard.</p>
+
+      <p>I am not a credentialed physics teacher. I am someone who learned AP Physics 1 the hard way, on purpose, to understand what that experience feels like from the inside — and then built the tool I wished had existed when I was doing it. The Feynman principle, applied to itself: you do not genuinely understand something until you can build the environment in which someone else can discover it.</p>
+    </div>
+
+    <div class="section-title">What's coming</div>
+
+    <div class="roadmap">
+
+      <div class="roadmap-item">
+        <div class="roadmap-marker">
+          <div class="roadmap-dot live"></div>
+        </div>
+        <div class="roadmap-content">
+          <div class="roadmap-label live">Live now</div>
+          <div class="roadmap-title">Units 1–4 · Progress Tracker</div>
+          <div class="roadmap-desc">24 simulations across Kinematics, Forces, Energy, and Momentum. Local four-state progress tracking — not started, in progress, completed, mastered — stored in your browser, no server required.</div>
+        </div>
+      </div>
+
+      <div class="roadmap-item">
+        <div class="roadmap-marker">
+          <div class="roadmap-dot next"></div>
+        </div>
+        <div class="roadmap-content">
+          <div class="roadmap-label next">In development</div>
+          <div class="roadmap-title">Units 5–8</div>
+          <div class="roadmap-desc">Torque and Rotational Dynamics, Energy (deeper), Oscillations, and Fluids. Same design principles, same build quality. No coverage for coverage's sake.</div>
+        </div>
+      </div>
+
+      <div class="roadmap-item">
+        <div class="roadmap-marker">
+          <div class="roadmap-dot next"></div>
+        </div>
+        <div class="roadmap-content">
+          <div class="roadmap-label next">Next</div>
+          <div class="roadmap-title">Earned Progress</div>
+          <div class="roadmap-desc">Status transitions based on what you actually did in the simulation — not what you clicked. The difference between self-reported and earned is the difference between a grade and understanding.</div>
+        </div>
+      </div>
+
+      <div class="roadmap-item">
+        <div class="roadmap-marker">
+          <div class="roadmap-dot future"></div>
+        </div>
+        <div class="roadmap-content">
+          <div class="roadmap-label">Future</div>
+          <div class="roadmap-title">The Mastery Layer</div>
+          <div class="roadmap-desc">An AI mentor — patient, available, never bored — that asks the next question, presents the concept from a different angle, and holds the line until you own the material rather than just recognizing it. This is the tier that earns the gold star.</div>
+        </div>
+      </div>
+
+      <div class="roadmap-item">
+        <div class="roadmap-marker">
+          <div class="roadmap-dot future"></div>
+        </div>
+        <div class="roadmap-content">
+          <div class="roadmap-label">Future</div>
+          <div class="roadmap-title">The Architect of Discovery Tools</div>
+          <div class="roadmap-desc">A dashboard for the human running the classroom — the teacher who designs the environment, shapes the conditions, and gets out of the way. The coach whose system runs itself. Progress by student, by unit, by concept. Tools for the guide, not the lecturer.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-title">The book</div>
+
+    <div class="book-card">
+      <div class="book-card-label">Published 2026</div>
+      <div class="book-card-title">Learning With AI</div>
+      <div class="book-card-subtitle">A Guide to Mastery, Curiosity, and the Art of Teaching Yourself</div>
+      <p>Every design decision on this site traces back to an argument made in this book. The simulations are built the way they are because of what Carroll proved in 1963 and Bloom proved in 1968. The progress tracker is self-reported rather than gated because of what the research says about intrinsic versus extrinsic motivation. The mastery layer is being held back because of what the wrong version of AI tutoring does to a learner's ability to struggle productively.</p>
+      <p>The book makes the case from first principles — through case studies, cognitive science, and forty years of learning in many different domains — that human beings have always known how to learn, that institutions broke the process, and that AI, used correctly, can restore it. physicsexplorer.com is what that looks like when it runs.</p>
+      <a href="why.html">Why this site works the way it does →</a>
+    </div>
+
+    <div class="contact-block">
+      <p>If you are a teacher and want to talk about how this fits a classroom, or a learner and something clicked — <a href="mailto:bruce@physicsexplorer.com">bruce@physicsexplorer.com</a>.</p>
+      <p>If you are thinking about what this could become at scale, same address.</p>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>AP Physics 1 Explorer</span>
+    <span>HTML · CSS · JavaScript · no login required</span>
+  </footer>
+
+</body>
+</html>
