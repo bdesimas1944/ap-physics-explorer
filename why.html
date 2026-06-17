@@ -133,44 +133,62 @@
   }
   .status-label strong { color: var(--text); font-weight: 500; }
 
-  /* ── Book callout ── */
-  .book-callout {
-    margin-top: 56px;
-    padding: 28px 32px;
+  /* ── Book card ── */
+  .book-card {
+    margin-top: 20px;
+    padding: 24px 28px;
     background: var(--surface);
     border: 1px solid var(--border2);
     border-radius: 12px;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    gap: 24px;
+    align-items: flex-start;
   }
-  .book-callout-label {
+  .book-cover {
+    width: 100px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .book-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .book-card-label {
     font-size: 10px;
     font-family: var(--font-mono);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-dim);
   }
-  .book-callout-title {
+  .book-card-title {
     font-family: var(--font-serif);
-    font-size: 22px;
+    font-size: 20px;
     color: var(--text);
+    line-height: 1.2;
   }
-  .book-callout p {
-    font-size: 14px;
-    line-height: 1.65;
-    color: var(--text-muted);
-    margin: 0;
-  }
-  .book-callout a {
+  .book-card-subtitle {
     font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.4;
+  }
+  .book-card p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 4px 0 0;
+  }
+  .book-card a {
+    font-size: 12px;
     font-family: var(--font-mono);
     color: var(--teal);
     text-decoration: none;
-    margin-top: 4px;
+    margin-top: 6px;
     display: inline-block;
   }
-  .book-callout a:hover { text-decoration: underline; }
+  .book-card a:hover { text-decoration: underline; }
 
   footer { border-top: 1px solid var(--border); padding: 16px 48px; font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); display: flex; gap: 24px; }
   </style>
@@ -183,6 +201,7 @@
       <a href="index.html">Course Map</a>
       <a href="why.html" class="active">Why This Works</a>
       <a href="about.html">About</a>
+      <a href="mailto:bruce@physicsexplorer.com">Contact</a>
     </nav>
   </header>
 
@@ -205,6 +224,21 @@
       <p>Benjamin Bloom put numbers on this in 1968. Students receiving one-on-one tutoring outperformed 98% of classroom-taught students on the same material. Not because the tutor was smarter. Because the tutor could wait. Could back up. Could present the same concept three different ways until one of them landed. Could notice the moment understanding arrived and move forward exactly then, not at the end of the fifty-minute period.</p>
 
       <p><strong>The constraint that made mastery-based learning a privilege of the few has been lifted.</strong> Not entirely — the human in the loop is still the determining variable. But the external scarcity that made individual pacing impossible — scarce knowledge, scarce teachers, fixed schedules — is no longer the limiting factor. These simulations do not replace a great teacher. They give every student the one thing a great teacher never had enough of: time to stay with something until it clicks.</p>
+    </div>
+
+    <div class="prose" style="margin-top: 28px;">
+      <p>The research behind this argument is not new. It has been waiting for the right tool.</p>
+    </div>
+
+    <div class="book-card">
+      <img src="images/book-cover.png" alt="Learning With AI book cover" class="book-cover">
+      <div class="book-card-content">
+        <div class="book-card-label">The book behind this site</div>
+        <div class="book-card-title">Learning With AI</div>
+        <div class="book-card-subtitle">A Guide to Mastery, Curiosity, and the Art of Teaching Yourself</div>
+        <p>The research behind these claims — Carroll, Bloom, and eight additional teaching principles drawn from cognitive science — is documented in Appendix F. The book makes the full case: learning is not broken because we lack information or effort. It is broken because we severed the process from its natural form. This site is what restoring it looks like in practice.</p>
+        <a href="about.html">About this project →</a>
+      </div>
     </div>
 
     <div class="pull-quote">
@@ -248,13 +282,6 @@
         <span class="status-icon mastered">★</span>
         <span class="status-label"><strong>Mastered</strong> — earned, not clicked. Coming in the next version.</span>
       </div>
-    </div>
-
-    <div class="book-callout">
-      <div class="book-callout-label">The full argument</div>
-      <div class="book-callout-title">Learning With AI</div>
-      <p>The philosophy behind this site — the research, the case studies, the techniques — is developed at length in <em>Learning With AI: A Guide to Mastery, Curiosity, and the Art of Teaching Yourself</em>. The book makes the case that learning is not broken because we lack information or effort. It is broken because we severed the process from its natural form. This site is what restoring it looks like in practice.</p>
-      <a href="about.html">About this project →</a>
     </div>
 
   </div>
