@@ -61,6 +61,57 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; h
 canvas { display:block; }
 .step-desc { padding:10px 20px; background:var(--surface); border-top:1px solid var(--border); font-size:12px; font-family:var(--font-mono); color:var(--text-muted); flex-shrink:0; line-height:1.5; min-height:44px; }
 .step-desc .hl { color:var(--text); }
+
+/* ── Learning Progress panel ── */
+.learning-progress {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.learning-progress h2 {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.progress-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.progress-btn {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.progress-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.progress-btn--start:not(:disabled):hover   { border-color: var(--blue); color: var(--blue); }
+.progress-btn--reset:not(:disabled):hover   { border-color: var(--red);  color: var(--red);  }
+.progress-btn--complete:not(:disabled):hover { border-color: var(--teal); color: var(--teal); }
+.progress-btn--resume:not(:disabled):hover   { border-color: var(--blue); color: var(--blue); }
+.progress-btn--mastery { font-style: italic; }
+#progress-status-text {
+  margin-top: 8px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+}
 </style>
 </head>
 <body>
@@ -113,6 +164,17 @@ canvas { display:block; }
         drag a to change motion<br>
         a=0 → straight line on x-t
       </div>
+    
+      <!-- Learning Progress -->
+      <section class="learning-progress" data-subunit-id="1.2">
+        <h2>Learning Progress</h2>
+        <div class="progress-buttons">
+          <button class="progress-btn" id="btn-start-reset"></button>
+          <button class="progress-btn" id="btn-complete-resume"></button>
+          <button class="progress-btn progress-btn--mastery" id="btn-mastery" disabled>Mastery Training — Coming Soon</button>
+        </div>
+        <p id="progress-status-text" aria-live="polite"></p>
+      </section>
     </div>
 
     <div class="canvas-area">
@@ -504,6 +566,14 @@ function drawAll() {
 
 window.addEventListener('resize',()=>{setupCanvas();update();});
 requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();update();}));
+</script>
+
+<script src="../js/progress.js"></script>
+<script>
+const SUBUNIT_ID = "1.2";
+document.addEventListener('DOMContentLoaded', function() {
+  initProgressControls(SUBUNIT_ID);
+});
 </script>
 </body>
 </html>
