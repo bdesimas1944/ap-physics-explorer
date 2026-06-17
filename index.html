@@ -195,14 +195,15 @@ html, body { min-height: 100%; background: var(--bg); color: var(--text); font-f
 
 /* ── Progress icons on course map ── */
 .progress-icon {
-  font-size: 10px;
-  width: 14px;
+  font-size: 12px;
+  width: 16px;
   flex-shrink: 0;
   text-align: center;
   transition: color 0.2s;
+  margin-left: 2px;
 }
-.progress-icon--not-started  { color: var(--text-dim); }
-.progress-icon--in-progress  { color: var(--blue); }
+.progress-icon--not-started  { color: var(--blue); opacity: 0.35; }
+.progress-icon--in-progress  { color: var(--blue); font-weight: bold; }
 .progress-icon--completed    { color: var(--teal); }
 .progress-icon--mastered     { color: var(--amber); }
 
@@ -259,22 +260,22 @@ footer { border-top: 1px solid var(--border); padding: 16px 48px; font-size: 12p
         <div class="unit-eq">x = x₀ + v₀t + ½at²</div>
         <div class="unit-sims">
           <a class="sim-node live" href="simulations/scalars-vs-vectors.html" style="--unit-color: var(--u1)" data-subunit-id="1.1">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.1 Scalars &amp; Vectors in One Dimension
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.1 Scalars &amp; Vectors in One Dimension
           </a>
           <a class="sim-node live" href="simulations/displacement-velocity-acceleration.html" style="--unit-color: var(--u1)" data-subunit-id="1.2">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.2 Displacement, Velocity &amp; Acceleration
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.2 Displacement, Velocity &amp; Acceleration
           </a>
           <a class="sim-node live" href="simulations/representing-motion.html" style="--unit-color: var(--u1)" data-subunit-id="1.3">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.3 Representing Motion
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.3 Representing Motion
           </a>
           <a class="sim-node live" href="simulations/reference-frames.html" style="--unit-color: var(--u1)" data-subunit-id="1.4">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.4 Reference Frames &amp; Relative Motion
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.4 Reference Frames &amp; Relative Motion
           </a>
           <a class="sim-node live" href="simulations/vector-decomposition.html" style="--unit-color: var(--u1)" data-subunit-id="1.5">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.5 Vectors &amp; Motion in Two Dimensions
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.5 Vectors &amp; Motion in Two Dimensions
           </a>
           <a class="sim-node live" href="simulations/projectile-motion.html" style="--unit-color: var(--u1)" data-subunit-id="1.5b">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.5b Projectile Motion
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>1.5b Projectile Motion
           </a>
         </div>
         <div class="unit-footer">
@@ -290,39 +291,39 @@ footer { border-top: 1px solid var(--border); padding: 16px 48px; font-size: 12p
         <div class="unit-eq">F = ma</div>
         <div class="unit-sims">
           <a class="sim-node live" href="simulations/center-of-mass.html" style="--unit-color: var(--u2)" data-subunit-id="2.1">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.1 Systems &amp; Center of Mass
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.1 Systems &amp; Center of Mass
           </a>
           <a class="sim-node live" href="simulations/ramp-fbd.html" style="--unit-color: var(--u2)" data-subunit-id="2.2">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.2 Forces &amp; Free-Body Diagrams
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.2 Forces &amp; Free-Body Diagrams
           </a>
           <a class="sim-node live" href="simulations/newtons-third-law.html" style="--unit-color: var(--u2)" data-subunit-id="2.3">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.3 Newton's Third Law
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.3 Newton's Third Law
           </a>
           <a class="sim-node live" href="simulations/newtons-first-law.html" style="--unit-color: var(--u2)" data-subunit-id="2.4">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.4 Newton's First Law
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.4 Newton's First Law
           </a>
           <a class="sim-node live" href="simulations/newtons-second-law.html" style="--unit-color: var(--u2)" data-subunit-id="2.5">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.5 Newton's Second Law
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.5 Newton's Second Law
           </a>
           <a class="sim-node live" href="simulations/gravitational-force.html" style="--unit-color: var(--u2)" data-subunit-id="2.6">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.6 Gravitational Force
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.6 Gravitational Force
           </a>
           <a class="sim-node live" href="simulations/ramp-friction.html" style="--unit-color: var(--u2)" data-subunit-id="2.7">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.7 Kinetic &amp; Static Friction
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.7 Kinetic &amp; Static Friction
           </a>
           <a class="sim-node live" href="simulations/springs.html" style="--unit-color: var(--u2)" data-subunit-id="2.8">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.8 Spring Forces
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.8 Spring Forces
           </a>
           <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; margin: 6px 0 4px;">2.9 Circular Motion</div>
           <a class="sim-node live" href="simulations/horizontal-circular-motion.html" style="--unit-color: var(--u2)" data-subunit-id="2.9">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.9 Horizontal Circular Motion
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.9 Horizontal Circular Motion
           </a>
           <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; margin: 8px 0 4px;">Advanced → also in Unit 3</div>
           <a class="sim-node live" href="simulations/loop-the-loop.html" style="--unit-color: var(--u2)" data-subunit-id="2.9b">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.9 Loop-the-Loop
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.9 Loop-the-Loop
           </a>
           <a class="sim-node live" href="simulations/vertical-circular-motion.html" style="--unit-color: var(--u2)" data-subunit-id="2.9c">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.9 Vertical Circular Motion
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>2.9 Vertical Circular Motion
           </a>
         </div>
         <div class="unit-footer">
@@ -339,26 +340,26 @@ footer { border-top: 1px solid var(--border); padding: 16px 48px; font-size: 12p
         <div class="unit-sims">
           <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:4px;">3.1–3.5 Core</div>
           <a class="sim-node live" href="simulations/ke.html" style="--unit-color: var(--u3)" data-subunit-id="3.1">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.1 Translational Kinetic Energy
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.1 Translational Kinetic Energy
           </a>
           <a class="sim-node live" href="simulations/energy-conservation.html" style="--unit-color: var(--u3)" data-subunit-id="3.2">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.2 Work → Energy Conservation
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.2 Work → Energy Conservation
           </a>
           <a class="sim-node live" href="simulations/energy-bowl.html" style="--unit-color: var(--u3)" data-subunit-id="3.3">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.3 Potential Energy → Energy Bowl
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.3 Potential Energy → Energy Bowl
           </a>
           <a class="sim-node live" href="simulations/energy-conservation.html" style="--unit-color: var(--u3)" data-subunit-id="3.4">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.4 Conservation of Energy → Energy Conservation
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.4 Conservation of Energy → Energy Conservation
           </a>
           <a class="sim-node live" href="simulations/power.html" style="--unit-color: var(--u3)" data-subunit-id="3.5">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.5 Power
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>3.5 Power
           </a>
           <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; margin: 8px 0 4px;">Centripetal Force (2.9 + 3.4)</div>
           <a class="sim-node live" href="simulations/loop-the-loop.html" style="--unit-color: var(--u3)" data-subunit-id="3.4b">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>Loop-the-Loop
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>Loop-the-Loop
           </a>
           <a class="sim-node live" href="simulations/vertical-circular-motion.html" style="--unit-color: var(--u3)" data-subunit-id="3.4c">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>Vertical Circular Motion
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>Vertical Circular Motion
           </a>
         </div>
         <div class="unit-footer">
@@ -374,16 +375,16 @@ footer { border-top: 1px solid var(--border); padding: 16px 48px; font-size: 12p
         <div class="unit-eq">p = mv</div>
         <div class="unit-sims">
           <a class="sim-node live" href="simulations/linear-momentum.html" style="--unit-color: var(--u4)" data-subunit-id="4.1">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>4.1 Linear Momentum
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>4.1 Linear Momentum
           </a>
           <a class="sim-node live" href="simulations/impulse-momentum.html" style="--unit-color: var(--u4)" data-subunit-id="4.2">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>4.2 Change in Momentum &amp; Impulse
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>4.2 Change in Momentum &amp; Impulse
           </a>
           <a class="sim-node live" href="simulations/conservation-of-momentum.html" style="--unit-color: var(--u4)" data-subunit-id="4.3">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>4.3 Conservation of Linear Momentum
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>4.3 Conservation of Linear Momentum
           </a>
           <a class="sim-node live" href="simulations/collisions.html" style="--unit-color: var(--u4)" data-subunit-id="4.4">
-            <span class="sim-node-dot"></span><span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>4.4 Elastic &amp; Inelastic Collisions
+            <span class="progress-icon progress-icon--not-started" aria-hidden="true">○</span>4.4 Elastic &amp; Inelastic Collisions
           </a>
           <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; margin: 8px 0 4px;">Downloads</div>
           <a class="sim-node live" href="downloads/momentum-ke-collisions.xlsx" download style="--unit-color: var(--u4)">
