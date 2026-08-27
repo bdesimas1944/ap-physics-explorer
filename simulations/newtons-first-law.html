@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newton's First Law — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1014;--surface:#17181d;--surface2:#1e2028;
+  --border:#2a2b33;--border2:#3a3b45;
+  --text:#e8e9ef;--text-muted:#7a7d8e;--text-dim:#4a4d5e;
+  --blue:#4a9eff;--teal:#2dd4a0;--amber:#f5a623;
+  --red:#ff5f6d;--purple:#b98aff;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --font-serif:'DM Serif Display',serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);}
+.site-header{display:flex;align-items:center;gap:16px;padding:0 24px;height:52px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.site-logo{font-family:var(--font-serif);font-size:18px;color:var(--text);text-decoration:none;}
+.site-logo span{color:var(--blue);}
+.site-tagline{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);}
+.header-back{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--text-muted);text-decoration:none;}
+.header-back:hover{color:var(--text);}
+.sim-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.sim-layout{display:flex;flex:1;overflow:hidden;}
+.ctrl-panel{width:280px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;overflow-y:auto;}
+.ctrl-divider{height:1px;background:var(--border);margin:10px 0;}
+.eq-block{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;margin-bottom:12px;}
+.eq-main{font-family:var(--font-serif);font-size:18px;font-style:italic;color:var(--text);margin-bottom:4px;}
+.eq-sub{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);line-height:1.9;}
+.section-head{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;margin-top:4px;}
+.slider-group{margin-bottom:10px;}
+.slider-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+.slider-label{font-size:12px;color:var(--text-muted);font-style:italic;font-family:var(--font-serif);}
+.slider-value{font-size:12px;font-family:var(--font-mono);color:var(--text);font-weight:500;}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:var(--border2);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--text);border:2px solid var(--border2);cursor:grab;}
+.result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.result-label{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);}
+.result-val{font-size:12px;font-family:var(--font-mono);font-weight:500;}
+.play-btn{width:100%;padding:10px;border-radius:6px;font-family:var(--font-mono);font-size:13px;cursor:pointer;border:1px solid var(--teal);background:#0a3a2a;color:var(--teal);margin-bottom:6px;transition:all 0.15s;}
+.reset-btn{width:100%;padding:8px;border-radius:6px;font-family:var(--font-mono);font-size:12px;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text-muted);transition:all 0.15s;}
+.reset-btn:hover{border-color:var(--amber);color:var(--amber);}
+.phase-indicator{padding:8px 12px;border-radius:6px;font-family:var(--font-mono);font-size:12px;text-align:center;margin-bottom:8px;border:1px solid var(--border2);}
+.ctrl-note{margin-top:auto;padding-top:10px;font-size:11px;color:#e8e9ef;font-family:var(--font-mono);border-top:1px solid var(--border);line-height:1.8;}
+.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.canvas-wrap{flex:1;overflow:hidden;}
+canvas{display:block;}
+.step-desc{padding:9px 18px;background:var(--surface);border-top:1px solid var(--border);font-size:11px;font-family:var(--font-mono);color:var(--text-muted);flex-shrink:0;min-height:38px;line-height:1.5;}
+.step-desc .hl{color:var(--text);}
+
+/* ── Learning Progress panel ── */
+.learning-progress{margin-top:14px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;flex-shrink:0;}
+.learning-progress h2{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;}
+.progress-buttons{display:flex;flex-direction:column;gap:6px;}
+.progress-btn{width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text-muted);font-family:var(--font-mono);font-size:11px;cursor:pointer;text-align:left;transition:border-color 0.15s,color 0.15s,background 0.15s;}
+.progress-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.progress-btn--start:not(:disabled):hover{border-color:var(--blue);color:var(--blue);}
+.progress-btn--reset:not(:disabled):hover{border-color:var(--red);color:var(--red);}
+.progress-btn--complete:not(:disabled):hover{border-color:var(--teal);color:var(--teal);}
+.progress-btn--resume:not(:disabled):hover{border-color:var(--blue);color:var(--blue);}
+.progress-btn--mastery{font-style:italic;}
+#progress-status-text{margin-top:8px;font-size:10px;font-family:var(--font-mono);color:var(--text-dim);}
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">2.4 · Newton's first law</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-main">ΣF = 0  ⟹  a = 0</div>
+        <div class="eq-sub">
+          <span style="color:var(--teal)">object at rest stays at rest</span><br>
+          <span style="color:var(--blue)">object in motion stays in motion</span><br>
+          <span style="color:var(--amber)">same speed, same direction</span><br>
+          <span style="color:var(--text-dim)">unless acted on by a net force</span>
+        </div>
+      </div>
+
+      <div id="scene-controls">
+        <div class="section-head" id="ctrl-title" style="color:#e8e9ef;font-size:13px;">Scenario</div>
+        <div class="slider-group" id="v-group">
+          <div class="slider-header"><span class="slider-label" id="v-label">v · speed</span><span class="slider-value" id="lbl-v">4 m/s</span></div>
+          <input type="range" id="sl-v" min="0.5" max="10" step="0.5" value="4" oninput="resetAnim()">
+        </div>
+      </div>
+
+      <div class="phase-indicator" id="phase-box" style="background:#13141a;color:var(--text-muted);">
+        Press Start to run
+      </div>
+
+      <button class="play-btn" id="play-btn" onclick="togglePlay()">▶ Start</button>
+      <button class="reset-btn" id="reset-btn-el" onclick="resetAnim()">↺ Reset</button>
+
+      <div class="ctrl-divider"></div>
+      <div id="after-section">
+        <div class="section-head">Reading</div>
+        <div class="result-row"><span class="result-label">net force</span><span class="result-val" style="color:var(--teal)" id="out-f">ΣF = 0</span></div>
+        <div class="result-row"><span class="result-label">velocity</span><span class="result-val" style="color:var(--blue)" id="out-v">— m/s</span></div>
+        <div class="result-row"><span class="result-label">acceleration</span><span class="result-val" style="color:var(--amber)" id="out-a">0 m/s²</span></div>
+      </div>
+
+      <div class="ctrl-note" id="ctrl-note-text">
+        no net force acting<br>
+        velocity stays constant<br>
+        this is inertia
+      </div>
+
+      <!-- Learning Progress -->
+      <section class="learning-progress" data-subunit-id="2.4">
+        <h2>Learning Progress</h2>
+        <div class="progress-buttons">
+          <button class="progress-btn" id="btn-start-reset"></button>
+          <button class="progress-btn" id="btn-complete-resume"></button>
+          <button class="progress-btn progress-btn--mastery" id="btn-mastery" disabled>Mastery Training — Coming Soon</button>
+        </div>
+        <p id="progress-status-text" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <div class="canvas-area">
+      <div class="tab-bar" style="display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;">
+        <button class="tab-btn active" id="tab1" onclick="setTab(1)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--blue);background:none;border:none;border-bottom:2px solid var(--blue);cursor:pointer;text-align:center;line-height:1.3;">① Space Object<br><span style="font-size:9px;opacity:0.6">zero force, ideal</span></button>
+        <button class="tab-btn" id="tab2" onclick="setTab(2)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;text-align:center;line-height:1.3;">② Coasting Car<br><span style="font-size:9px;opacity:0.6">engine off, no friction</span></button>
+        <button class="tab-btn" id="tab3" onclick="setTab(3)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;text-align:center;line-height:1.3;">③ Sudden Stop<br><span style="font-size:9px;opacity:0.6">inertia, misconception</span></button>
+        <button class="tab-btn" id="tab4" onclick="setTab(4)" style="flex:1;padding:9px 6px;font-size:11px;font-family:var(--font-mono);color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;text-align:center;line-height:1.3;">④ Tablecloth Pull<br><span style="font-size:9px;opacity:0.6">inertia at rest</span></button>
+      </div>
+      <div class="canvas-wrap"><canvas id="c"></canvas></div>
+      <div class="step-desc" id="step-desc">
+        <span class="hl">Newton's First Law:</span> an object at rest stays at rest, and an object in motion stays in motion at constant velocity, unless acted on by a net external force. This is <span class="hl">inertia</span> — resistance to a change in motion.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+let animId=null, running=false;
+let phase='ready'; // ready → running → done
+let currentTab1=1;
+let objX=0, objY=0, t=0;
+let passengerX=0, busX=0, busStopped=false;
+let clothX=0, dishSettled=true;
+
+function W(){return canvas.width/(window.devicePixelRatio||1);}
+function H(){return canvas.height/(window.devicePixelRatio||1);}
+function setupCanvas(){
+  const wrap=canvas.parentElement, dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr; canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px'; canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function getV(){return parseFloat(document.getElementById('sl-v').value);}
+
+function lbl(text,x,y,color,align='center',size=11,italic=false){
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align; ctx.textBaseline='middle'; ctx.fillText(text,x,y);
+}
+function arrow(x1,y1,x2,y2,color,lw=2.5,hs=9){
+  const dx=x2-x1,dy=y2-y1;
+  if(Math.hypot(dx,dy)<4)return;
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);
+  ctx.save();ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-hs,hs*0.4);ctx.lineTo(-hs,-hs*0.4);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+function insightBox(bg,border,lines){
+  const w=W(), h=H();
+  const ib_x=w*0.04, ib_y=h*0.76, ib_w=w*0.92, ib_h=20+lines.length*17;
+  ctx.fillStyle=bg; ctx.strokeStyle=border; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect(ib_x,ib_y,ib_w,ib_h,6); ctx.fill(); ctx.stroke();
+  lines.forEach((ln,i)=>{
+    lbl(ln.text, w/2, ib_y+16+i*17, ln.color, 'center', ln.size||11, ln.bold||false);
+  });
+}
+
+function setPhaseUI(p, msg, color='#4a4d5e'){
+  phase=p;
+  const box=document.getElementById('phase-box');
+  box.textContent=msg; box.style.color=color; box.style.borderColor=color;
+}
+
+const TAB_CONFIG={
+  1:{label:'v · drift speed', min:0.5,max:10,step:0.5,val:4,note:'no forces anywhere — deep space<br>velocity never changes<br>this is inertia in its purest form'},
+  2:{label:'v · coasting speed', min:0.5,max:10,step:0.5,val:5,note:'engine off, frictionless ice<br>no net force acting<br>car holds constant velocity'},
+  3:{label:'v · bus speed before stop', min:2,max:12,step:0.5,val:8,note:'bus decelerates — passenger does not<br>nothing pushes the passenger forward<br>inertia just keeps them moving'},
+  4:{label:'pull speed', min:2,max:14,step:1,val:9,note:'fast pull ⟹ short contact time<br>too little impulse to move the dish<br>inertia keeps it at rest'}
+};
+
+function updateCtrlPanel(tab){
+  const cfg=TAB_CONFIG[tab];
+  document.getElementById('v-label').textContent=cfg.label;
+  const sl=document.getElementById('sl-v');
+  sl.min=cfg.min; sl.max=cfg.max; sl.step=cfg.step; sl.value=cfg.val;
+  document.getElementById('lbl-v').textContent=cfg.val+' m/s';
+  document.getElementById('ctrl-note-text').innerHTML=cfg.note;
+}
+
+function setTab(n){
+  currentTab1=n;
+  for(let i=1;i<=4;i++){
+    const btn=document.getElementById('tab'+i);
+    if(i===n){btn.style.color='var(--blue)';btn.style.borderBottomColor='var(--blue)';btn.classList.add('active');}
+    else{btn.style.color='var(--text-dim)';btn.style.borderBottomColor='transparent';btn.classList.remove('active');}
+  }
+  updateCtrlPanel(n);
+  const descs={
+    1:'<span class="hl">Space Object:</span> far from any planet, star, or drag, there are no forces at all on this tool. It drifts at constant velocity forever — no engine, no friction, nothing to slow it down or speed it up.',
+    2:'<span class="hl">Coasting Car:</span> engine off, frictionless ice. The forces that are present (gravity, normal force) are balanced — <span class="hl">ΣF = 0</span>. The car holds its velocity exactly, same as the object in space.',
+    3:'<span class="hl">Sudden Stop:</span> the bus brakes — a force acts on the bus, not on the passenger. The passenger keeps moving at the bus\'s old speed until something (a seatbelt, the dashboard) exerts a force on them too.',
+    4:'<span class="hl">Tablecloth Pull:</span> yanked fast enough, the cloth is gone before friction has time to drag the dish along with it. The dish\'s inertia keeps it almost exactly where it started.'
+  };
+  document.getElementById('step-desc').innerHTML=descs[n];
+  resetAnim();
+}
+
+function resetAnim(){
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  running=false;
+  phase='ready';
+  t=0;
+  const v=getV();
+  document.getElementById('lbl-v').textContent=v+' m/s';
+  document.getElementById('out-v').textContent=(currentTab1===3?0:v).toFixed(2)+' m/s';
+  document.getElementById('out-a').textContent='0 m/s²';
+  document.getElementById('out-f').textContent='ΣF = 0';
+  document.getElementById('out-f').style.color='var(--teal)';
+  const btn=document.getElementById('play-btn');
+  btn.textContent='▶ Start'; btn.style.borderColor='var(--teal)'; btn.style.color='var(--teal)';
+  setPhaseUI('ready','Press Start to run');
+  objX=W()*0.15; passengerX=W()*0.42; busX=W()*0.15; busStopped=false;
+  clothX=0; dishSettled=false;
+  ctx.clearRect(0,0,W(),H());
+  draw();
+}
+
+function togglePlay(){
+  if(running){
+    running=false;
+    cancelAnimationFrame(animId);
+    document.getElementById('play-btn').textContent='▶ Resume';
+    return;
+  }
+  if(phase==='ready'||phase==='done'){
+    if(phase==='done') resetAnim();
+    phase='running';
+    setPhaseUI('running','● Running — watch the velocity','#2dd4a0');
+  }
+  running=true;
+  document.getElementById('play-btn').textContent='⏸ Pause';
+  document.getElementById('play-btn').style.borderColor='var(--amber)';
+  document.getElementById('play-btn').style.color='var(--amber)';
+  loop();
+}
+
+function loop(){
+  if(!running)return;
+  const v=getV();
+  t+=1/60;
+
+  if(currentTab1===1||currentTab1===2){
+    objX += v*0.6;
+    document.getElementById('out-v').textContent=v.toFixed(2)+' m/s';
+    if(objX>W()*0.95){ objX=W()*0.15; }
+  } else if(currentTab1===3){
+    // bus decelerates quickly after 0.6s, passenger keeps going at old speed
+    if(t<0.6){
+      busX += v*0.6; passengerX += v*0.6;
+      document.getElementById('out-v').textContent=v.toFixed(2)+' m/s (both)';
+    } else {
+      busStopped=true;
+      passengerX += v*0.6; // passenger keeps moving
+      document.getElementById('out-v').textContent=v.toFixed(2)+' m/s (passenger only)';
+      if(passengerX>W()*0.85){
+        phase='done';
+        setPhaseUI('done','◼ Passenger kept moving — bus stopped, they didn\'t','#ff5f6d');
+        running=false; cancelAnimationFrame(animId);
+        document.getElementById('play-btn').textContent='▶ Start Over';
+        draw(); return;
+      }
+    }
+  } else if(currentTab1===4){
+    clothX += v*1.4;
+    if(clothX>W()*0.7 && !dishSettled){
+      dishSettled=true;
+      phase='done';
+      setPhaseUI('done','◼ Cloth gone — dish barely moved','#2dd4a0');
+      running=false; cancelAnimationFrame(animId);
+      document.getElementById('play-btn').textContent='▶ Start Over';
+      draw(); return;
+    }
+  }
+
+  draw();
+  animId=requestAnimationFrame(loop);
+}
+
+function draw(){
+  const w=W(), h=H();
+  ctx.clearRect(0,0,w,h);
+  if(currentTab1===1) drawSpace(w,h);
+  else if(currentTab1===2) drawCar(w,h);
+  else if(currentTab1===3) drawBus(w,h);
+  else drawTablecloth(w,h);
+}
+
+function drawSpace(w,h){
+  // starfield
+  ctx.fillStyle='#0a0b10'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='#3a3b4a';
+  for(let i=0;i<60;i++){
+    const sx=(i*137.5)%w, sy=(i*97.3)%(h*0.65);
+    ctx.beginPath(); ctx.arc(sx,sy,1.2,0,Math.PI*2); ctx.fill();
+  }
+  lbl('Deep Space — no forces acting', w/2, h*0.08, '#e8e9ef','center',15,true);
+  lbl('No gravity, no drag, no contact forces. Nothing to change the tool\'s motion.', w/2, h*0.14, '#7a7d8e','center',12);
+
+  const y=h*0.42;
+  ctx.fillStyle='#1e2028'; ctx.strokeStyle='#4a9eff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(objX-22,y-10,44,20,4); ctx.fill(); ctx.stroke();
+  lbl('tool', objX, y, '#4a9eff','center',10,true);
+
+  const v=getV();
+  arrow(objX+24,y,objX+24+v*4,y,'#2dd4a0',2.5,8);
+  lbl('v', objX+24+v*4+10, y, '#2dd4a0','left',11,true);
+
+  insightBox('#0d1a0d','#2dd4a0',[
+    {text:'ΣF = 0. Velocity never changes — same speed, same direction, forever.', color:'#2dd4a0', bold:true, size:13},
+    {text:'This is the cleanest possible picture of Newton\'s First Law.', color:'#e8e9ef'},
+    {text:'On Earth we never see this directly — friction and gravity are always present.', color:'#7a7d8e'}
+  ]);
+}
+
+function drawCar(w,h){
+  lbl('Coasting Car — engine off, frictionless ice', w/2, h*0.08, '#e8e9ef','center',15,true);
+  lbl('Gravity and the normal force are present, but they cancel exactly.', w/2, h*0.14, '#7a7d8e','center',12);
+
+  const roadY=h*0.5;
+  ctx.strokeStyle='#2a2b33'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,roadY+22); ctx.lineTo(w,roadY+22); ctx.stroke();
+  ctx.strokeStyle='#7dd4fb44'; ctx.lineWidth=1;
+  for(let i=0;i<w;i+=30){ ctx.beginPath(); ctx.moveTo(i,roadY+22); ctx.lineTo(i+14,roadY+30); ctx.stroke(); }
+  lbl('ice — frictionless', w*0.5, roadY+44, '#7dd4fb','center',10);
+
+  ctx.fillStyle='#1e2028'; ctx.strokeStyle='#f5a623'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(objX-30,roadY-18,60,26,6); ctx.fill(); ctx.stroke();
+  lbl('car', objX, roadY-5, '#f5a623','center',11,true);
+  ctx.fillStyle='#3a3b4a';
+  ctx.beginPath(); ctx.arc(objX-16,roadY+10,6,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(objX+16,roadY+10,6,0,Math.PI*2); ctx.fill();
+
+  const v=getV();
+  arrow(objX+34,roadY-5,objX+34+v*3,roadY-5,'#2dd4a0',2.5,8);
+  lbl('v', objX+34+v*3+10, roadY-5, '#2dd4a0','left',11,true);
+
+  // vertical force balance
+  arrow(objX,roadY-40,objX,roadY-20,'#4a9eff',2,7);
+  lbl('N', objX-10, roadY-32, '#4a9eff','right',10,true);
+  arrow(objX,roadY-20,objX,roadY-40,'#ff5f6d',2,7);
+  lbl('mg', objX+10, roadY-32, '#ff5f6d','left',10,true);
+
+  insightBox('#0d1a0d','#2dd4a0',[
+    {text:'ΣF = 0 (vertical forces cancel, no horizontal force at all). a = 0.', color:'#2dd4a0', bold:true, size:13},
+    {text:'The car holds constant velocity exactly like the object in deep space.', color:'#e8e9ef'},
+    {text:'On real roads, friction and air resistance are the missing forces that slow it.', color:'#7a7d8e'}
+  ]);
+}
+
+function drawBus(w,h){
+  lbl('Sudden Stop — the misconception check', w/2, h*0.08, '#e8e9ef','center',15,true);
+  lbl('The bus decelerates. Nothing decelerates the passenger — until something does.', w/2, h*0.14, '#7a7d8e','center',12);
+
+  const roadY=h*0.52;
+  ctx.strokeStyle='#2a2b33'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,roadY+26); ctx.lineTo(w,roadY+26); ctx.stroke();
+
+  // bus
+  ctx.fillStyle='#1e2028'; ctx.strokeStyle='#4a9eff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(busX-50,roadY-30,110,42,6); ctx.fill(); ctx.stroke();
+  lbl('BUS', busX+5, roadY-9, '#4a9eff','center',12,true);
+  ctx.fillStyle='#3a3b4a';
+  ctx.beginPath(); ctx.arc(busX-28,roadY+14,7,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(busX+42,roadY+14,7,0,Math.PI*2); ctx.fill();
+
+  // passenger (small figure) drawn relative to bus interior but tracked independently
+  ctx.fillStyle='#1e2028'; ctx.strokeStyle='#ff5f6d'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(passengerX,roadY-20,9,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(passengerX-7,roadY-11,14,20,3); ctx.fill(); ctx.stroke();
+  lbl('you', passengerX, roadY-38, '#ff5f6d','center',10,true);
+
+  if(busStopped){
+    lbl('braking force acts here', busX+5, roadY+40, '#f5a623','center',10);
+    arrow(busX-50,roadY-9,busX-70,roadY-9,'#f5a623',2,7);
+  }
+
+  const v=getV();
+  if(!busStopped){
+    arrow(busX+65,roadY-9,busX+65+v*2,roadY-9,'#2dd4a0',2,7);
+  } else {
+    arrow(passengerX+12,roadY-20,passengerX+12+v*2,roadY-20,'#ff5f6d',2,7);
+    lbl('still moving', passengerX+12+v*2+8, roadY-20, '#ff5f6d','left',10,true);
+  }
+
+  insightBox(busStopped?'#1a0a0a':'#0d1a0d', busStopped?'#ff5f6d':'#2dd4a0',[
+    {text: busStopped ? 'No force pushed you forward. The bus stopped — you didn\'t, yet.' : 'Bus and passenger move together. ΣF ≈ 0 on both.', color: busStopped?'#ff5f6d':'#2dd4a0', bold:true, size:13},
+    {text:'A common misconception: "a force threw me forward." There was no forward force.', color:'#e8e9ef'},
+    {text:'Your inertia kept you moving at the old speed. The seatbelt is what stops you.', color:'#7a7d8e'}
+  ]);
+}
+
+function drawTablecloth(w,h){
+  lbl('Tablecloth Pull — inertia at rest', w/2, h*0.08, '#e8e9ef','center',15,true);
+  lbl('Pulled fast enough, friction has too little time to drag the dish along.', w/2, h*0.14, '#7a7d8e','center',12);
+
+  const tblY=h*0.55, tblX=w*0.2, tblW=w*0.6, tblH=20;
+  ctx.fillStyle='#2a2b3a'; ctx.strokeStyle='#5a5b7a'; ctx.lineWidth=1.5;
+  ctx.fillRect(tblX,tblY,tblW,tblH);
+  ctx.strokeStyle='#3a3b4a'; ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(tblX+16,tblY+tblH);ctx.lineTo(tblX+16,tblY+tblH+60);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(tblX+tblW-16,tblY+tblH);ctx.lineTo(tblX+tblW-16,tblY+tblH+60);ctx.stroke();
+
+  // cloth — shrinks/slides based on clothX
+  const clothW=Math.max(tblW-clothX,0);
+  if(clothW>2){
+    ctx.fillStyle='#e8e9ef22'; ctx.strokeStyle='#e8e9ef88'; ctx.lineWidth=1.5;
+    ctx.fillRect(tblX+clothX,tblY-6,clothW,8);
+    ctx.strokeRect(tblX+clothX,tblY-6,clothW,8);
+  }
+
+  // dish stays basically put — tiny drift only while cloth still under it
+  const dishDrift = Math.min(clothX*0.03, 6);
+  const dishX=tblX+tblW*0.5+dishDrift;
+  ctx.fillStyle='#1e2028'; ctx.strokeStyle='#f5a623'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.ellipse(dishX,tblY-10,24,7,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  lbl('dish', dishX, tblY-10, '#f5a623','center',10,true);
+
+  // pull arrow
+  if(!dishSettled){
+    arrow(tblX+clothX-4,tblY-2,tblX+clothX-40,tblY-2,'#2dd4a0',2.5,8);
+    lbl('pull', tblX+clothX-46, tblY-2, '#2dd4a0','right',11,true);
+  }
+
+  insightBox(dishSettled?'#0d1a0d':'#0d0d1a', dishSettled?'#2dd4a0':'#b98aff',[
+    {text: dishSettled ? 'Cloth gone. Dish displaced only slightly — inertia kept it in place.' : 'Cloth sliding out from under the dish...', color: dishSettled?'#2dd4a0':'#b98aff', bold:true, size:13},
+    {text:'Friction between cloth and dish has only a fraction of a second to act.', color:'#e8e9ef'},
+    {text:'That\'s too little impulse to give the dish much velocity. It stays close to where it started.', color:'#7a7d8e'}
+  ]);
+}
+
+window.addEventListener('resize',()=>{setupCanvas();draw();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();setTab(1);}));
+</script>
+
+<script src="../js/progress.js"></script>
+<script>
+const SUBUNIT_ID = "2.4";
+document.addEventListener('DOMContentLoaded', function() {
+  initProgressControls(SUBUNIT_ID);
+});
+</script>
+</body>
+</html>

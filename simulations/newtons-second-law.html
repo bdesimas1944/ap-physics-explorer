@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newton's Second Law — AP Physics 1 Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1014;--surface:#17181d;--surface2:#1e2028;
+  --border:#2a2b33;--border2:#3a3b45;
+  --text:#e8e9ef;--text-muted:#7a7d8e;--text-dim:#4a4d5e;
+  --blue:#4a9eff;--teal:#2dd4a0;--amber:#f5a623;
+  --red:#ff5f6d;--purple:#b98aff;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --font-serif:'DM Serif Display',serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);}
+.site-header{display:flex;align-items:center;gap:16px;padding:0 24px;height:52px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.site-logo{font-family:var(--font-serif);font-size:18px;color:var(--text);text-decoration:none;}
+.site-logo span{color:var(--blue);}
+.site-tagline{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);}
+.header-back{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--text-muted);text-decoration:none;}
+.header-back:hover{color:var(--text);}
+.sim-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.sim-layout{display:flex;flex:1;overflow:hidden;}
+.ctrl-panel{width:280px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;overflow-y:auto;}
+.ctrl-divider{height:1px;background:var(--border);margin:10px 0;}
+.eq-block{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;margin-bottom:12px;}
+.eq-main{font-family:var(--font-serif);font-size:18px;font-style:italic;color:var(--text);margin-bottom:4px;}
+.eq-sub{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);line-height:1.9;}
+.section-head{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;margin-top:4px;}
+.slider-group{margin-bottom:10px;}
+.slider-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+.slider-label{font-size:12px;color:var(--text-muted);font-style:italic;font-family:var(--font-serif);}
+.slider-value{font-size:12px;font-family:var(--font-mono);color:var(--text);font-weight:500;}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:var(--border2);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--text);border:2px solid var(--border2);cursor:grab;}
+.result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.result-label{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);}
+.result-val{font-size:12px;font-family:var(--font-mono);font-weight:500;}
+.play-btn{width:100%;padding:10px;border-radius:6px;font-family:var(--font-mono);font-size:13px;cursor:pointer;border:1px solid var(--teal);background:#0a3a2a;color:var(--teal);margin-bottom:6px;transition:all 0.15s;}
+.reset-btn{width:100%;padding:8px;border-radius:6px;font-family:var(--font-mono);font-size:12px;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text-muted);transition:all 0.15s;}
+.reset-btn:hover{border-color:var(--amber);color:var(--amber);}
+.phase-indicator{padding:8px 12px;border-radius:6px;font-family:var(--font-mono);font-size:12px;text-align:center;margin-bottom:8px;border:1px solid var(--border2);}
+.ctrl-note{margin-top:auto;padding-top:10px;font-size:11px;color:#e8e9ef;font-family:var(--font-mono);border-top:1px solid var(--border);line-height:1.8;}
+.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.canvas-wrap{flex:1;overflow:hidden;}
+canvas{display:block;}
+.step-desc{padding:9px 18px;background:var(--surface);border-top:1px solid var(--border);font-size:11px;font-family:var(--font-mono);color:var(--text-muted);flex-shrink:0;min-height:38px;line-height:1.5;}
+.step-desc .hl{color:var(--text);}
+
+/* ── Learning Progress panel ── */
+.learning-progress{margin-top:14px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;flex-shrink:0;}
+.learning-progress h2{font-size:10px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;}
+.progress-buttons{display:flex;flex-direction:column;gap:6px;}
+.progress-btn{width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text-muted);font-family:var(--font-mono);font-size:11px;cursor:pointer;text-align:left;transition:border-color 0.15s,color 0.15s,background 0.15s;}
+.progress-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.progress-btn--start:not(:disabled):hover{border-color:var(--blue);color:var(--blue);}
+.progress-btn--reset:not(:disabled):hover{border-color:var(--red);color:var(--red);}
+.progress-btn--complete:not(:disabled):hover{border-color:var(--teal);color:var(--teal);}
+.progress-btn--resume:not(:disabled):hover{border-color:var(--blue);color:var(--blue);}
+.progress-btn--mastery{font-style:italic;}
+#progress-status-text{margin-top:8px;font-size:10px;font-family:var(--font-mono);color:var(--text-dim);}
+</style>
+</head>
+<body>
+<div class="sim-shell">
+  <header class="site-header">
+    <a href="../index.html" class="site-logo">AP Physics <span>1</span> Explorer</a>
+    <span class="site-tagline">2.5 · Newton's second law</span>
+    <a href="../index.html" class="header-back">← all simulations</a>
+  </header>
+  <div class="sim-layout">
+    <div class="ctrl-panel">
+      <div class="eq-block">
+        <div class="eq-main">a = F<sub>net</sub> / m</div>
+        <div class="eq-sub">
+          <span style="color:var(--amber)">bigger force → bigger acceleration</span><br>
+          <span style="color:var(--blue)">bigger mass → smaller acceleration</span><br>
+          <span style="color:var(--teal)">a is directly proportional to F</span><br>
+          <span style="color:var(--text-dim)">a is inversely proportional to m</span>
+        </div>
+      </div>
+
+      <div class="section-head" style="color:#e8e9ef;font-size:13px;">Applied force</div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">F · net force</span><span class="slider-value" id="lbl-f">20 N</span></div>
+        <input type="range" id="sl-f" min="1" max="100" step="1" value="20" oninput="onSliderChange()">
+      </div>
+
+      <div class="section-head" style="color:#e8e9ef;font-size:13px;">Object</div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">m · mass</span><span class="slider-value" id="lbl-m">5 kg</span></div>
+        <input type="range" id="sl-m" min="1" max="50" step="1" value="5" oninput="onSliderChange()">
+      </div>
+
+      <div class="phase-indicator" id="phase-box" style="background:#13141a;color:var(--text-muted);">
+        Press Start to run
+      </div>
+
+      <button class="play-btn" id="play-btn" onclick="togglePlay()">▶ Start</button>
+      <button class="reset-btn" id="reset-btn-el" onclick="resetAnim()">↺ Reset</button>
+
+      <div class="ctrl-divider"></div>
+      <div id="after-section">
+        <div class="section-head">Live readout</div>
+        <div class="result-row"><span class="result-label">acceleration a</span><span class="result-val" style="color:var(--amber)" id="out-a">4.00 m/s²</span></div>
+        <div class="result-row"><span class="result-label">velocity v</span><span class="result-val" style="color:var(--blue)" id="out-v">0.00 m/s</span></div>
+        <div class="result-row"><span class="result-label">position x</span><span class="result-val" style="color:var(--teal)" id="out-x">0.00 m</span></div>
+        <div class="result-row"><span class="result-label">elapsed t</span><span class="result-val" style="color:var(--text-muted)" id="out-t">0.00 s</span></div>
+      </div>
+
+      <div class="ctrl-note">
+        F is applied continuously<br>
+        a stays constant while F, m are fixed<br>
+        v grows linearly · x grows quadratically
+      </div>
+
+      <!-- Learning Progress -->
+      <section class="learning-progress" data-subunit-id="2.5">
+        <h2>Learning Progress</h2>
+        <div class="progress-buttons">
+          <button class="progress-btn" id="btn-start-reset"></button>
+          <button class="progress-btn" id="btn-complete-resume"></button>
+          <button class="progress-btn progress-btn--mastery" id="btn-mastery" disabled>Mastery Training — Coming Soon</button>
+        </div>
+        <p id="progress-status-text" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <div class="canvas-area">
+      <div class="canvas-wrap"><canvas id="c"></canvas></div>
+      <div class="step-desc" id="step-desc">
+        <span class="hl">Newton's Second Law:</span> the acceleration of an object is directly proportional to the net force acting on it, and inversely proportional to its mass — <span class="hl">a = F/m</span>. Drag the sliders to change force and mass, then press Start and watch how each one changes the acceleration.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+let animId=null, running=false;
+let phase='ready'; // ready → running → done
+let simT=0, simV=0, simX=0;
+const PIX_PER_M=18;
+
+function W(){return canvas.width/(window.devicePixelRatio||1);}
+function H(){return canvas.height/(window.devicePixelRatio||1);}
+function setupCanvas(){
+  const wrap=canvas.parentElement, dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr; canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px'; canvas.style.height=wrap.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function getF(){return parseFloat(document.getElementById('sl-f').value);}
+function getM(){return parseFloat(document.getElementById('sl-m').value);}
+function getA(){return getF()/getM();}
+
+function lbl(text,x,y,color,align='center',size=11,italic=false){
+  ctx.fillStyle=color;
+  ctx.font=italic?`italic ${size}px "DM Serif Display",serif`:`${size}px "DM Mono",monospace`;
+  ctx.textAlign=align; ctx.textBaseline='middle'; ctx.fillText(text,x,y);
+}
+function arrow(x1,y1,x2,y2,color,lw=2.5,hs=9){
+  const dx=x2-x1,dy=y2-y1;
+  if(Math.hypot(dx,dy)<4)return;
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);
+  ctx.save();ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-hs,hs*0.4);ctx.lineTo(-hs,-hs*0.4);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+function insightBox(bg,border,lines){
+  const w=W(), h=H();
+  const ib_x=w*0.04, ib_y=h*0.80, ib_w=w*0.92, ib_h=20+lines.length*17;
+  ctx.fillStyle=bg; ctx.strokeStyle=border; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect(ib_x,ib_y,ib_w,ib_h,6); ctx.fill(); ctx.stroke();
+  lines.forEach((ln,i)=>{
+    lbl(ln.text, w/2, ib_y+16+i*17, ln.color, 'center', ln.size||11, ln.bold||false);
+  });
+}
+
+function setPhaseUI(p, msg, color='#4a4d5e'){
+  phase=p;
+  const box=document.getElementById('phase-box');
+  box.textContent=msg; box.style.color=color; box.style.borderColor=color;
+}
+
+function updateReadout(){
+  const a=getA();
+  document.getElementById('lbl-f').textContent=getF()+' N';
+  document.getElementById('lbl-m').textContent=getM()+' kg';
+  document.getElementById('out-a').textContent=a.toFixed(2)+' m/s²';
+  document.getElementById('out-v').textContent=simV.toFixed(2)+' m/s';
+  document.getElementById('out-x').textContent=simX.toFixed(2)+' m';
+  document.getElementById('out-t').textContent=simT.toFixed(2)+' s';
+}
+
+function onSliderChange(){
+  if(phase==='running'){
+    // live-adjust: acceleration changes instantly, motion continues from current state
+    updateReadout();
+    draw();
+  } else {
+    resetAnim();
+  }
+}
+
+function resetAnim(){
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  running=false;
+  phase='ready';
+  simT=0; simV=0; simX=0;
+  updateReadout();
+  const btn=document.getElementById('play-btn');
+  btn.textContent='▶ Start'; btn.style.borderColor='var(--teal)'; btn.style.color='var(--teal)';
+  setPhaseUI('ready','Press Start to run');
+  ctx.clearRect(0,0,W(),H());
+  draw();
+}
+
+function togglePlay(){
+  if(running){
+    running=false;
+    cancelAnimationFrame(animId);
+    document.getElementById('play-btn').textContent='▶ Resume';
+    setPhaseUI('paused','⏸ Paused','#f5a623');
+    return;
+  }
+  if(phase==='ready'||phase==='done'){
+    if(phase==='done') resetAnim();
+  }
+  phase='running';
+  setPhaseUI('running','● Running — F/m = a, constantly','#2dd4a0');
+  running=true;
+  document.getElementById('play-btn').textContent='⏸ Pause';
+  document.getElementById('play-btn').style.borderColor='var(--amber)';
+  document.getElementById('play-btn').style.color='var(--amber)';
+  loop();
+}
+
+function loop(){
+  if(!running)return;
+  const dt=1/60;
+  const a=getA();
+  simV += a*dt;
+  simX += simV*dt;
+  simT += dt;
+  updateReadout();
+  draw();
+  const maxTravel=(W()/PIX_PER_M)*0.78;
+  if(simX>=maxTravel){
+    phase='done';
+    setPhaseUI('done','◼ Reached the edge — press Reset to try new values','#b98aff');
+    running=false; cancelAnimationFrame(animId);
+    document.getElementById('play-btn').textContent='▶ Start Over';
+    return;
+  }
+  animId=requestAnimationFrame(loop);
+}
+
+function draw(){
+  const w=W(), h=H();
+  ctx.clearRect(0,0,w,h);
+
+  lbl('F = ma — the sandbox', w/2, h*0.08, '#e8e9ef','center',15,true);
+  lbl('Drag force and mass, then press Start. Watch how each one changes a.', w/2, h*0.14, '#7a7d8e','center',12);
+
+  const groundY=h*0.56;
+  ctx.strokeStyle='#2a2b33'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,groundY+22); ctx.lineTo(w,groundY+22); ctx.stroke();
+
+  const startX=w*0.12;
+  const objX=startX+simX*PIX_PER_M;
+
+  const F=getF(), M=getM(), a=getA();
+  const boxSize=24+Math.min(M*1.4,60);
+
+  // motion trail
+  ctx.strokeStyle='#4a9eff33'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(startX,groundY); ctx.lineTo(objX,groundY); ctx.stroke();
+
+  // block
+  ctx.fillStyle='#1e2028'; ctx.strokeStyle='#f5a623'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(objX-boxSize/2,groundY-boxSize/2,boxSize,boxSize,6); ctx.fill(); ctx.stroke();
+  lbl(M+' kg', objX, groundY, '#f5a623','center',12,true);
+
+  // Force arrow (fixed visual length scaled to F, capped)
+  const fArrowLen=20+Math.min(F*1.1,90);
+  arrow(objX-boxSize/2-10,groundY,objX-boxSize/2-10-fArrowLen,groundY,'#ff5f6d',3,10);
+  lbl('F = '+F+' N', objX-boxSize/2-10-fArrowLen/2, groundY-16, '#ff5f6d','center',12,true);
+
+  // velocity arrow (only if moving)
+  if(simV>0.02){
+    const vArrowLen=Math.min(simV*6,90);
+    arrow(objX+boxSize/2+8,groundY,objX+boxSize/2+8+vArrowLen,groundY,'#4a9eff',2.5,8);
+    lbl('v', objX+boxSize/2+8+vArrowLen+10, groundY, '#4a9eff','left',11,true);
+  }
+
+  // acceleration label above block
+  lbl('a = '+a.toFixed(2)+' m/s²', objX, groundY-boxSize/2-16, '#f5a623','center',12,true);
+
+  let insightColor, insightBorder, insightBg, mainLine;
+  if(F>=60 && M<=10){
+    insightColor='#ff5f6d'; insightBorder='#ff5f6d'; insightBg='#1a0a0a';
+    mainLine='Large F, small m ⟹ large a. This object accelerates hard.';
+  } else if(M>=35){
+    insightColor='#4a9eff'; insightBorder='#4a9eff'; insightBg='#0a1a2a';
+    mainLine='Large mass resists acceleration — same force moves it far more slowly.';
+  } else {
+    insightColor='#2dd4a0'; insightBorder='#2dd4a0'; insightBg='#0d1a0d';
+    mainLine='a = F/m holds at every instant — change either slider, a updates immediately.';
+  }
+
+  insightBox(insightBg, insightBorder, [
+    {text:mainLine, color:insightColor, bold:true, size:13},
+    {text:'Doubling F doubles a. Doubling m halves a — F and m act oppositely on a.', color:'#e8e9ef'},
+    {text:'Velocity grows linearly (v = at). Position grows quadratically (x = ½at²).', color:'#7a7d8e'}
+  ]);
+}
+
+window.addEventListener('resize',()=>{setupCanvas();draw();});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{setupCanvas();resetAnim();}));
+</script>
+
+<script src="../js/progress.js"></script>
+<script>
+const SUBUNIT_ID = "2.5";
+document.addEventListener('DOMContentLoaded', function() {
+  initProgressControls(SUBUNIT_ID);
+});
+</script>
+</body>
+</html>
